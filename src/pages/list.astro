@@ -1,0 +1,91 @@
+---
+import SiteHeader from "../components/SiteHeader.astro";
+import SpaCard from "../components/SpaCard.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getSpas } from "../lib/spas";
+
+const spas = await getSpas();
+---
+
+<BaseLayout title="一覧">
+  <SiteHeader current="list" />
+  <main id="content" class="list-page" tabindex="-1">
+    <section class="list-hero" aria-labelledby="list-title">
+      <p class="eyebrow">温浴施設一覧</p>
+      <h1 id="list-title">地図なしで、さっと比べる</h1>
+      <p>
+        東葛地域と周辺の温浴施設を、地域順で並べています。現在地を許可すると近い順に並び替えます。
+      </p>
+      <button
+        type="button"
+        class="external-link primary-link locate-list-button"
+        data-locate-list
+        aria-describedby="location-status"
+      >
+        現在地から近い順
+      </button>
+      <p
+        id="location-status"
+        class="muted"
+        data-location-status
+        aria-live="polite"
+      >
+      </p>
+    </section>
+    <section aria-label="温浴施設カード">
+      <div data-spas-json data-spas={JSON.stringify(spas)}></div>
+      <div class="list-grid" data-spa-list>
+        {spas.map((spa) => <SpaCard spa={spa} />)}
+      </div>
+    </section>
+  </main>
+  <script>
+    import "../scripts/list";
+  </script>
+</BaseLayout>
+
+<style>
+  .list-page {
+    width: min(1120px, calc(100% - 2rem));
+    padding: 7rem 0 4rem;
+    margin-inline: auto;
+  }
+
+  .list-hero {
+    max-width: 45rem;
+    margin-block-end: 2rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.3rem;
+    font-weight: 800;
+    color: var(--color-brand);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 5.4vw, 2.85rem);
+    line-height: 1.18;
+    letter-spacing: 0;
+  }
+
+  .list-hero p {
+    color: var(--color-muted);
+  }
+
+  .locate-list-button {
+    width: fit-content;
+  }
+
+  .list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 720px) {
+    .list-page {
+      padding-block-start: 8.5rem;
+    }
+  }
+</style>

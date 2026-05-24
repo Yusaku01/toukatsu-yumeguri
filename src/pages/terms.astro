@@ -1,0 +1,119 @@
+---
+import SiteHeader from "../components/SiteHeader.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="利用規約">
+  <SiteHeader current="terms" />
+  <main id="content" class="terms-page" tabindex="-1">
+    <article>
+      <p class="eyebrow">利用規約</p>
+      <h1>掲載情報とプライバシーについて</h1>
+      <section>
+        <h2>掲載情報</h2>
+        <p>
+          掲載している施設情報は、公式サイトや公開情報をもとに確認しています。営業時間、料金、休館日などは変更されることがあるため、訪問前に各施設の公式サイトをご確認ください。
+        </p>
+      </section>
+      <section>
+        <h2>現在地</h2>
+        <p>
+          現在地機能は、ブラウザで許可された場合にだけ端末内で距離表示と並び替えに使います。このサイトは現在地を保存しません。
+        </p>
+      </section>
+      <section>
+        <h2>アクセス解析</h2>
+        <p>
+          運用時に Cloudflare Web Analytics
+          を利用する場合があります。Cookieを使わず、個人を直接識別する情報の収集を目的としません。
+        </p>
+      </section>
+      <section>
+        <h2>連絡先</h2>
+        <p>
+          掲載内容の追加・修正提案は、GitHubリポジトリまたは作者のXアカウントからお願いします。
+        </p>
+        <p class="link-row">
+          <a
+            class="external-link social-link primary-link"
+            href="https://github.com/Yusaku01/toukatsu-yumeguri"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img src="/github-mark.svg" alt="" width="18" height="18" />
+            <span class="visually-hidden">GitHub</span>
+          </a>
+          <a
+            class="external-link social-link"
+            href="https://x.com/sakku_04"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img src="/x-logo.svg" alt="" width="18" height="18" />
+            <span class="visually-hidden">X</span>
+          </a>
+        </p>
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .terms-page {
+    width: min(780px, calc(100% - 2rem));
+    padding: 7rem 0 4rem;
+    margin-inline: auto;
+  }
+
+  article {
+    padding: 1.25rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .eyebrow {
+    margin: 0 0 0.3rem;
+    font-weight: 800;
+    color: var(--color-brand);
+  }
+
+  h1 {
+    margin: 0 0 1.8rem;
+    font-size: clamp(1.8rem, 5.6vw, 2.75rem);
+    line-height: 1.18;
+    letter-spacing: 0;
+  }
+
+  h2 {
+    margin: 1.6rem 0 0.4rem;
+    font-size: 1.15rem;
+  }
+
+  p {
+    color: var(--color-muted);
+  }
+
+  .link-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .social-link img {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 auto;
+  }
+
+  .social-link {
+    justify-content: center;
+    width: 2.9rem;
+    min-height: 2.9rem;
+    padding: 0;
+  }
+
+  .primary-link img {
+    filter: brightness(0) invert(1);
+  }
+</style>

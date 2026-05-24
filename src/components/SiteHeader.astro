@@ -1,0 +1,37 @@
+---
+type Props = {
+  current?: "map" | "list" | "terms";
+};
+
+const current = Astro.props.current ?? "map";
+---
+
+<header class="site-header">
+  <a class="brand-pill" href="/" aria-label="東葛湯めぐりマップ ホーム">
+    <span class="brand-mark" aria-hidden="true">
+      <img src="/pin.svg" alt="" width="30" height="48" />
+    </span>
+    <span class="brand-title">東葛湯めぐりマップ</span>
+  </a>
+  <nav class="nav-pill" aria-label="主要ページ">
+    <a href="/" aria-current={current === "map" ? "page" : undefined}>地図</a>
+    <a href="/list/" aria-current={current === "list" ? "page" : undefined}
+      >一覧</a
+    >
+    <a href="/terms/" aria-current={current === "terms" ? "page" : undefined}
+      >利用規約</a
+    >
+  </nav>
+  <details class="nav-menu">
+    <summary>MENU</summary>
+    <nav aria-label="主要ページ">
+      <a href="/" aria-current={current === "map" ? "page" : undefined}>地図</a>
+      <a href="/list/" aria-current={current === "list" ? "page" : undefined}
+        >一覧</a
+      >
+      <a href="/terms/" aria-current={current === "terms" ? "page" : undefined}
+        >利用規約</a
+      >
+    </nav>
+  </details>
+</header>

@@ -1,0 +1,14 @@
+{
+  "id": "noda-onsen-honoka",
+  "name": "のだ温泉 ほのか",
+  "city": "野田市",
+  "area": "花井",
+  "address": "千葉県野田市花井1丁目1-2",
+  "officialUrl": "https://yudokoro-honoka.jp/noda/",
+  "googleMapsUrl": "https://www.google.com/maps/place/%E3%81%AE%E3%81%A0%E6%B8%A9%E6%B3%89+%E3%81%BB%E3%81%AE%E3%81%8B/@35.9399341,139.7176623,11z/data=!4m10!1m2!2m1!1z44K544O844OR44O86Yqt5rmv!3m6!1s0x6018986eea400001:0x70df0e20af9bd000!8m2!3d35.9399502!4d139.8819575!15sChLjgrnjg7zjg5Hjg7zpiq3mua9aFSIT44K544O844OR44O8IOmKrea5r5IBEXN1cGVyX3B1YmxpY19iYXRomgEkQ2hkRFNVaE5NRzluUzBWSlEwRm5TVU5sT1dSMWRUVjNSUkFC4AEA-gEECBUQFw!16s%2Fg%2F11c20cf6fr?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D",
+  "lat": 35.9399502,
+  "lng": 139.8819575,
+  "tags": ["天然温泉", "岩盤浴", "家族風呂"],
+  "notes": "野田市花井の温浴施設。岩盤浴や家族風呂もある。",
+  "lastCheckedAt": "2026-05-24"
+}

@@ -1,0 +1,51 @@
+---
+import "../styles/global.css";
+
+type Props = {
+  title?: string;
+  description?: string;
+  bodyClass?: string;
+};
+
+const siteName = "東葛湯めぐりマップ";
+const description =
+  Astro.props.description ??
+  "東葛地域で、今日行きたい温浴施設を地図から探せる湯めぐりマップです。";
+const title = Astro.props.title
+  ? `${Astro.props.title} | ${siteName}`
+  : siteName;
+const bodyClass = Astro.props.bodyClass ?? "";
+const analyticsToken = import.meta.env.PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <slot name="head" />
+    {
+      analyticsToken && (
+        <script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={`{"token":"${analyticsToken}"}`}
+        />
+      )
+    }
+  </head>
+  <body class={bodyClass}>
+    <a href="#content" class="skip-link">本文へ移動</a>
+    <slot />
+  </body>
+</html>

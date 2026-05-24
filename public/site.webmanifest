@@ -1,0 +1,14 @@
+{
+  "name": "東葛湯めぐりマップ",
+  "short_name": "湯めぐり",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#b82a0b",
+  "background_color": "#f3ede6",
+  "display": "standalone"
+}

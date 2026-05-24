@@ -1,0 +1,144 @@
+---
+import type { Spa } from "../lib/types";
+
+type Props = {
+  spa: Spa;
+  compact?: boolean;
+};
+
+const { spa, compact = false } = Astro.props;
+---
+
+<article
+  class:list={["spa-card", compact && "spa-card-compact"]}
+  data-spa-card={spa.id}
+>
+  <div class="spa-card-main">
+    <p class="spa-meta">
+      <span>{spa.city}</span>
+      {spa.area && <span>{spa.area}</span>}
+      <span data-distance hidden></span>
+    </p>
+    <h2>{spa.name}</h2>
+    <address>{spa.address}</address>
+    {spa.notes && <p class="spa-notes">{spa.notes}</p>}
+    {
+      spa.tags.length > 0 && (
+        <ul class="tag-list" aria-label={`${spa.name}の特徴`}>
+          {spa.tags.map((tag) => (
+            <li>{tag}</li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+  <div class="spa-actions">
+    <a
+      class="external-link primary-link"
+      href={spa.googleMapsUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Google マップ
+    </a>
+    <a
+      class="external-link"
+      href={spa.officialUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      公式サイト
+    </a>
+  </div>
+</article>
+
+<style>
+  .spa-card {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+    text-align: start;
+    background: var(--color-surface-strong);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 5px 18px rgb(45 22 14 / 7%);
+  }
+
+  .spa-card[data-selected] {
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px rgb(184 42 11 / 18%);
+  }
+
+  .spa-card-compact {
+    cursor: pointer;
+  }
+
+  .spa-card-main {
+    min-width: 0;
+  }
+
+  .spa-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin: 0 0 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--color-brand);
+  }
+
+  .spa-meta span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.6rem;
+    padding: 0.15rem 0.5rem;
+    background: #fff3ea;
+    border-radius: var(--radius-pill);
+  }
+
+  .spa-meta span[hidden] {
+    display: none;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: clamp(1rem, 2.8vw, 1.18rem);
+    line-height: 1.35;
+    letter-spacing: 0;
+  }
+
+  address {
+    margin-block-start: 0.45rem;
+    font-style: normal;
+    color: var(--color-muted);
+  }
+
+  .spa-notes {
+    margin: 0.7rem 0 0;
+    color: var(--color-muted);
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0;
+    margin: 0.75rem 0 0;
+    list-style: none;
+  }
+
+  .tag-list li {
+    padding: 0.18rem 0.48rem;
+    font-size: 0.78rem;
+    color: var(--color-brand-dark);
+    background: var(--color-paper);
+    border-radius: var(--radius-pill);
+  }
+
+  .spa-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+</style>

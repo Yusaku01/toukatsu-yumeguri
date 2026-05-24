@@ -1,0 +1,265 @@
+---
+import SiteHeader from "../components/SiteHeader.astro";
+import SpaCard from "../components/SpaCard.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCities, getSpas } from "../lib/spas";
+
+const spas = await getSpas();
+const cities = getCities(spas);
+---
+
+<BaseLayout bodyClass="map-page">
+  <fragment slot="head">
+    <link rel="preconnect" href="https://tile.openstreetmap.org" />
+  </fragment>
+  <SiteHeader current="map" />
+  <main id="content" class="map-shell" tabindex="-1">
+    <section class="map-stage" aria-label="温浴施設の地図">
+      <div id="map" class="map-canvas" data-spas={JSON.stringify(spas)}></div>
+      <search class="map-search" aria-label="温浴施設の絞り込み">
+        <div class="city-filter" aria-label="市区町村で絞り込み">
+          <button type="button" data-city-filter="all" aria-pressed="true"
+            >すべて</button
+          >
+          {
+            cities.map((city) => (
+              <button
+                type="button"
+                data-city-filter={city}
+                aria-pressed="false"
+              >
+                {city}
+              </button>
+            ))
+          }
+        </div>
+      </search>
+      <button
+        class="locate-button"
+        type="button"
+        data-locate
+        aria-describedby="location-status"
+      >
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M12 2v3M12 19v3M2 12h3M19 12h3"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"></path>
+          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"
+          ></circle>
+        </svg>
+        現在地
+      </button>
+    </section>
+    <aside class="map-panel" aria-labelledby="panel-title">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">温浴施設</p>
+          <h1 id="panel-title">今日行きたい湯を探す</h1>
+        </div>
+        <span class="count-badge" data-visible-count>{spas.length}件</span>
+      </div>
+      <p
+        id="location-status"
+        class="location-status"
+        data-location-status
+        aria-live="polite"
+      >
+        地図のピンまたはカードを選択できます
+      </p>
+      <div class="spa-list" data-spa-list>
+        {spas.map((spa) => <SpaCard spa={spa} compact />)}
+      </div>
+    </aside>
+  </main>
+  <script>
+    import "../scripts/map";
+  </script>
+</BaseLayout>
+
+<style>
+  .map-shell {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(22rem, 28rem) 1fr;
+    width: 100vw;
+    height: 100vh;
+    min-height: 560px;
+  }
+
+  .map-stage {
+    position: relative;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .map-canvas {
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(120deg, rgb(112 200 215 / 16%), transparent 48%), #dce8e4;
+  }
+
+  .map-panel {
+    position: relative;
+    z-index: 500;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: stretch;
+    width: min(28rem, calc(100vw - 1.5rem));
+    max-height: calc(100vh - 7rem);
+    margin: 5.6rem 0.75rem 0.75rem;
+    overflow: hidden;
+    background: rgb(255 250 244 / 94%);
+    border: 1px solid rgb(64 19 6 / 12%);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(14px);
+  }
+
+  .panel-head {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.1rem 1rem 0.85rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .eyebrow {
+    margin: 0 0 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--color-brand);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.25rem, 3vw, 1.65rem);
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+
+  .count-badge {
+    flex: 0 0 auto;
+    padding: 0.25rem 0.55rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--color-surface-strong);
+    background: var(--color-brand);
+    border-radius: var(--radius-pill);
+  }
+
+  .location-status {
+    min-height: 2rem;
+    padding: 0.55rem 1rem;
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--color-muted);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .spa-list {
+    display: grid;
+    gap: 0.75rem;
+    max-height: calc(100vh - 15rem);
+    padding: 0.75rem;
+    overflow: auto;
+  }
+
+  .map-search {
+    position: fixed;
+    z-index: 700;
+    inset-block-start: 0.8rem;
+    inset-inline: 19rem 8rem;
+    pointer-events: none;
+  }
+
+  .city-filter {
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+    padding-block: 0.15rem;
+    overflow-x: auto;
+    pointer-events: auto;
+    scrollbar-width: none;
+  }
+
+  .city-filter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .city-filter button,
+  .locate-button {
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: center;
+    min-height: 2.7rem;
+    padding: 0.55rem 0.85rem;
+    font-weight: 800;
+    color: var(--color-brand-dark);
+    white-space: nowrap;
+    background: rgb(255 250 244 / 94%);
+    border: 1px solid rgb(64 19 6 / 12%);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-chip);
+    backdrop-filter: blur(12px);
+  }
+
+  .city-filter button[aria-pressed="true"],
+  .locate-button:hover {
+    color: var(--color-surface-strong);
+    background: var(--color-brand);
+    border-color: var(--color-brand);
+  }
+
+  .locate-button {
+    position: fixed;
+    z-index: 720;
+    inset-block-end: 5.15rem;
+    inset-inline-end: 1.1rem;
+  }
+
+  .locate-button:disabled {
+    cursor: progress;
+    opacity: 0.72;
+  }
+
+  @media (max-width: 900px) {
+    .map-shell {
+      display: block;
+      min-height: 100svh;
+    }
+
+    .map-stage,
+    .map-canvas {
+      height: 100svh;
+    }
+
+    .map-search {
+      inset-block-start: 4.35rem;
+      inset-inline: 0.75rem;
+    }
+
+    .map-panel {
+      position: fixed;
+      inset-inline: 0.65rem;
+      inset-block-end: calc(0.65rem + var(--safe-bottom));
+      width: auto;
+      max-height: 44svh;
+      margin: 0;
+    }
+
+    .spa-list {
+      max-height: calc(44svh - 7.8rem);
+    }
+
+    .locate-button {
+      inset-block-end: calc(45svh + 1rem + var(--safe-bottom));
+    }
+  }
+</style>
