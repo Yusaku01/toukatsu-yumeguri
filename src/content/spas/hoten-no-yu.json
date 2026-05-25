@@ -1,0 +1,14 @@
+{
+  "id": "hoten-no-yu",
+  "name": "楽天地天然温泉 法典の湯",
+  "city": "市川市",
+  "area": "柏井町",
+  "address": "千葉県市川市柏井町1-1520",
+  "officialUrl": "https://rakutenchi-oasis.com/hoten/",
+  "googleMapsUrl": "https://www.google.com/maps/place/%E6%A5%BD%E5%A4%A9%E5%9C%B0%E5%A4%A9%E7%84%B6%E6%B8%A9%E6%B3%89+%E6%B3%95%E5%85%B8%E3%81%AE%E6%B9%AF/@35.735357,139.9596392,17z/data=!3m1!4b1!4m6!3m5!1s0x6018811a531d0523:0x5ff36f8a684cb7dc!8m2!3d35.7353571!4d139.9645101!16s%2Fg%2F1tg5zm4b?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D",
+  "lat": 35.7353571,
+  "lng": 139.9645101,
+  "tags": ["天然温泉", "露天風呂", "サウナ"],
+  "notes": "船橋法典駅から徒歩圏の天然温泉。東葛から少し足を伸ばす周辺候補として掲載。",
+  "lastCheckedAt": "2026-05-25"
+}

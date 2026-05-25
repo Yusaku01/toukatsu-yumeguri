@@ -1,0 +1,14 @@
+{
+  "id": "yudokoro-kasai",
+  "name": "スーパー銭湯 湯処葛西",
+  "city": "江戸川区",
+  "area": "東葛西",
+  "address": "東京都江戸川区東葛西9-3-5",
+  "officialUrl": "https://www.yudokoro-kasai.com/",
+  "googleMapsUrl": "https://www.google.com/maps/place/%E3%82%B9%E3%83%BC%E3%83%91%E3%83%BC%E9%8A%AD%E6%B9%AF+%E6%B9%AF%E5%87%A6%E8%91%9B%E8%A5%BF/@35.655762,139.7292709,12z/data=!4m10!1m2!2m1!1z44K544O844OR44O86Yqt5rmv!3m6!1s0x60187d63cf6c3101:0x42077f785a097e99!8m2!3d35.655788!4d139.8816996!15sChLjgrnjg7zjg5Hjg7zpiq3mua9aFSIT44K544O844OR44O8IOmKrea5r5IBEXN1cGVyX3B1YmxpY19iYXRomgFEQ2k5RFFVbFJRVU52WkVOb2RIbGpSamx2VDJ0b2JFMHdVbkpZTUd4MldUQldZVTFIZEZsUFZ6RktVbGhXTWxkdFl4QULgAQD6AQQILhAg!16s%2Fg%2F1tf31cfq?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D",
+  "lat": 35.655788,
+  "lng": 139.8816996,
+  "tags": ["露天風呂", "サウナ", "食事処"],
+  "notes": "葛西エリアで立ち寄りやすい大型スーパー銭湯。",
+  "lastCheckedAt": "2026-05-25"
+}

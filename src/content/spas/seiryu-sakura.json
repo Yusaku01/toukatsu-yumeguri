@@ -1,0 +1,14 @@
+{
+  "id": "seiryu-sakura",
+  "name": "佐倉天然温泉 澄流",
+  "city": "佐倉市",
+  "area": "染井野",
+  "address": "千葉県佐倉市染井野4-7-3",
+  "officialUrl": "https://sakurasomeino-sumire.com/",
+  "googleMapsUrl": "https://www.google.com/maps/place/%E4%BD%90%E5%80%89%E5%A4%A9%E7%84%B6%E6%B8%A9%E6%B3%89+%E6%BE%84%E6%B5%81/@35.7485308,140.065176,12z/data=!4m11!1m3!2m2!1z44K544O844OR44O86Yqt5rmv!6e1!3m6!1s0x602288a554686351:0xe92bab33bce4e721!8m2!3d35.7183912!4d140.1932853!15sChLjgrnjg7zjg5Hjg7zpiq3mua9aFSIT44K544O844OR44O8IOmKrea5r5IBEXN1cGVyX3B1YmxpY19iYXRomgEkQ2hkRFNVaE5NRzluUzBWSlEwRm5TVU55Y0hVMlVEVm5SUkFC4AEA-gEFCNcCECM!16s%2Fg%2F11c5_32_rc?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D",
+  "lat": 35.7183912,
+  "lng": 140.1932853,
+  "tags": ["天然温泉", "露天風呂", "岩盤浴"],
+  "notes": "佐倉染井野温泉の自家源泉を楽しめる温浴施設。",
+  "lastCheckedAt": "2026-05-25"
+}
