@@ -9,7 +9,12 @@ const spas = await getSpas();
 
 <BaseLayout title="一覧">
   <SiteHeader current="list" />
-  <main id="content" class="list-page" tabindex="-1">
+  <main
+    id="content"
+    class="list-page"
+    tabindex="-1"
+    transition:name="page-content"
+  >
     <section class="list-hero" aria-labelledby="list-title">
       <p class="eyebrow">温浴施設一覧</p>
       <h1 id="list-title">地図なしで、さっと比べる</h1>

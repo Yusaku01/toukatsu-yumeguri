@@ -5,7 +5,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <BaseLayout title="利用規約">
   <SiteHeader current="terms" />
-  <main id="content" class="terms-page" tabindex="-1">
+  <main
+    id="content"
+    class="terms-page"
+    tabindex="-1"
+    transition:name="page-content"
+  >
     <article>
       <p class="eyebrow">利用規約</p>
       <h1>掲載情報とプライバシーについて</h1>

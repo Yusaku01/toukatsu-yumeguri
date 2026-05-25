@@ -13,7 +13,12 @@ const cities = getCities(spas);
     <link rel="preconnect" href="https://tile.openstreetmap.org" />
   </fragment>
   <SiteHeader current="map" />
-  <main id="content" class="map-shell" tabindex="-1">
+  <main
+    id="content"
+    class="map-shell"
+    tabindex="-1"
+    transition:name="page-content"
+  >
     <section class="map-stage" aria-label="温浴施設の地図">
       <div id="map" class="map-canvas" data-spas={JSON.stringify(spas)}></div>
       <search class="map-search" aria-label="温浴施設の絞り込み">
@@ -38,7 +43,7 @@ const cities = getCities(spas);
         class="locate-button"
         type="button"
         data-locate
-        aria-describedby="location-status"
+        aria-label="現在地を表示"
       >
         <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
@@ -49,10 +54,23 @@ const cities = getCities(spas);
           <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"
           ></circle>
         </svg>
-        現在地
       </button>
     </section>
-    <aside class="map-panel" aria-labelledby="panel-title">
+    <aside
+      id="map-panel"
+      class="map-panel"
+      aria-labelledby="panel-title"
+      aria-expanded="false"
+    >
+      <button
+        class="panel-grip"
+        type="button"
+        data-panel-grip
+        aria-controls="map-panel"
+        aria-label="施設一覧パネルを広げる"
+      >
+        <span aria-hidden="true"></span>
+      </button>
       <div class="panel-head">
         <div>
           <p class="eyebrow">温浴施設</p>
@@ -60,14 +78,6 @@ const cities = getCities(spas);
         </div>
         <span class="count-badge" data-visible-count>{spas.length}件</span>
       </div>
-      <p
-        id="location-status"
-        class="location-status"
-        data-location-status
-        aria-live="polite"
-      >
-        地図のピンまたはカードを選択できます
-      </p>
       <div class="spa-list" data-spa-list>
         {spas.map((spa) => <SpaCard spa={spa} compact />)}
       </div>
@@ -76,10 +86,120 @@ const cities = getCities(spas);
   <script>
     import "../scripts/map";
   </script>
+  <script>
+    const mobileQuery = window.matchMedia("(max-width: 900px)");
+
+    const collapsedHeight = 44;
+    const expandedHeight = 82;
+    const minimumHeight = 36;
+
+    const initPanelSheet = () => {
+      const panel = document.querySelector<HTMLElement>(".map-panel");
+      const shell = document.querySelector<HTMLElement>(".map-shell");
+      const grip =
+        document.querySelector<HTMLButtonElement>("[data-panel-grip]");
+      if (!panel || !shell || !grip || panel.dataset.sheetReady === "true") {
+        return;
+      }
+
+      panel.dataset.sheetReady = "true";
+
+      let panelHeight = collapsedHeight;
+      let startY = 0;
+      let startHeight = collapsedHeight;
+      let ignoreNextClick = false;
+
+      const setPanelHeight = (height: number) => {
+        const clampedHeight = Math.min(
+          expandedHeight,
+          Math.max(minimumHeight, height),
+        );
+
+        panelHeight = clampedHeight;
+        shell.style.setProperty("--mobile-panel-height", `${clampedHeight}svh`);
+        panel.setAttribute(
+          "aria-expanded",
+          clampedHeight > collapsedHeight ? "true" : "false",
+        );
+        grip.setAttribute(
+          "aria-label",
+          clampedHeight > collapsedHeight
+            ? "施設一覧パネルをたたむ"
+            : "施設一覧パネルを広げる",
+        );
+      };
+
+      const snapPanelHeight = () => {
+        setPanelHeight(panelHeight >= 60 ? expandedHeight : collapsedHeight);
+        panel.classList.remove("is-dragging");
+      };
+
+      const handlePointerMove = (event: PointerEvent) => {
+        if (!mobileQuery.matches) return;
+
+        const delta = startY - event.clientY;
+        if (Math.abs(delta) > 6) {
+          ignoreNextClick = true;
+        }
+
+        setPanelHeight(startHeight + (delta / window.innerHeight) * 100);
+      };
+
+      const stopDrag = () => {
+        window.removeEventListener("pointermove", handlePointerMove);
+        snapPanelHeight();
+      };
+
+      grip.addEventListener("pointerdown", (event) => {
+        if (!mobileQuery.matches) return;
+
+        startY = event.clientY;
+        startHeight = panelHeight;
+        panel.classList.add("is-dragging");
+        grip.setPointerCapture(event.pointerId);
+
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", stopDrag, { once: true });
+        window.addEventListener("pointercancel", stopDrag, { once: true });
+      });
+
+      grip.addEventListener("click", () => {
+        if (!mobileQuery.matches) return;
+
+        if (ignoreNextClick) {
+          ignoreNextClick = false;
+          return;
+        }
+
+        setPanelHeight(
+          panelHeight > collapsedHeight ? collapsedHeight : expandedHeight,
+        );
+      });
+
+      mobileQuery.addEventListener("change", () => {
+        if (mobileQuery.matches) {
+          setPanelHeight(collapsedHeight);
+          return;
+        }
+
+        shell.style.removeProperty("--mobile-panel-height");
+        panel.classList.remove("is-dragging");
+        panel.setAttribute("aria-expanded", "false");
+      });
+    };
+
+    document.addEventListener("astro:page-load", initPanelSheet);
+    initPanelSheet();
+  </script>
 </BaseLayout>
 
 <style>
   .map-shell {
+    --mobile-panel-height: 44svh;
+    --map-control-bottom: calc(1rem + var(--safe-bottom));
+    --map-control-gap: 2rem;
+    --map-zoom-height: 4.25rem;
+
     position: relative;
     display: grid;
     grid-template-columns: minmax(22rem, 28rem) 1fr;
@@ -171,6 +291,10 @@ const cities = getCities(spas);
     overflow: auto;
   }
 
+  .panel-grip {
+    display: none;
+  }
+
   .map-search {
     position: fixed;
     z-index: 700;
@@ -220,8 +344,31 @@ const cities = getCities(spas);
   .locate-button {
     position: fixed;
     z-index: 720;
-    inset-block-end: 5.15rem;
-    inset-inline-end: 1.1rem;
+    justify-content: center;
+    width: 32px;
+    min-height: 32px;
+    height: 32px;
+    padding-inline: 0;
+    color: #000000;
+    background: #fff;
+    border-radius: 0;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    inset-block-end: calc(
+      var(--map-control-bottom) + var(--map-zoom-height) +
+        var(--map-control-gap)
+    );
+    inset-inline-end: 1.3rem;
+  }
+
+  .locate-button:hover {
+    color: var(--color-brand-dark);
+    background: #fff;
+    border-color: rgb(64 19 6 / 12%);
+  }
+
+  .map-stage :global(.leaflet-bottom.leaflet-right) {
+    margin-block-end: var(--map-control-bottom);
+    margin-inline-end: 0.6rem;
   }
 
   .locate-button:disabled {
@@ -231,6 +378,10 @@ const cities = getCities(spas);
 
   @media (max-width: 900px) {
     .map-shell {
+      --map-control-bottom: calc(
+        var(--mobile-panel-height) + 0.7rem + var(--safe-bottom)
+      );
+
       display: block;
       min-height: 100svh;
     }
@@ -242,24 +393,72 @@ const cities = getCities(spas);
 
     .map-search {
       inset-block-start: 4.35rem;
-      inset-inline: 0.75rem;
+      inset-inline: 0.75rem 0;
     }
 
     .map-panel {
       position: fixed;
-      inset-inline: 0.65rem;
-      inset-block-end: calc(0.65rem + var(--safe-bottom));
+      z-index: 900;
+      inset-inline: 0;
+      inset-block-end: var(--safe-bottom);
       width: auto;
-      max-height: 44svh;
+      height: var(--mobile-panel-height);
+      max-height: calc(86svh - var(--safe-bottom));
       margin: 0;
+      border-inline: 0;
+      border-end-end-radius: 0;
+      border-end-start-radius: 0;
+      transition: height 180ms ease;
     }
 
     .spa-list {
-      max-height: calc(44svh - 7.8rem);
+      max-height: calc(var(--mobile-panel-height) - 9.1rem);
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+
+    .panel-grip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 1.35rem;
+      padding: 0.35rem 0 0.1rem;
+      cursor: grab;
+      touch-action: none;
+      background: transparent;
+      border: 0;
+    }
+
+    .panel-grip span {
+      display: block;
+      width: 2.6rem;
+      height: 0.25rem;
+      background: rgb(64 19 6 / 22%);
+      border-radius: var(--radius-pill);
+    }
+
+    .map-panel.is-dragging {
+      transition: none;
+    }
+
+    .map-panel.is-dragging .panel-grip {
+      cursor: grabbing;
     }
 
     .locate-button {
-      inset-block-end: calc(45svh + 1rem + var(--safe-bottom));
+      z-index: 920;
+      inset-block-end: calc(
+        var(--map-control-bottom) + var(--map-zoom-height) +
+          var(--map-control-gap)
+      );
+      inset-inline-end: 0.9rem;
+    }
+
+    .map-stage :global(.leaflet-bottom.leaflet-right) {
+      z-index: 910;
+      margin-block-end: var(--map-control-bottom);
+      margin-inline-end: 0.25rem;
     }
   }
 </style>

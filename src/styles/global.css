@@ -46,6 +46,18 @@ body.map-page {
   overflow: hidden;
 }
 
+::view-transition-old(page-content),
+::view-transition-new(page-content) {
+  animation-duration: 180ms;
+  animation-timing-function: ease;
+}
+
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation-duration: 140ms;
+  animation-timing-function: ease;
+}
+
 a {
   color: inherit;
 }
