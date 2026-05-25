@@ -109,6 +109,15 @@ const cities = getCities(spas);
       let startHeight = collapsedHeight;
       let ignoreNextClick = false;
 
+      const updatePanelHeight = (clientY: number) => {
+        const delta = startY - clientY;
+        if (Math.abs(delta) > 6) {
+          ignoreNextClick = true;
+        }
+
+        setPanelHeight(startHeight + (delta / window.innerHeight) * 100);
+      };
+
       const setPanelHeight = (height: number) => {
         const clampedHeight = Math.min(
           expandedHeight,
@@ -136,32 +145,54 @@ const cities = getCities(spas);
 
       const handlePointerMove = (event: PointerEvent) => {
         if (!mobileQuery.matches) return;
+        updatePanelHeight(event.clientY);
+      };
 
-        const delta = startY - event.clientY;
-        if (Math.abs(delta) > 6) {
-          ignoreNextClick = true;
-        }
+      const handleTouchMove = (event: TouchEvent) => {
+        if (!mobileQuery.matches || event.touches.length === 0) return;
+        if (event.cancelable) event.preventDefault();
+        updatePanelHeight(event.touches[0].clientY);
+      };
 
-        setPanelHeight(startHeight + (delta / window.innerHeight) * 100);
+      const startDrag = (clientY: number) => {
+        startY = clientY;
+        startHeight = panelHeight;
+        panel.classList.add("is-dragging");
       };
 
       const stopDrag = () => {
         window.removeEventListener("pointermove", handlePointerMove);
+        window.removeEventListener("touchmove", handleTouchMove);
         snapPanelHeight();
       };
 
       grip.addEventListener("pointerdown", (event) => {
         if (!mobileQuery.matches) return;
+        if (event.pointerType === "touch") return;
 
-        startY = event.clientY;
-        startHeight = panelHeight;
-        panel.classList.add("is-dragging");
+        startDrag(event.clientY);
         grip.setPointerCapture(event.pointerId);
 
         window.addEventListener("pointermove", handlePointerMove);
         window.addEventListener("pointerup", stopDrag, { once: true });
         window.addEventListener("pointercancel", stopDrag, { once: true });
       });
+
+      grip.addEventListener(
+        "touchstart",
+        (event) => {
+          if (!mobileQuery.matches || event.touches.length === 0) return;
+          if (event.cancelable) event.preventDefault();
+
+          startDrag(event.touches[0].clientY);
+          window.addEventListener("touchmove", handleTouchMove, {
+            passive: false,
+          });
+          window.addEventListener("touchend", stopDrag, { once: true });
+          window.addEventListener("touchcancel", stopDrag, { once: true });
+        },
+        { passive: false },
+      );
 
       grip.addEventListener("click", () => {
         if (!mobileQuery.matches) return;
@@ -412,7 +443,7 @@ const cities = getCities(spas);
     }
 
     .spa-list {
-      max-height: calc(var(--mobile-panel-height) - 9.1rem);
+      max-height: calc(var(--mobile-panel-height) - 10.25rem);
       overscroll-behavior: contain;
       scrollbar-gutter: stable;
     }
@@ -422,8 +453,8 @@ const cities = getCities(spas);
       align-items: center;
       justify-content: center;
       width: 100%;
-      min-height: 1.35rem;
-      padding: 0.35rem 0 0.1rem;
+      min-height: 2.5rem;
+      padding: 0.75rem 0 0.55rem;
       cursor: grab;
       touch-action: none;
       background: transparent;
