@@ -1,6 +1,5 @@
 ---
 import SiteHeader from "../components/SiteHeader.astro";
-import SpaCard from "../components/SpaCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCities, getSpas } from "../lib/spas";
 
@@ -39,28 +38,14 @@ const cities = getCities(spas);
           }
         </div>
       </search>
-      <button
-        class="locate-button"
-        type="button"
-        data-locate
-        aria-label="現在地を表示"
-      >
-        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M12 2v3M12 19v3M2 12h3M19 12h3"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"></path>
-          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"
-          ></circle>
-        </svg>
-      </button>
     </section>
     <aside
       id="map-panel"
       class="map-panel"
-      aria-labelledby="panel-title"
+      aria-label="選択した温浴施設"
       aria-expanded="false"
+      aria-hidden="true"
+      data-map-panel
     >
       <button
         class="panel-grip"
@@ -71,16 +56,21 @@ const cities = getCities(spas);
       >
         <span aria-hidden="true"></span>
       </button>
-      <div class="panel-head">
-        <div>
-          <p class="eyebrow">温浴施設</p>
-          <h1 id="panel-title">今日行きたい湯を探す</h1>
-        </div>
-        <span class="count-badge" data-visible-count>{spas.length}件</span>
-      </div>
-      <div class="spa-list" data-spa-list>
-        {spas.map((spa) => <SpaCard spa={spa} compact />)}
-      </div>
+      <button
+        class="panel-close"
+        type="button"
+        data-panel-close
+        aria-label="施設パネルを閉じる"
+      >
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M6 6l12 12M18 6L6 18"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"></path>
+        </svg>
+      </button>
+      <div class="spa-list" data-spa-list></div>
     </aside>
   </main>
   <script>
@@ -89,15 +79,18 @@ const cities = getCities(spas);
   <script>
     const mobileQuery = window.matchMedia("(max-width: 900px)");
 
-    const collapsedHeight = 44;
-    const expandedHeight = 82;
-    const minimumHeight = 36;
+    const collapsedHeight = 30;
+    const expandedHeight = 62;
+    const minimumHeight = 24;
+    const expandedSnapThreshold = (collapsedHeight + expandedHeight) / 2;
 
     const initPanelSheet = () => {
       const panel = document.querySelector<HTMLElement>(".map-panel");
       const shell = document.querySelector<HTMLElement>(".map-shell");
       const grip =
         document.querySelector<HTMLButtonElement>("[data-panel-grip]");
+      const closeButton =
+        document.querySelector<HTMLButtonElement>("[data-panel-close]");
       if (!panel || !shell || !grip || panel.dataset.sheetReady === "true") {
         return;
       }
@@ -138,8 +131,16 @@ const cities = getCities(spas);
         );
       };
 
+      const openPanel = () => {
+        setPanelHeight(collapsedHeight);
+      };
+
       const snapPanelHeight = () => {
-        setPanelHeight(panelHeight >= 60 ? expandedHeight : collapsedHeight);
+        setPanelHeight(
+          panelHeight >= expandedSnapThreshold
+            ? expandedHeight
+            : collapsedHeight,
+        );
         panel.classList.remove("is-dragging");
       };
 
@@ -167,7 +168,9 @@ const cities = getCities(spas);
       };
 
       grip.addEventListener("pointerdown", (event) => {
-        if (!mobileQuery.matches) return;
+        if (!mobileQuery.matches || !panel.classList.contains("is-open")) {
+          return;
+        }
         if (event.pointerType === "touch") return;
 
         startDrag(event.clientY);
@@ -182,6 +185,7 @@ const cities = getCities(spas);
         "touchstart",
         (event) => {
           if (!mobileQuery.matches || event.touches.length === 0) return;
+          if (!panel.classList.contains("is-open")) return;
           if (event.cancelable) event.preventDefault();
 
           startDrag(event.touches[0].clientY);
@@ -195,7 +199,9 @@ const cities = getCities(spas);
       );
 
       grip.addEventListener("click", () => {
-        if (!mobileQuery.matches) return;
+        if (!mobileQuery.matches || !panel.classList.contains("is-open")) {
+          return;
+        }
 
         if (ignoreNextClick) {
           ignoreNextClick = false;
@@ -207,9 +213,15 @@ const cities = getCities(spas);
         );
       });
 
+      closeButton?.addEventListener("click", () => {
+        panel.dispatchEvent(new CustomEvent("spa-panel-close"));
+      });
+
       mobileQuery.addEventListener("change", () => {
         if (mobileQuery.matches) {
-          setPanelHeight(collapsedHeight);
+          if (panel.classList.contains("is-open")) {
+            openPanel();
+          }
           return;
         }
 
@@ -217,6 +229,8 @@ const cities = getCities(spas);
         panel.classList.remove("is-dragging");
         panel.setAttribute("aria-expanded", "false");
       });
+
+      panel.addEventListener("spa-panel-open", openPanel);
     };
 
     document.addEventListener("astro:page-load", initPanelSheet);
@@ -226,10 +240,13 @@ const cities = getCities(spas);
 
 <style>
   .map-shell {
-    --mobile-panel-height: 44svh;
+    --mobile-panel-height: 30svh;
+    --mobile-panel-closed-height: 2.75rem;
     --map-control-bottom: calc(1rem + var(--safe-bottom));
     --map-control-gap: 2rem;
     --map-zoom-height: 4.25rem;
+    --map-transition-duration: 0.3s;
+    --map-transition-easing: cubic-bezier(0.2, 0, 0, 1);
 
     position: relative;
     display: grid;
@@ -259,67 +276,200 @@ const cities = getCities(spas);
     z-index: 500;
     grid-column: 1;
     grid-row: 1;
-    align-self: stretch;
-    width: min(28rem, calc(100vw - 1.5rem));
-    max-height: calc(100vh - 7rem);
-    margin: 5.6rem 0.75rem 0.75rem;
+    align-self: start;
+    width: min(25.5rem, calc(100vw - 1.5rem));
+    max-height: calc(100vh - 6.35rem);
+    margin: 5.6rem 0 0 0.75rem;
     overflow: hidden;
-    background: rgb(255 250 244 / 94%);
+    background: rgb(255 250 244 / 98%);
     border: 1px solid rgb(64 19 6 / 12%);
     border-radius: var(--radius-card);
-    box-shadow: var(--shadow-soft);
-    backdrop-filter: blur(14px);
+    box-shadow: 0 2px 8px rgb(45 22 14 / 16%);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-100%);
+    transition:
+      opacity var(--map-transition-duration) var(--map-transition-easing),
+      transform var(--map-transition-duration) var(--map-transition-easing);
   }
 
-  .panel-head {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 1.1rem 1rem 0.85rem;
-    border-bottom: 1px solid var(--color-border);
+  .map-panel.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
   }
 
-  .eyebrow {
-    margin: 0 0 0.35rem;
-    font-size: 0.78rem;
-    font-weight: 800;
-    line-height: 1.35;
-    color: var(--color-brand);
+  .map-panel:not(.is-open) .panel-close {
+    display: none;
   }
 
-  h1 {
-    margin: 0;
-    font-size: clamp(1.25rem, 3vw, 1.65rem);
-    line-height: 1.25;
-    letter-spacing: 0;
-  }
-
-  .count-badge {
-    flex: 0 0 auto;
-    padding: 0.25rem 0.55rem;
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: var(--color-surface-strong);
-    background: var(--color-brand);
-    border-radius: var(--radius-pill);
-  }
-
-  .location-status {
-    min-height: 2rem;
-    padding: 0.55rem 1rem;
-    margin: 0;
-    font-size: 0.88rem;
-    color: var(--color-muted);
-    border-bottom: 1px solid var(--color-border);
+  .panel-close {
+    position: absolute;
+    z-index: 2;
+    inset-block-start: 0.65rem;
+    inset-inline-end: 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.45rem;
+    height: 2.45rem;
+    color: var(--color-brand-dark);
+    background: rgb(255 255 255 / 88%);
+    border: 1px solid rgb(64 19 6 / 12%);
+    border-radius: 999px;
+    box-shadow: 0 1px 4px rgb(45 22 14 / 14%);
+    scale: 1;
+    translate: 0 0;
+    transition-duration: var(--map-transition-duration);
+    transition-property:
+      background-color, border-color, box-shadow, color, scale, translate;
+    transition-timing-function: var(--map-transition-easing);
   }
 
   .spa-list {
     display: grid;
-    gap: 0.75rem;
-    max-height: calc(100vh - 15rem);
-    padding: 0.75rem;
+    max-height: calc(100vh - 6.35rem);
+    padding: 0;
     overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  :global(.map-panel .spa-card) {
+    display: grid;
+    gap: 1.15rem;
+    align-content: start;
+    padding: 3.55rem 1.25rem 1.25rem;
+    text-align: start;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    transition:
+      opacity var(--map-transition-duration) var(--map-transition-easing),
+      transform var(--map-transition-duration) var(--map-transition-easing);
+  }
+
+  @starting-style {
+    :global(.map-panel .spa-card) {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+
+  :global(.map-panel .spa-card-main) {
+    min-width: 0;
+  }
+
+  :global(.map-panel .spa-meta) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin: 0 0 0.75rem;
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: var(--color-brand);
+  }
+
+  :global(.map-panel .spa-meta span) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.6rem;
+    padding: 0.16rem 0.52rem;
+    background: #fff3ea;
+    border-radius: var(--radius-pill);
+  }
+
+  :global(.map-panel .spa-card h2) {
+    margin: 0;
+    padding-inline-end: 2.25rem;
+    font-size: 1.42rem;
+    line-height: 1.32;
+    letter-spacing: 0;
+  }
+
+  :global(.map-panel .spa-summary) {
+    max-width: 34ch;
+    margin: 0.75rem 0 0;
+    font-size: 0.98rem;
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+
+  :global(.map-panel .spa-detail-list) {
+    display: grid;
+    gap: 0;
+    margin-block-start: 1.05rem;
+    border-block: 1px solid var(--color-border);
+  }
+
+  :global(.map-panel .spa-detail-row) {
+    display: grid;
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: center;
+    padding-block: 0.9rem;
+  }
+
+  :global(.map-panel .spa-detail-row:not(:last-child)) {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  :global(.map-panel .spa-detail-label) {
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--color-muted);
+  }
+
+  :global(.map-panel .spa-card address) {
+    margin: 0;
+    font-style: normal;
+    line-height: 1.65;
+    color: var(--color-text);
+  }
+
+  :global(.map-panel .spa-summary + .spa-detail-list) {
+    margin-block-start: 1.15rem;
+  }
+
+  :global(.map-panel .tag-list) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  :global(.map-panel .tag-list li) {
+    padding: 0.24rem 0.58rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--color-brand-dark);
+    background: #fff3ea;
+    border: 1px solid rgb(184 42 11 / 14%);
+    border-radius: var(--radius-pill);
+  }
+
+  :global(.map-panel .spa-actions) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding-block-start: 0.15rem;
+  }
+
+  :global(.map-panel .external-link) {
+    justify-content: center;
+    min-height: 2.75rem;
+    text-align: center;
+    scale: 1;
+    translate: 0 0;
+    transition-duration: var(--map-transition-duration);
+    transition-property:
+      background-color, border-color, box-shadow, color, scale, translate;
+    transition-timing-function: var(--map-transition-easing);
   }
 
   .panel-grip {
@@ -329,15 +479,20 @@ const cities = getCities(spas);
   .map-search {
     position: fixed;
     z-index: 700;
-    inset-block-start: 0.8rem;
+    inset-block-start: 0.75rem;
     inset-inline: 19rem 8rem;
     pointer-events: none;
+  }
+
+  .map-shell.is-panel-open .map-search {
+    inset-inline-start: 27.5rem;
   }
 
   .city-filter {
     display: flex;
     gap: 0.45rem;
     align-items: center;
+    min-height: 3rem;
     padding-block: 0.15rem;
     overflow-x: auto;
     pointer-events: auto;
@@ -348,8 +503,7 @@ const cities = getCities(spas);
     display: none;
   }
 
-  .city-filter button,
-  .locate-button {
+  .city-filter button {
     display: inline-flex;
     gap: 0.35rem;
     align-items: center;
@@ -365,36 +519,22 @@ const cities = getCities(spas);
     backdrop-filter: blur(12px);
   }
 
-  .city-filter button[aria-pressed="true"],
-  .locate-button:hover {
+  .city-filter button {
+    min-height: 2.15rem;
+    padding: 0.4rem 0.68rem;
+    font-size: 0.9rem;
+    scale: 1;
+    translate: 0 0;
+    transition-duration: var(--map-transition-duration);
+    transition-property:
+      background-color, border-color, box-shadow, color, scale, translate;
+    transition-timing-function: var(--map-transition-easing);
+  }
+
+  .city-filter button[aria-pressed="true"] {
     color: var(--color-surface-strong);
     background: var(--color-brand);
     border-color: var(--color-brand);
-  }
-
-  .locate-button {
-    position: fixed;
-    z-index: 720;
-    justify-content: center;
-    width: 32px;
-    min-height: 32px;
-    height: 32px;
-    padding-inline: 0;
-    color: #000000;
-    background: #fff;
-    border-radius: 0;
-    border: 2px solid rgba(0, 0, 0, 0.2);
-    inset-block-end: calc(
-      var(--map-control-bottom) + var(--map-zoom-height) +
-        var(--map-control-gap)
-    );
-    inset-inline-end: 1.3rem;
-  }
-
-  .locate-button:hover {
-    color: var(--color-brand-dark);
-    background: #fff;
-    border-color: rgb(64 19 6 / 12%);
   }
 
   .map-stage :global(.leaflet-bottom.leaflet-right) {
@@ -402,15 +542,66 @@ const cities = getCities(spas);
     margin-inline-end: 0.6rem;
   }
 
-  .locate-button:disabled {
+  .map-stage :global(.leaflet-control-locate a) {
+    display: grid;
+    place-items: center;
+    color: #000;
+  }
+
+  .map-stage :global(.leaflet-control-locate a[aria-disabled="true"]) {
     cursor: progress;
     opacity: 0.72;
+  }
+
+  .map-stage :global(.leaflet-control-locate svg) {
+    width: 18px;
+    height: 18px;
+  }
+
+  .panel-close:active,
+  :global(.map-panel .external-link:active),
+  .city-filter button:active {
+    scale: 0.98;
+    translate: 0 0;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .panel-close:hover {
+      color: var(--color-surface-strong);
+      background: var(--color-brand);
+      border-color: var(--color-brand);
+      box-shadow: 0 8px 20px rgb(45 22 14 / 20%);
+      scale: 1.06;
+      translate: 0 -1px;
+    }
+
+    :global(.map-panel .external-link:hover) {
+      background: rgb(255 255 255 / 86%);
+      border-color: rgb(184 42 11 / 30%);
+      box-shadow: 0 8px 20px rgb(45 22 14 / 14%);
+      scale: 1.02;
+      translate: 0 -1px;
+    }
+
+    :global(.map-panel .primary-link:hover) {
+      background: var(--color-brand-dark);
+      border-color: var(--color-brand-dark);
+    }
+
+    .city-filter button:hover:not([aria-pressed="true"]) {
+      color: var(--color-surface-strong);
+      background: var(--color-brand);
+      border-color: var(--color-brand);
+      box-shadow: 0 8px 20px rgb(45 22 14 / 16%);
+      scale: 1.03;
+      translate: 0 -2px;
+    }
   }
 
   @media (max-width: 900px) {
     .map-shell {
       --map-control-bottom: calc(
-        var(--mobile-panel-height) + 0.7rem + var(--safe-bottom)
+        var(--mobile-panel-closed-height) + 0.7rem + var(--safe-bottom)
       );
 
       display: block;
@@ -423,7 +614,11 @@ const cities = getCities(spas);
     }
 
     .map-search {
-      inset-block-start: 4.35rem;
+      inset-block-start: 4.85rem;
+      inset-inline: 0.75rem 0;
+    }
+
+    .map-shell.is-panel-open .map-search {
       inset-inline: 0.75rem 0;
     }
 
@@ -433,19 +628,66 @@ const cities = getCities(spas);
       inset-inline: 0;
       inset-block-end: var(--safe-bottom);
       width: auto;
-      height: var(--mobile-panel-height);
+      height: var(--mobile-panel-closed-height);
       max-height: calc(86svh - var(--safe-bottom));
       margin: 0;
       border-inline: 0;
       border-end-end-radius: 0;
       border-end-start-radius: 0;
-      transition: height 180ms ease;
+      box-shadow: 0 -2px 12px rgb(45 22 14 / 16%);
+      transition:
+        height var(--map-transition-duration) var(--map-transition-easing),
+        max-height var(--map-transition-duration) var(--map-transition-easing),
+        transform var(--map-transition-duration) var(--map-transition-easing);
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(calc(100% - var(--mobile-panel-closed-height)));
+    }
+
+    .map-panel.is-open {
+      height: auto;
+      max-height: var(--mobile-panel-height);
+      transform: translateY(0);
+    }
+
+    .map-panel:not(.is-open) .spa-list {
+      display: none;
     }
 
     .spa-list {
-      max-height: calc(var(--mobile-panel-height) - 10.25rem);
+      max-height: calc(var(--mobile-panel-height) - 3.25rem);
       overscroll-behavior: contain;
       scrollbar-gutter: stable;
+    }
+
+    :global(.map-panel .spa-card) {
+      min-height: auto;
+      margin-block-end: 20px;
+      padding: 0 1rem 1rem;
+    }
+
+    :global(.map-panel .spa-card h2) {
+      padding-inline-end: 2.4rem;
+      font-size: 1.22rem;
+    }
+
+    :global(.map-panel .spa-summary) {
+      max-width: none;
+      font-size: 0.94rem;
+      line-height: 1.62;
+    }
+
+    :global(.map-panel .spa-detail-row) {
+      grid-template-columns: 3.75rem minmax(0, 1fr);
+      gap: 0.65rem;
+      padding-block: 0.75rem;
+    }
+
+    .panel-close {
+      inset-block-start: 2.85rem;
+      inset-inline-end: 0.75rem;
+      width: 2.25rem;
+      height: 2.25rem;
     }
 
     .panel-grip {
@@ -477,17 +719,8 @@ const cities = getCities(spas);
       cursor: grabbing;
     }
 
-    .locate-button {
-      z-index: 920;
-      inset-block-end: calc(
-        var(--map-control-bottom) + var(--map-zoom-height) +
-          var(--map-control-gap)
-      );
-      inset-inline-end: 0.9rem;
-    }
-
     .map-stage :global(.leaflet-bottom.leaflet-right) {
-      z-index: 910;
+      z-index: 800;
       margin-block-end: var(--map-control-bottom);
       margin-inline-end: 0.25rem;
     }

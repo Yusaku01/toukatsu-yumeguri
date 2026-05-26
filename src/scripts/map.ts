@@ -18,14 +18,9 @@ const initMapPage = () => {
 
   mapElement.dataset.ready = "true";
 
-  const cards = Array.from(
-    document.querySelectorAll<HTMLElement>("[data-spa-card]"),
-  );
   const chips = Array.from(
     document.querySelectorAll<HTMLButtonElement>("[data-city-filter]"),
   );
-  const locateButton =
-    document.querySelector<HTMLButtonElement>("[data-locate]");
   const statusElement = document.querySelector<HTMLElement>(
     "[data-location-status]",
   );
@@ -33,10 +28,18 @@ const initMapPage = () => {
     "[data-visible-count]",
   );
   const listElement = document.querySelector<HTMLElement>("[data-spa-list]");
+  const panelElement = document.querySelector<HTMLElement>("[data-map-panel]");
+  const shellElement = document.querySelector<HTMLElement>(".map-shell");
   const spas: Spa[] = JSON.parse(mapElement.dataset.spas ?? "[]");
   const markers = new Map<string, L.Marker>();
+  const hoverTooltipQuery = window.matchMedia(
+    "(hover: hover) and (pointer: fine)",
+  );
   let activeCity = "all";
   let currentLocation: Coordinates | undefined;
+  let currentLocationMarker: L.CircleMarker | undefined;
+  let locateButton: HTMLAnchorElement | undefined;
+  let selectedSpaId: string | undefined;
 
   const map = L.map(mapElement, {
     zoomControl: false,
@@ -51,47 +54,59 @@ const initMapPage = () => {
 
   L.control.zoom({ position: "bottomright" }).addTo(map);
 
+  const locateControl = L.Control.extend({
+    options: {
+      position: "bottomright",
+    },
+
+    onAdd(controlMap: L.Map) {
+      const container = L.DomUtil.create(
+        "div",
+        "leaflet-control-locate leaflet-bar leaflet-control",
+      );
+      const button = L.DomUtil.create("a", "", container);
+      button.href = "#";
+      button.title = "現在地を表示";
+      button.role = "button";
+      button.setAttribute("aria-label", "現在地を表示");
+      button.setAttribute("aria-disabled", "false");
+      button.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
+        </svg>
+      `;
+
+      L.DomEvent.disableClickPropagation(container);
+      L.DomEvent.on(button, "click", (event) => {
+        L.DomEvent.preventDefault(event);
+        if (button.getAttribute("aria-disabled") === "true") return;
+
+        locateButton = button;
+        locateButton.setAttribute("aria-disabled", "true");
+        if (statusElement) statusElement.textContent = "現在地を確認しています";
+
+        controlMap.locate({
+          enableHighAccuracy: false,
+          timeout: 8000,
+          maximumAge: 300000,
+          setView: false,
+        });
+      });
+
+      locateButton = button;
+      return container;
+    },
+  });
+
+  map.addControl(new locateControl());
+
   const getVisibleSpas = () =>
     spas.filter((spa) => activeCity === "all" || spa.city === activeCity);
 
   const updateCount = () => {
     if (!countElement) return;
     countElement.textContent = `${getVisibleSpas().length}件`;
-  };
-
-  const updateDistances = () => {
-    if (!currentLocation) return;
-
-    const origin = currentLocation;
-
-    cards.forEach((card) => {
-      const spa = spas.find((item) => item.id === card.dataset.spaCard);
-      const distanceElement =
-        card.querySelector<HTMLElement>("[data-distance]");
-
-      if (!spa || !distanceElement) return;
-      distanceElement.textContent = formatDistance(
-        getDistanceInMeters(origin, spa),
-      );
-      distanceElement.hidden = false;
-    });
-  };
-
-  const sortCardsByDistance = () => {
-    if (!currentLocation || !listElement) return;
-
-    const origin = currentLocation;
-
-    cards
-      .map((card) => {
-        const spa = spas.find((item) => item.id === card.dataset.spaCard);
-        return {
-          card,
-          distance: spa ? getDistanceInMeters(origin, spa) : Infinity,
-        };
-      })
-      .sort((a, b) => a.distance - b.distance)
-      .forEach(({ card }) => listElement.append(card));
   };
 
   const fitVisibleMarkers = () => {
@@ -105,14 +120,120 @@ const initMapPage = () => {
     map.fitBounds(bounds, { animate: false, maxZoom: 13 });
   };
 
+  const openPanel = () => {
+    if (!panelElement) return;
+
+    panelElement.classList.add("is-open");
+    panelElement.removeAttribute("aria-hidden");
+    shellElement?.classList.add("is-panel-open");
+    panelElement.dispatchEvent(new CustomEvent("spa-panel-open"));
+  };
+
+  const closePanel = () => {
+    if (!panelElement) return;
+
+    selectedSpaId = undefined;
+    panelElement.classList.remove("is-open");
+    panelElement.setAttribute("aria-hidden", "true");
+    panelElement.setAttribute("aria-expanded", "false");
+    shellElement?.classList.remove("is-panel-open");
+    listElement?.replaceChildren();
+  };
+
+  panelElement?.addEventListener("spa-panel-close", closePanel);
+
+  const appendTextElement = (
+    parent: HTMLElement,
+    tagName: keyof HTMLElementTagNameMap,
+    text: string,
+    className?: string,
+  ) => {
+    const element = document.createElement(tagName);
+    element.textContent = text;
+    if (className) element.className = className;
+    parent.append(element);
+    return element;
+  };
+
+  const createSelectedCard = (spa: Spa) => {
+    const card = document.createElement("article");
+    card.className = "spa-card";
+    card.dataset.spaCard = spa.id;
+    card.dataset.selected = "";
+
+    const main = document.createElement("div");
+    main.className = "spa-card-main";
+
+    const meta = document.createElement("p");
+    meta.className = "spa-meta";
+    appendTextElement(meta, "span", spa.city);
+    if (spa.area) appendTextElement(meta, "span", spa.area);
+    if (currentLocation) {
+      appendTextElement(
+        meta,
+        "span",
+        formatDistance(getDistanceInMeters(currentLocation, spa)),
+      );
+    }
+
+    appendTextElement(main, "h2", spa.name);
+    main.prepend(meta);
+
+    if (spa.notes) appendTextElement(main, "p", spa.notes, "spa-summary");
+
+    const details = document.createElement("div");
+    details.className = "spa-detail-list";
+
+    const addressRow = document.createElement("div");
+    addressRow.className = "spa-detail-row";
+    appendTextElement(addressRow, "span", "住所", "spa-detail-label");
+    const address = appendTextElement(addressRow, "address", spa.address);
+    address.setAttribute("translate", "no");
+    details.append(addressRow);
+
+    if (spa.tags.length > 0) {
+      const featureRow = document.createElement("div");
+      featureRow.className = "spa-detail-row";
+      appendTextElement(featureRow, "span", "特徴", "spa-detail-label");
+      const tagList = document.createElement("ul");
+      tagList.className = "tag-list";
+      tagList.setAttribute("aria-label", `${spa.name}の特徴`);
+      spa.tags.forEach((tag) => appendTextElement(tagList, "li", tag));
+      featureRow.append(tagList);
+      details.append(featureRow);
+    }
+
+    main.append(details);
+
+    const actions = document.createElement("div");
+    actions.className = "spa-actions";
+
+    const googleMapsLink = document.createElement("a");
+    googleMapsLink.className = "external-link primary-link";
+    googleMapsLink.href = spa.googleMapsUrl;
+    googleMapsLink.target = "_blank";
+    googleMapsLink.rel = "noopener noreferrer";
+    googleMapsLink.textContent = "Google マップ";
+
+    const officialLink = document.createElement("a");
+    officialLink.className = "external-link";
+    officialLink.href = spa.officialUrl;
+    officialLink.target = "_blank";
+    officialLink.rel = "noopener noreferrer";
+    officialLink.textContent = "公式サイト";
+
+    actions.append(googleMapsLink, officialLink);
+    card.append(main, actions);
+    return card;
+  };
+
   const selectSpa = (spaId: string) => {
-    cards.forEach((card) => {
-      const selected = card.dataset.spaCard === spaId;
-      card.toggleAttribute("data-selected", selected);
-      if (selected) {
-        card.scrollIntoView({ block: "nearest" });
-      }
-    });
+    const spa = spas.find((item) => item.id === spaId);
+    if (!spa || !listElement) return;
+
+    selectedSpaId = spaId;
+    openPanel();
+    listElement.replaceChildren(createSelectedCard(spa));
   };
 
   spas.forEach((spa) => {
@@ -121,30 +242,29 @@ const initMapPage = () => {
       title: spa.name,
     }).addTo(map);
 
-    marker.bindPopup(
+    marker.bindTooltip(
       `<strong>${spa.name}</strong><br><span>${spa.city}${spa.area ? ` / ${spa.area}` : ""}</span>`,
+      {
+        className: "spa-marker-tooltip",
+        direction: "top",
+        offset: [0, -42],
+        opacity: 1,
+      },
     );
+    marker.on("mouseover", () => {
+      if (hoverTooltipQuery.matches) marker.openTooltip();
+    });
+    marker.on("mouseout", () => marker.closeTooltip());
+    marker.on("focus", () => {
+      if (hoverTooltipQuery.matches) marker.openTooltip();
+    });
+    marker.on("blur", () => marker.closeTooltip());
     marker.on("click", () => selectSpa(spa.id));
     markers.set(spa.id, marker);
   });
 
-  cards.forEach((card) => {
-    card.addEventListener("click", () => {
-      const spa = spas.find((item) => item.id === card.dataset.spaCard);
-      if (!spa) return;
-
-      selectSpa(spa.id);
-      map.setView([spa.lat, spa.lng], 14);
-      markers.get(spa.id)?.openPopup();
-    });
-  });
-
   const applyFilter = () => {
     const visibleIds = new Set(getVisibleSpas().map((spa) => spa.id));
-
-    cards.forEach((card) => {
-      card.hidden = !visibleIds.has(card.dataset.spaCard ?? "");
-    });
 
     markers.forEach((marker, id) => {
       if (visibleIds.has(id)) {
@@ -160,6 +280,11 @@ const initMapPage = () => {
     });
 
     updateCount();
+    if (!selectedSpaId || !visibleIds.has(selectedSpaId)) {
+      closePanel();
+    } else {
+      selectSpa(selectedSpaId);
+    }
     fitVisibleMarkers();
   };
 
@@ -170,46 +295,41 @@ const initMapPage = () => {
     });
   });
 
-  locateButton?.addEventListener("click", () => {
-    if (!navigator.geolocation) {
-      if (statusElement)
-        statusElement.textContent = "現在地を取得できない環境です";
-      return;
-    }
-
-    locateButton.disabled = true;
-    if (statusElement) statusElement.textContent = "現在地を確認しています";
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        currentLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        L.circleMarker([currentLocation.lat, currentLocation.lng], {
-          radius: 8,
-          color: "#401306",
-          fillColor: "#ff7442",
-          fillOpacity: 0.85,
-          weight: 3,
-        })
-          .bindPopup("現在地")
-          .addTo(map);
-        map.setView([currentLocation.lat, currentLocation.lng], 12);
-        updateDistances();
-        sortCardsByDistance();
-        if (statusElement) statusElement.textContent = "近い順に並べました";
-        locateButton.disabled = false;
+  map.on("locationfound", (event) => {
+    currentLocation = {
+      lat: event.latlng.lat,
+      lng: event.latlng.lng,
+    };
+    currentLocationMarker?.remove();
+    currentLocationMarker = L.circleMarker(
+      [currentLocation.lat, currentLocation.lng],
+      {
+        radius: 8,
+        color: "#401306",
+        fillColor: "#ff7442",
+        fillOpacity: 0.85,
+        weight: 3,
       },
-      () => {
-        if (statusElement)
-          statusElement.textContent = "現在地は許可されませんでした";
-        locateButton.disabled = false;
-      },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
-    );
+    )
+      .bindPopup("現在地")
+      .addTo(map);
+    map.setView([currentLocation.lat, currentLocation.lng], 12);
+    if (selectedSpaId) selectSpa(selectedSpaId);
+    if (statusElement) statusElement.textContent = "近い順に並べました";
+    locateButton?.setAttribute("aria-disabled", "false");
   });
 
+  map.on("locationerror", (event) => {
+    if (statusElement) {
+      statusElement.textContent =
+        event.code === 0
+          ? "現在地を取得できない環境です"
+          : "現在地は許可されませんでした";
+    }
+    locateButton?.setAttribute("aria-disabled", "false");
+  });
+
+  closePanel();
   applyFilter();
 };
 

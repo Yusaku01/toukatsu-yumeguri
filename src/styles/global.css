@@ -201,6 +201,12 @@ button {
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-chip);
   backdrop-filter: blur(12px);
+  scale: 1;
+  translate: 0 0;
+  transition-duration: 0.3s;
+  transition-property: background-color, border-color, box-shadow, scale,
+    translate;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
 .nav-menu summary::-webkit-details-marker {
@@ -229,6 +235,26 @@ button {
 
 .nav-menu a:hover {
   background: var(--color-paper);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-menu summary:hover {
+    background: rgb(255 255 255 / 96%);
+    border-color: rgb(184 42 11 / 30%);
+    box-shadow: 0 10px 24px rgb(45 22 14 / 18%);
+    scale: 1.03;
+    translate: 0 -2px;
+  }
+}
+
+.nav-menu summary:focus-visible {
+  border-color: rgb(184 42 11 / 28%);
+  box-shadow: 0 8px 22px rgb(45 22 14 / 16%);
+}
+
+.nav-menu summary:active {
+  scale: 0.98;
+  translate: 0 0;
 }
 
 .icon {
