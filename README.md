@@ -29,6 +29,8 @@ pnpm run lint
 pnpm run build
 ```
 
+OGP画像を正しく表示させるため、本番URLを `PUBLIC_SITE_URL` で指定してください（例: `https://example.com`）。
+
 施設情報は `src/content/spas/` に1施設1JSONで管理します。
 施設情報を追加・修正したい場合は、同ディレクトリをご確認ください。
 

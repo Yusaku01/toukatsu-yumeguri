@@ -17,6 +17,11 @@ const title = Astro.props.title
   : siteName;
 const bodyClass = Astro.props.bodyClass ?? "";
 const analyticsToken = import.meta.env.PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN;
+const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? Astro.site?.toString();
+const ogImage = siteUrl ? new URL("/ogp.png", siteUrl).toString() : "/ogp.png";
+const ogUrl = siteUrl
+  ? new URL(Astro.url.pathname, siteUrl).toString()
+  : Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -29,7 +34,8 @@ const analyticsToken = import.meta.env.PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN;
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/ogp.png" />
+    <meta property="og:url" content={ogUrl} />
+    <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
