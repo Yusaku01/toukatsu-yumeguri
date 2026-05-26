@@ -4,6 +4,10 @@ import { formatDistance, getDistanceInMeters } from "../lib/geo";
 import type { Coordinates, Spa } from "../lib/types";
 
 const TOKATSU_CENTER: Coordinates = { lat: 35.855, lng: 139.945 };
+const INITIAL_MAP_ZOOM = 11;
+const DESKTOP_MAX_INITIAL_MAP_ZOOM = 13;
+const FILTER_MAX_MAP_ZOOM = 13;
+const MOBILE_MAX_INITIAL_MAP_ZOOM = 9;
 
 const pinIcon = L.icon({
   iconUrl: "/pin.svg",
@@ -35,6 +39,7 @@ const initMapPage = () => {
   const hoverTooltipQuery = window.matchMedia(
     "(hover: hover) and (pointer: fine)",
   );
+  const mobileInitialViewQuery = window.matchMedia("(max-width: 900px)");
   let activeCity = "all";
   let currentLocation: Coordinates | undefined;
   let currentLocationMarker: L.CircleMarker | undefined;
@@ -44,10 +49,13 @@ const initMapPage = () => {
   const map = L.map(mapElement, {
     zoomControl: false,
     preferCanvas: true,
-  }).setView([TOKATSU_CENTER.lat, TOKATSU_CENTER.lng], 11);
+  });
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    keepBuffer: 0,
     maxZoom: 19,
+    updateWhenIdle: true,
+    updateWhenZooming: false,
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
@@ -109,7 +117,12 @@ const initMapPage = () => {
     countElement.textContent = `${getVisibleSpas().length}件`;
   };
 
-  const fitVisibleMarkers = () => {
+  const getInitialMaxZoom = () =>
+    mobileInitialViewQuery.matches
+      ? MOBILE_MAX_INITIAL_MAP_ZOOM
+      : DESKTOP_MAX_INITIAL_MAP_ZOOM;
+
+  const fitVisibleMarkers = (maxZoom = FILTER_MAX_MAP_ZOOM) => {
     const visibleMarkers = getVisibleSpas()
       .map((spa) => markers.get(spa.id))
       .filter((marker): marker is L.Marker => Boolean(marker));
@@ -117,7 +130,7 @@ const initMapPage = () => {
     if (visibleMarkers.length === 0) return;
 
     const bounds = L.featureGroup(visibleMarkers).getBounds().pad(0.22);
-    map.fitBounds(bounds, { animate: false, maxZoom: 13 });
+    map.fitBounds(bounds, { animate: false, maxZoom });
   };
 
   const openPanel = () => {
@@ -236,6 +249,15 @@ const initMapPage = () => {
     listElement.replaceChildren(createSelectedCard(spa));
   };
 
+  if (spas.length > 0) {
+    const bounds = L.latLngBounds(
+      spas.map((spa) => [spa.lat, spa.lng] as L.LatLngTuple),
+    ).pad(0.22);
+    map.fitBounds(bounds, { animate: false, maxZoom: getInitialMaxZoom() });
+  } else {
+    map.setView([TOKATSU_CENTER.lat, TOKATSU_CENTER.lng], INITIAL_MAP_ZOOM);
+  }
+
   spas.forEach((spa) => {
     const marker = L.marker([spa.lat, spa.lng], {
       icon: pinIcon,
@@ -263,7 +285,7 @@ const initMapPage = () => {
     markers.set(spa.id, marker);
   });
 
-  const applyFilter = () => {
+  const applyFilter = (maxZoom = FILTER_MAX_MAP_ZOOM) => {
     const visibleIds = new Set(getVisibleSpas().map((spa) => spa.id));
 
     markers.forEach((marker, id) => {
@@ -285,7 +307,7 @@ const initMapPage = () => {
     } else {
       selectSpa(selectedSpaId);
     }
-    fitVisibleMarkers();
+    fitVisibleMarkers(maxZoom);
   };
 
   chips.forEach((chip) => {
@@ -330,7 +352,7 @@ const initMapPage = () => {
   });
 
   closePanel();
-  applyFilter();
+  applyFilter(getInitialMaxZoom());
 };
 
 document.addEventListener("astro:page-load", initMapPage);
