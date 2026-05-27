@@ -17,4 +17,33 @@ pnpm run test
 pnpm run build
 ```
 
+## 命名規則
+
+ブランチ名、コミットメッセージ、Pull Requestタイトルは、基本的にConventional Commitsに従ってください。
+
+例:
+
+- `feat: add facility filters`
+- `fix: correct spa address`
+- `docs: update contribution guide`
+- `chore: remove unused files`
+
+ブランチ名は、Conventional Commitsのtypeを先頭にした短いkebab-caseにします。
+
+例:
+
+- `feat/add-facility-filters`
+- `fix/correct-spa-address`
+- `docs/update-contribution-guide`
+
+## ページ配置
+
+`src/pages/` 配下のページは、原則としてディレクトリ単位で管理します。
+
+- `/list/` は `src/pages/list/index.astro`
+- `/terms/` は `src/pages/terms/index.astro`
+
+`src/pages/list.astro` のようにページ名を直接ファイル名にする配置は避けてください。
+このルールはESLintでも検出します。
+
 Pull Requestでは、変更内容と確認したコマンドを短く書いてください。

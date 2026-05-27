@@ -35,4 +35,3 @@ pnpm run build
 ## 設計メモ
 
 基本設計は [docs/basic-design.md](docs/basic-design.md) にまとめています。
-実装前の推奨計画は [docs/recommended-plan.md](docs/recommended-plan.md) にまとめています。

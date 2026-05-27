@@ -1,7 +1,9 @@
 node_modules/
 dist/
 .astro/
+.astro-cache/
 .wrangler/
+.pnpm-store/
 
 # Local environment and secrets
 .env

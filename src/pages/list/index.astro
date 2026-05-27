@@ -1,8 +1,8 @@
 ---
-import SiteHeader from "../components/SiteHeader.astro";
-import SpaCard from "../components/SpaCard.astro";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { getSpas } from "../lib/spas";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SpaCard from "../../components/SpaCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getSpas } from "../../lib/spas";
 
 const spas = await getSpas();
 ---
@@ -45,7 +45,7 @@ const spas = await getSpas();
     </section>
   </main>
   <script>
-    import "../scripts/list";
+    import "../../scripts/list";
   </script>
 </BaseLayout>
 

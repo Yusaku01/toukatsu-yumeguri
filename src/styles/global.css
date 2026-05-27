@@ -204,8 +204,8 @@ button {
   scale: 1;
   translate: 0 0;
   transition-duration: 0.3s;
-  transition-property: background-color, border-color, box-shadow, scale,
-    translate;
+  transition-property:
+    background-color, border-color, box-shadow, scale, translate;
   transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 

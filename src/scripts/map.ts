@@ -25,12 +25,6 @@ const initMapPage = () => {
   const chips = Array.from(
     document.querySelectorAll<HTMLButtonElement>("[data-city-filter]"),
   );
-  const statusElement = document.querySelector<HTMLElement>(
-    "[data-location-status]",
-  );
-  const countElement = document.querySelector<HTMLElement>(
-    "[data-visible-count]",
-  );
   const listElement = document.querySelector<HTMLElement>("[data-spa-list]");
   const panelElement = document.querySelector<HTMLElement>("[data-map-panel]");
   const shellElement = document.querySelector<HTMLElement>(".map-shell");
@@ -92,7 +86,6 @@ const initMapPage = () => {
 
         locateButton = button;
         locateButton.setAttribute("aria-disabled", "true");
-        if (statusElement) statusElement.textContent = "現在地を確認しています";
 
         controlMap.locate({
           enableHighAccuracy: false,
@@ -111,11 +104,6 @@ const initMapPage = () => {
 
   const getVisibleSpas = () =>
     spas.filter((spa) => activeCity === "all" || spa.city === activeCity);
-
-  const updateCount = () => {
-    if (!countElement) return;
-    countElement.textContent = `${getVisibleSpas().length}件`;
-  };
 
   const getInitialMaxZoom = () =>
     mobileInitialViewQuery.matches
@@ -301,7 +289,6 @@ const initMapPage = () => {
       chip.setAttribute("aria-pressed", String(selected));
     });
 
-    updateCount();
     if (!selectedSpaId || !visibleIds.has(selectedSpaId)) {
       closePanel();
     } else {
@@ -337,17 +324,10 @@ const initMapPage = () => {
       .addTo(map);
     map.setView([currentLocation.lat, currentLocation.lng], 12);
     if (selectedSpaId) selectSpa(selectedSpaId);
-    if (statusElement) statusElement.textContent = "近い順に並べました";
     locateButton?.setAttribute("aria-disabled", "false");
   });
 
-  map.on("locationerror", (event) => {
-    if (statusElement) {
-      statusElement.textContent =
-        event.code === 0
-          ? "現在地を取得できない環境です"
-          : "現在地は許可されませんでした";
-    }
+  map.on("locationerror", () => {
     locateButton?.setAttribute("aria-disabled", "false");
   });
 
