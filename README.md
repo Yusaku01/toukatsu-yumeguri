@@ -11,7 +11,7 @@
 
 - Astro v6
 - TypeScript
-- Leaflet + OpenStreetMap
+- Leaflet + Stadia Maps（Alidade Smooth / OpenStreetMap ベース）
 - Astro Content Collection + JSON
 - Cloudflare Workers Static Assets
 - Vitest
