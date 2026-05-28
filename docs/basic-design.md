@@ -82,7 +82,7 @@
 
 - Astro v6
 - TypeScript
-- Leaflet + Stadia Maps（Alidade Smooth / OpenStreetMap ベース）
+- Leaflet + OpenStreetMap
 - Astro Content Collection + JSON
 - Cloudflare Workers Static Assets
 - Vitest
@@ -90,7 +90,7 @@
 
 コアロジックは小さくテストする。特に、距離計算、市区町村の並び順、施設一覧の並び替えはVitestで確認する。
 
-地図タイルはStadia MapsのAlidade Smoothを使う。Leafletのラスタタイルとして扱い、Stadia Maps、OpenMapTiles、OpenStreetMapの帰属表示を地図上に表示する。
+地図タイルはOpenStreetMap標準タイルから始める。アクセスが増えた場合は、利用規約や負荷を見て管理されたタイルサービスへの移行を検討する。
 
 ## コントリビュート
 
