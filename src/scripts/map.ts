@@ -45,13 +45,13 @@ const initMapPage = () => {
     preferCanvas: true,
   });
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    keepBuffer: 0,
-    maxZoom: 19,
-    updateWhenIdle: true,
-    updateWhenZooming: false,
+  L.tileLayer("https://tile.mierune.co.jp/mierune/{z}/{x}/{y}@2x.png", {
+    maxZoom: 18,
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      '<a href="https://mierune.co.jp" target="_blank" rel="noopener noreferrer">MIERUNE Inc.</a> ' +
+      '<a href="https://www.openmaptiles.org/" target="_blank" rel="noopener noreferrer">&copy; OpenMapTiles</a> ' +
+      '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">&copy; OpenStreetMap contributors</a>',
+    className: "map-tile map-tile--soft",
   }).addTo(map);
 
   L.control.zoom({ position: "bottomright" }).addTo(map);

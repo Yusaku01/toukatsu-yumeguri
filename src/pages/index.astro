@@ -9,10 +9,10 @@ const cities = getCities(spas);
 
 <BaseLayout bodyClass="map-page">
   <fragment slot="head">
-    <link rel="preconnect" href="https://tile.openstreetmap.org" />
+    <link rel="preconnect" href="https://tile.mierune.co.jp" />
     <link
       rel="preload"
-      href="https://b.tile.openstreetmap.org/9/455/200.png"
+      href="https://tile.mierune.co.jp/mierune/9/455/200@2x.png"
       as="image"
       type="image/png"
       fetchpriority="high"
@@ -20,7 +20,7 @@ const cities = getCities(spas);
     />
     <link
       rel="preload"
-      href="https://a.tile.openstreetmap.org/9/455/202.png"
+      href="https://tile.mierune.co.jp/mierune/9/455/202@2x.png"
       as="image"
       type="image/png"
       fetchpriority="high"
@@ -285,6 +285,10 @@ const cities = getCities(spas);
     height: 100%;
     background:
       linear-gradient(120deg, rgb(112 200 215 / 16%), transparent 48%), #dce8e4;
+  }
+
+  :global(.map-tile--soft) {
+    filter: saturate(0.75) contrast(0.95) brightness(1.03);
   }
 
   .map-panel {
