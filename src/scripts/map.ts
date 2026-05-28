@@ -8,12 +8,6 @@ const INITIAL_MAP_ZOOM = 11;
 const DESKTOP_MAX_INITIAL_MAP_ZOOM = 13;
 const FILTER_MAX_MAP_ZOOM = 13;
 const MOBILE_MAX_INITIAL_MAP_ZOOM = 9;
-const STADIA_MAPS_TILE_URL =
-  "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png";
-const STADIA_MAPS_ATTRIBUTION =
-  '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener noreferrer">Stadia Maps</a> ' +
-  '&copy; <a href="https://openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a> ' +
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>';
 
 const pinIcon = L.icon({
   iconUrl: "/pin.svg",
@@ -51,12 +45,13 @@ const initMapPage = () => {
     preferCanvas: true,
   });
 
-  L.tileLayer(STADIA_MAPS_TILE_URL, {
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     keepBuffer: 0,
-    maxZoom: 20,
+    maxZoom: 19,
     updateWhenIdle: true,
     updateWhenZooming: false,
-    attribution: STADIA_MAPS_ATTRIBUTION,
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
 
   L.control.zoom({ position: "bottomright" }).addTo(map);
