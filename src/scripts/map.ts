@@ -1,6 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { formatDistance, getDistanceInMeters } from "../lib/geo";
+import { getSpaTagGroups } from "../lib/tag-groups";
 import type { Coordinates, Spa } from "../lib/types";
 
 const TOKATSU_CENTER: Coordinates = { lat: 35.855, lng: 139.945 };
@@ -192,19 +193,28 @@ const initMapPage = () => {
     address.setAttribute("translate", "no");
     details.append(addressRow);
 
-    if (spa.tags.length > 0) {
+    const tagGroups = getSpaTagGroups(spa);
+    if (tagGroups.length > 0) {
       const featureRow = document.createElement("div");
       featureRow.className = "spa-detail-row";
       appendTextElement(featureRow, "span", "特徴", "spa-detail-label");
-      const tagList = document.createElement("ul");
-      tagList.className = "tag-list";
-      tagList.setAttribute("aria-label", `${spa.name}の特徴`);
-      spa.tags.forEach((tag) => appendTextElement(tagList, "li", tag));
-      featureRow.append(tagList);
+      const tagGroupList = document.createElement("div");
+      tagGroupList.className = "tag-groups";
+      tagGroupList.setAttribute("role", "group");
+      tagGroupList.setAttribute("aria-label", `${spa.name}の特徴`);
+      tagGroups.forEach((group) => {
+        const tagGroup = document.createElement("div");
+        tagGroup.className = "tag-group";
+        appendTextElement(tagGroup, "span", group.label, "tag-group-label");
+        const tagList = document.createElement("ul");
+        tagList.className = "tag-list";
+        group.tags.forEach((tag) => appendTextElement(tagList, "li", tag));
+        tagGroup.append(tagList);
+        tagGroupList.append(tagGroup);
+      });
+      featureRow.append(tagGroupList);
       details.append(featureRow);
     }
-
-    main.append(details);
 
     const actions = document.createElement("div");
     actions.className = "spa-actions";
@@ -224,6 +234,7 @@ const initMapPage = () => {
     officialLink.textContent = "公式サイト";
 
     actions.append(googleMapsLink, officialLink);
+    main.append(details);
     card.append(main, actions);
     return card;
   };
@@ -232,9 +243,9 @@ const initMapPage = () => {
     const spa = spas.find((item) => item.id === spaId);
     if (!spa || !listElement) return;
 
+    listElement.replaceChildren(createSelectedCard(spa));
     selectedSpaId = spaId;
     openPanel();
-    listElement.replaceChildren(createSelectedCard(spa));
   };
 
   if (spas.length > 0) {

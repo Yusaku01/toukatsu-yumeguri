@@ -43,3 +43,17 @@ export const getOrderedCities = (spas: Spa[]): string[] => {
     (a, b) => getCityRank(a) - getCityRank(b) || a.localeCompare(b, "ja"),
   );
 };
+
+export const getCityCounts = (
+  spas: Spa[],
+): Array<{ city: string; count: number }> => {
+  const counts = new Map<string, number>();
+  spas.forEach((spa) => {
+    counts.set(spa.city, (counts.get(spa.city) ?? 0) + 1);
+  });
+
+  return getOrderedCities(spas).map((city) => ({
+    city,
+    count: counts.get(city) ?? 0,
+  }));
+};

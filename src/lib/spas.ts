@@ -1,5 +1,9 @@
 import { getCollection } from "astro:content";
-import { getOrderedCities, sortSpasForDisplay } from "./sort";
+import {
+  getCityCounts as getOrderedCityCounts,
+  getOrderedCities,
+  sortSpasForDisplay,
+} from "./sort";
 import type { Spa } from "./types";
 
 export const getSpas = async (): Promise<Spa[]> => {
@@ -9,3 +13,10 @@ export const getSpas = async (): Promise<Spa[]> => {
 };
 
 export const getCities = (spas: Spa[]): string[] => getOrderedCities(spas);
+
+export const getCityCounts = (
+  spas: Spa[],
+): Array<{
+  city: string;
+  count: number;
+}> => getOrderedCityCounts(spas);

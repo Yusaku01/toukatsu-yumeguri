@@ -1,10 +1,11 @@
 ---
 import SiteHeader from "../components/SiteHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getCities, getSpas } from "../lib/spas";
+import { getCityCounts, getSpas } from "../lib/spas";
 
 const spas = await getSpas();
-const cities = getCities(spas);
+const cityCounts = getCityCounts(spas);
+const totalSpaCount = spas.length;
 ---
 
 <BaseLayout bodyClass="map-page">
@@ -39,16 +40,18 @@ const cities = getCities(spas);
       <search class="map-search" aria-label="温浴施設の絞り込み">
         <div class="city-filter" aria-label="市区町村で絞り込み">
           <button type="button" data-city-filter="all" aria-pressed="true"
-            >すべて</button
+            ><span class="city-filter-label">すべて</span>
+            <span class="city-filter-count">{totalSpaCount}</span></button
           >
           {
-            cities.map((city) => (
+            cityCounts.map(({ city, count }) => (
               <button
                 type="button"
                 data-city-filter={city}
                 aria-pressed="false"
               >
-                {city}
+                <span class="city-filter-label">{city}</span>
+                <span class="city-filter-count">{count}</span>
               </button>
             ))
           }
@@ -96,7 +99,7 @@ const cities = getCities(spas);
     const mobileQuery = window.matchMedia("(max-width: 900px)");
 
     const collapsedHeight = 30;
-    const expandedHeight = 62;
+    const expandedHeight = 78;
     const minimumHeight = 24;
     const expandedSnapThreshold = (collapsedHeight + expandedHeight) / 2;
 
@@ -147,8 +150,35 @@ const cities = getCities(spas);
         );
       };
 
+      const getContentFitHeight = () => {
+        const panelContent = panel.querySelector<HTMLElement>(".spa-list");
+        if (!panelContent) return collapsedHeight;
+
+        const rootFontSize = Number.parseFloat(
+          window.getComputedStyle(document.documentElement).fontSize,
+        );
+        const panelChromeHeight = rootFontSize * 3.25;
+
+        const heightInViewport =
+          ((panelContent.scrollHeight + panelChromeHeight) /
+            window.innerHeight) *
+          100;
+
+        return Math.min(
+          expandedHeight,
+          Math.max(collapsedHeight, heightInViewport),
+        );
+      };
+
       const openPanel = () => {
-        setPanelHeight(collapsedHeight);
+        if (!mobileQuery.matches) {
+          setPanelHeight(collapsedHeight);
+          return;
+        }
+
+        requestAnimationFrame(() => {
+          setPanelHeight(getContentFitHeight());
+        });
       };
 
       const snapPanelHeight = () => {
@@ -452,6 +482,26 @@ const cities = getCities(spas);
     margin-block-start: 1.15rem;
   }
 
+  :global(.map-panel .tag-groups) {
+    display: grid;
+    gap: 0.48rem;
+    min-width: 0;
+  }
+
+  :global(.map-panel .tag-group) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  :global(.map-panel .tag-group-label) {
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--color-muted);
+  }
+
   :global(.map-panel .tag-list) {
     display: flex;
     flex-wrap: wrap;
@@ -519,8 +569,10 @@ const cities = getCities(spas);
 
   .city-filter button {
     display: inline-flex;
+    flex: 0 0 auto;
     gap: 0.35rem;
     align-items: center;
+    justify-content: center;
     min-height: 2.7rem;
     padding: 0.55rem 0.85rem;
     font-weight: 800;
@@ -531,6 +583,24 @@ const cities = getCities(spas);
     border-radius: var(--radius-pill);
     box-shadow: var(--shadow-chip);
     backdrop-filter: blur(12px);
+  }
+
+  .city-filter-label {
+    white-space: nowrap;
+  }
+
+  .city-filter-count {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 1.55rem;
+    block-size: 1.55rem;
+    flex: 0 0 auto;
+    font-size: 0.76em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: rgb(64 19 6 / 70%);
+    background: rgb(64 19 6 / 7%);
+    border-radius: 50%;
   }
 
   .city-filter button {
@@ -549,6 +619,11 @@ const cities = getCities(spas);
     color: var(--color-surface-strong);
     background: var(--color-brand);
     border-color: var(--color-brand);
+  }
+
+  .city-filter button[aria-pressed="true"] .city-filter-count {
+    color: var(--color-brand);
+    background: rgb(255 250 244 / 94%);
   }
 
   .map-stage :global(.leaflet-bottom.leaflet-right) {
@@ -609,6 +684,11 @@ const cities = getCities(spas);
       box-shadow: 0 8px 20px rgb(45 22 14 / 16%);
       scale: 1.03;
       translate: 0 -2px;
+    }
+
+    .city-filter button:hover:not([aria-pressed="true"]) .city-filter-count {
+      color: var(--color-brand);
+      background: rgb(255 250 244 / 94%);
     }
   }
 
@@ -693,6 +773,10 @@ const cities = getCities(spas);
     :global(.map-panel .spa-summary) {
       font-size: 0.94rem;
       line-height: 1.62;
+    }
+
+    :global(.map-panel .spa-detail-list) {
+      margin-block-start: 0.95rem;
     }
 
     :global(.map-panel .spa-detail-row) {

@@ -15,6 +15,16 @@ const spas = defineCollection({
     lat: z.number(),
     lng: z.number(),
     tags: z.array(z.string()).default([]),
+    tagGroups: z
+      .object({
+        bath: z.array(z.string()).default([]),
+        sauna: z.array(z.string()).default([]),
+        access: z.array(z.string()).default([]),
+        family: z.array(z.string()).default([]),
+        food: z.array(z.string()).default([]),
+      })
+      .partial()
+      .optional(),
     notes: z.string().optional(),
     lastCheckedAt: z.string(),
   }),

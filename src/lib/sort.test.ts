@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sortSpasForDisplay } from "./sort";
+import { getCityCounts, sortSpasForDisplay } from "./sort";
 import type { Spa } from "./types";
 
 const spa = (name: string, city: string, lat = 35.8, lng = 139.9): Spa => ({
@@ -40,5 +40,24 @@ describe("sortSpasForDisplay", () => {
     );
 
     expect(sorted.map((item) => item.name)).toEqual(["近い湯", "遠い湯"]);
+  });
+});
+
+describe("getCityCounts", () => {
+  it("counts facilities in the fixed city display order", () => {
+    const counts = getCityCounts([
+      spa("柏の湯 1", "柏市"),
+      spa("千葉の湯 1", "千葉市"),
+      spa("松戸の湯", "松戸市"),
+      spa("柏の湯 2", "柏市"),
+      spa("千葉の湯 2", "千葉市"),
+      spa("千葉の湯 3", "千葉市"),
+    ]);
+
+    expect(counts).toEqual([
+      { city: "松戸市", count: 1 },
+      { city: "柏市", count: 2 },
+      { city: "千葉市", count: 3 },
+    ]);
   });
 });

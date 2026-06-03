@@ -3,6 +3,10 @@ export type Coordinates = {
   lng: number;
 };
 
+export type SpaTagGroupKey = "bath" | "sauna" | "access" | "family" | "food";
+
+export type SpaTagGroups = Partial<Record<SpaTagGroupKey, string[]>>;
+
 export type Spa = Coordinates & {
   id: string;
   name: string;
@@ -12,6 +16,7 @@ export type Spa = Coordinates & {
   officialUrl: string;
   googleMapsUrl: string;
   tags: string[];
+  tagGroups?: SpaTagGroups;
   notes?: string;
   lastCheckedAt: string;
 };

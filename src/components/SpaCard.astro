@@ -1,11 +1,13 @@
 ---
 import type { Spa } from "../lib/types";
+import { getSpaTagGroups } from "../lib/tag-groups";
 
 type Props = {
   spa: Spa;
 };
 
 const { spa } = Astro.props;
+const tagGroups = getSpaTagGroups(spa);
 ---
 
 <article class="spa-card" data-spa-card={spa.id}>
@@ -19,12 +21,19 @@ const { spa } = Astro.props;
     <address>{spa.address}</address>
     {spa.notes && <p class="spa-notes">{spa.notes}</p>}
     {
-      spa.tags.length > 0 && (
-        <ul class="tag-list" aria-label={`${spa.name}の特徴`}>
-          {spa.tags.map((tag) => (
-            <li>{tag}</li>
+      tagGroups.length > 0 && (
+        <div class="tag-groups" role="group" aria-label={`${spa.name}の特徴`}>
+          {tagGroups.map((group) => (
+            <div class="tag-group">
+              <span class="tag-group-label">{group.label}</span>
+              <ul class="tag-list">
+                {group.tags.map((tag) => (
+                  <li>{tag}</li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       )
     }
   </div>
@@ -111,12 +120,32 @@ const { spa } = Astro.props;
     color: var(--color-muted);
   }
 
+  .tag-groups {
+    display: grid;
+    gap: 0.4rem;
+    margin-block-start: 0.75rem;
+  }
+
+  .tag-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .tag-group-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--color-muted);
+  }
+
   .tag-list {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
     padding: 0;
-    margin: 0.75rem 0 0;
+    margin: 0;
     list-style: none;
   }
 
