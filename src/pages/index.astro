@@ -288,6 +288,7 @@ const totalSpaCount = spas.length;
   .map-shell {
     --mobile-panel-height: 30svh;
     --mobile-panel-closed-height: 2.75rem;
+    --map-panel-block-start: 8.55rem;
     --map-control-bottom: calc(1rem + var(--safe-bottom));
     --map-control-gap: 2rem;
     --map-zoom-height: 4.25rem;
@@ -328,8 +329,8 @@ const totalSpaCount = spas.length;
     grid-row: 1;
     align-self: start;
     width: min(25.5rem, calc(100vw - 1.5rem));
-    max-height: calc(100vh - 6.35rem);
-    margin: 5.6rem 0 0 0.75rem;
+    max-height: calc(100vh - var(--map-panel-block-start) - 0.75rem);
+    margin: var(--map-panel-block-start) 0 0 0.75rem;
     overflow: hidden;
     background: rgb(255 250 244 / 98%);
     border: 1px solid rgb(64 19 6 / 12%);
@@ -378,7 +379,7 @@ const totalSpaCount = spas.length;
 
   .spa-list {
     display: grid;
-    max-height: calc(100vh - 6.35rem);
+    max-height: calc(100vh - var(--map-panel-block-start) - 0.75rem);
     padding: 0;
     overflow: auto;
     overscroll-behavior: contain;
@@ -547,8 +548,8 @@ const totalSpaCount = spas.length;
   .map-search {
     position: fixed;
     z-index: 700;
-    inset-block-start: 0.75rem;
-    inset-inline: 19rem 8rem;
+    inset-block-start: 4.85rem;
+    inset-inline: 0.75rem 8rem;
     pointer-events: none;
   }
 
