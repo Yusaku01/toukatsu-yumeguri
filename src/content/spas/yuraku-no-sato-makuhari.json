@@ -8,10 +8,12 @@
   "googleMapsUrl": "https://www.google.com/maps/place/JFA%E5%A4%A2%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89+%E5%B9%95%E5%BC%B5%E6%B8%A9%E6%B3%89+%E6%B9%AF%E6%A5%BD%E3%81%AE%E9%87%8C/@35.6657751,139.8615337,12z/data=!4m10!1m2!2m1!1z44K544O844OR44O86Yqt5rmv!3m6!1s0x60228308478d356d:0xed32a9a28edb09b0!8m2!3d35.6359603!4d140.0396723!15sChLjgrnjg7zjg5Hjg7zpiq3mua9aFSIT44K544O844OR44O8IOmKrea5r5IBEXN1cGVyX3B1YmxpY19iYXRomgEjQ2haRFNVaE5NRzluUzBWSlEwRm5TVVJ1WjJSSU0wRm5FQUXgAQD6AQQIQxAm!16s%2Fg%2F11j5zhdt_b?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D",
   "lat": 35.6359603,
   "lng": 140.0396723,
-  "tags": ["天然温泉", "露天風呂", "オーシャンビュー"],
+  "tags": ["天然温泉", "露天風呂", "岩盤浴", "サウナ", "食事処"],
   "tagGroups": {
-    "bath": ["天然温泉", "露天風呂", "オーシャンビュー"]
+    "bath": ["天然温泉", "露天風呂", "岩盤浴"],
+    "sauna": ["サウナ"],
+    "food": ["食事処"]
   },
   "notes": "東京湾を望む展望露天風呂がある幕張の温浴施設。",
-  "lastCheckedAt": "2026-05-25"
+  "lastCheckedAt": "2026-06-13"
 }

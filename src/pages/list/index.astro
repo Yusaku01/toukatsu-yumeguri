@@ -88,6 +88,40 @@ const spas = await getSpas();
     gap: 1rem;
   }
 
+  :global(.list-grid .spa-detail-list) {
+    display: grid;
+    margin-block-start: 0.9rem;
+    border-block: 1px solid var(--color-border);
+  }
+
+  :global(.list-grid .spa-detail-row) {
+    display: grid;
+    grid-template-columns: 3.75rem minmax(0, 1fr);
+    gap: 0.7rem;
+    align-items: start;
+    padding-block: 0.72rem;
+  }
+
+  :global(.list-grid .spa-detail-row:not(:last-child)) {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  :global(.list-grid .spa-detail-label) {
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+
+  :global(.list-grid .spa-card address),
+  :global(.list-grid .spa-notes) {
+    margin: 0;
+  }
+
+  :global(.list-grid .tag-groups) {
+    margin-block-start: 0;
+  }
+
   @media (max-width: 720px) {
     .list-page {
       padding-block-start: 8.5rem;

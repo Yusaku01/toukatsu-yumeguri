@@ -21,20 +21,6 @@ const mapReload = current === "map" ? undefined : true;
     </span>
     <span class="brand-title">東葛湯めぐりマップ</span>
   </a>
-  <nav class="nav-pill" aria-label="主要ページ">
-    <a
-      href="/"
-      aria-current={current === "map" ? "page" : undefined}
-      data-astro-prefetch={mapPrefetch}
-      data-astro-reload={mapReload}>地図</a
-    >
-    <a href="/list/" aria-current={current === "list" ? "page" : undefined}
-      >一覧</a
-    >
-    <a href="/terms/" aria-current={current === "terms" ? "page" : undefined}
-      >利用規約</a
-    >
-  </nav>
   <details class="nav-menu">
     <summary>MENU</summary>
     <nav aria-label="主要ページ">

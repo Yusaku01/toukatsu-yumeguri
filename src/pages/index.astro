@@ -38,7 +38,26 @@ const totalSpaCount = spas.length;
     <section class="map-stage" aria-label="温浴施設の地図">
       <div id="map" class="map-canvas" data-spas={JSON.stringify(spas)}></div>
       <search class="map-search" aria-label="温浴施設の絞り込み">
-        <div class="city-filter" aria-label="市区町村で絞り込み">
+        <button
+          class="city-filter-scroll city-filter-scroll--prev"
+          type="button"
+          data-city-filter-scroll="prev"
+          aria-label="市区町村フィルターを左へ送る"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M15 18l-6-6 6-6"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <div
+          class="city-filter"
+          data-city-filter-list
+          aria-label="市区町村で絞り込み"
+        >
           <button type="button" data-city-filter="all" aria-pressed="true"
             ><span class="city-filter-label">すべて</span>
             <span class="city-filter-count">{totalSpaCount}</span></button
@@ -56,6 +75,21 @@ const totalSpaCount = spas.length;
             ))
           }
         </div>
+        <button
+          class="city-filter-scroll city-filter-scroll--next"
+          type="button"
+          data-city-filter-scroll="next"
+          aria-label="市区町村フィルターを右へ送る"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M9 6l6 6-6 6"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </button>
       </search>
     </section>
     <aside
@@ -548,8 +582,12 @@ const totalSpaCount = spas.length;
   .map-search {
     position: fixed;
     z-index: 700;
-    inset-block-start: 4.85rem;
-    inset-inline: 0.75rem 8rem;
+    inset-block-start: 1.1rem;
+    inset-inline: clamp(17rem, 24vw, 20rem) 6.25rem;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.45rem;
+    align-items: center;
     pointer-events: none;
   }
 
@@ -560,12 +598,45 @@ const totalSpaCount = spas.length;
     min-height: 3rem;
     padding-block: 0.15rem;
     overflow-x: auto;
+    scroll-behavior: smooth;
     pointer-events: auto;
     scrollbar-width: none;
   }
 
   .city-filter::-webkit-scrollbar {
     display: none;
+  }
+
+  .city-filter-scroll {
+    display: grid;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    place-items: center;
+    color: var(--color-brand-dark);
+    pointer-events: auto;
+    cursor: pointer;
+    background: rgb(255 250 244 / 94%);
+    border: 1px solid rgb(64 19 6 / 12%);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-chip);
+    backdrop-filter: blur(12px);
+    scale: 1;
+    translate: 0 0;
+    transition-duration: var(--map-transition-duration);
+    transition-property:
+      background-color, border-color, box-shadow, color, opacity, scale,
+      translate;
+    transition-timing-function: var(--map-transition-easing);
+  }
+
+  .city-filter-scroll:disabled {
+    cursor: default;
+    opacity: 0.42;
+  }
+
+  .city-filter-scroll .icon {
+    inline-size: 0.95rem;
+    block-size: 0.95rem;
   }
 
   .city-filter button {
@@ -650,6 +721,7 @@ const totalSpaCount = spas.length;
 
   .panel-close:active,
   :global(.map-panel .external-link:active),
+  .city-filter-scroll:active:not(:disabled),
   .city-filter button:active {
     scale: 0.98;
     translate: 0 0;
@@ -691,6 +763,15 @@ const totalSpaCount = spas.length;
       color: var(--color-brand);
       background: rgb(255 250 244 / 94%);
     }
+
+    .city-filter-scroll:hover:not(:disabled) {
+      color: var(--color-surface-strong);
+      background: var(--color-brand);
+      border-color: var(--color-brand);
+      box-shadow: 0 8px 20px rgb(45 22 14 / 16%);
+      scale: 1.05;
+      translate: 0 -1px;
+    }
   }
 
   @media (max-width: 900px) {
@@ -711,10 +792,15 @@ const totalSpaCount = spas.length;
     .map-search {
       inset-block-start: 4.85rem;
       inset-inline: 0.75rem 0;
+      display: block;
     }
 
     .map-shell.is-panel-open .map-search {
       inset-inline: 0.75rem 0;
+    }
+
+    .city-filter-scroll {
+      display: none;
     }
 
     .map-stage :global(.leaflet-control-attribution.leaflet-control) {

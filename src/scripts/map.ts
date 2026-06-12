@@ -26,6 +26,12 @@ const initMapPage = () => {
   const chips = Array.from(
     document.querySelectorAll<HTMLButtonElement>("[data-city-filter]"),
   );
+  const cityFilterList = document.querySelector<HTMLElement>(
+    "[data-city-filter-list]",
+  );
+  const cityFilterScrollButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-city-filter-scroll]"),
+  );
   const listElement = document.querySelector<HTMLElement>("[data-spa-list]");
   const panelElement = document.querySelector<HTMLElement>("[data-map-panel]");
   const shellElement = document.querySelector<HTMLElement>(".map-shell");
@@ -40,6 +46,41 @@ const initMapPage = () => {
   let currentLocationMarker: L.CircleMarker | undefined;
   let locateButton: HTMLAnchorElement | undefined;
   let selectedSpaId: string | undefined;
+
+  const updateCityFilterScrollButtons = () => {
+    if (!cityFilterList || cityFilterScrollButtons.length === 0) return;
+
+    const maxScrollLeft =
+      cityFilterList.scrollWidth - cityFilterList.clientWidth;
+    const canScroll = maxScrollLeft > 1;
+    const atStart = cityFilterList.scrollLeft <= 1;
+    const atEnd = cityFilterList.scrollLeft >= maxScrollLeft - 1;
+
+    cityFilterScrollButtons.forEach((button) => {
+      const direction = button.dataset.cityFilterScroll;
+      button.disabled =
+        !canScroll ||
+        (direction === "prev" && atStart) ||
+        (direction === "next" && atEnd);
+    });
+  };
+
+  cityFilterScrollButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!cityFilterList) return;
+
+      const direction = button.dataset.cityFilterScroll === "prev" ? -1 : 1;
+      cityFilterList.scrollBy({
+        left: direction * cityFilterList.clientWidth * 0.72,
+        behavior: "smooth",
+      });
+    });
+  });
+
+  cityFilterList?.addEventListener("scroll", updateCityFilterScrollButtons, {
+    passive: true,
+  });
+  window.addEventListener("resize", updateCityFilterScrollButtons);
 
   const map = L.map(mapElement, {
     zoomControl: false,
@@ -344,6 +385,7 @@ const initMapPage = () => {
 
   closePanel();
   applyFilter(getInitialMaxZoom());
+  updateCityFilterScrollButtons();
 };
 
 document.addEventListener("astro:page-load", initMapPage);

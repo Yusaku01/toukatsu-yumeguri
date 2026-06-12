@@ -3,7 +3,7 @@ export type Coordinates = {
   lng: number;
 };
 
-export type SpaTagGroupKey = "bath" | "sauna" | "access" | "family" | "food";
+export type SpaTagGroupKey = "bath" | "sauna" | "food" | "other";
 
 export type SpaTagGroups = Partial<Record<SpaTagGroupKey, string[]>>;
 

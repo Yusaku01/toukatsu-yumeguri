@@ -19,9 +19,8 @@ const spas = defineCollection({
       .object({
         bath: z.array(z.string()).default([]),
         sauna: z.array(z.string()).default([]),
-        access: z.array(z.string()).default([]),
-        family: z.array(z.string()).default([]),
         food: z.array(z.string()).default([]),
+        other: z.array(z.string()).default([]),
       })
       .partial()
       .optional(),

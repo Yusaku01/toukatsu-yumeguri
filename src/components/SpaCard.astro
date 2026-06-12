@@ -18,24 +18,43 @@ const tagGroups = getSpaTagGroups(spa);
       <span data-distance hidden></span>
     </p>
     <h2>{spa.name}</h2>
-    <address>{spa.address}</address>
-    {spa.notes && <p class="spa-notes">{spa.notes}</p>}
-    {
-      tagGroups.length > 0 && (
-        <div class="tag-groups" role="group" aria-label={`${spa.name}の特徴`}>
-          {tagGroups.map((group) => (
-            <div class="tag-group">
-              <span class="tag-group-label">{group.label}</span>
-              <ul class="tag-list">
-                {group.tags.map((tag) => (
-                  <li>{tag}</li>
-                ))}
-              </ul>
+    <div class="spa-detail-list">
+      <div class="spa-detail-row">
+        <span class="spa-detail-label">住所</span>
+        <address>{spa.address}</address>
+      </div>
+      {
+        spa.notes && (
+          <div class="spa-detail-row">
+            <span class="spa-detail-label">メモ</span>
+            <p class="spa-notes">{spa.notes}</p>
+          </div>
+        )
+      }
+      {
+        tagGroups.length > 0 && (
+          <div class="spa-detail-row">
+            <span class="spa-detail-label">特徴</span>
+            <div
+              class="tag-groups"
+              role="group"
+              aria-label={`${spa.name}の特徴`}
+            >
+              {tagGroups.map((group) => (
+                <div class="tag-group">
+                  <span class="tag-group-label">{group.label}</span>
+                  <ul class="tag-list">
+                    {group.tags.map((tag) => (
+                      <li>{tag}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )
-    }
+          </div>
+        )
+      }
+    </div>
   </div>
   <div class="spa-actions">
     <a
@@ -60,7 +79,8 @@ const tagGroups = getSpaTagGroups(spa);
 <style>
   .spa-card {
     display: grid;
-    gap: 0.85rem;
+    align-content: space-between;
+    gap: 1rem;
     padding: 1rem;
     text-align: start;
     background: var(--color-surface-strong);
@@ -110,20 +130,45 @@ const tagGroups = getSpaTagGroups(spa);
   }
 
   address {
-    margin-block-start: 0.45rem;
+    margin: 0;
     font-style: normal;
     color: var(--color-muted);
   }
 
   .spa-notes {
-    margin: 0.7rem 0 0;
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  .spa-detail-list {
+    display: grid;
+    margin-block-start: 0.9rem;
+    border-block: 1px solid var(--color-border);
+  }
+
+  .spa-detail-row {
+    display: grid;
+    grid-template-columns: 3.75rem minmax(0, 1fr);
+    gap: 0.7rem;
+    align-items: start;
+    padding-block: 0.72rem;
+  }
+
+  .spa-detail-row:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .spa-detail-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.5;
     color: var(--color-muted);
   }
 
   .tag-groups {
     display: grid;
     gap: 0.4rem;
-    margin-block-start: 0.75rem;
+    min-width: 0;
   }
 
   .tag-group {
@@ -158,8 +203,22 @@ const tagGroups = getSpaTagGroups(spa);
   }
 
   .spa-actions {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
+    justify-content: center;
+    width: min(100%, 18.5rem);
+    margin-inline: auto;
+  }
+
+  .spa-actions :global(.external-link) {
+    justify-content: center;
+    inline-size: 100%;
+    block-size: 3.25rem;
+    min-width: 0;
+    min-height: 0;
+    padding-block: 0;
+    text-align: center;
+    white-space: nowrap;
   }
 </style>
