@@ -1,1 +1,31 @@
-{"id":"koyaru-morinoyu","name":"小谷流温泉 森の湯","city":"八街市","area":"小谷流","address":"千葉県八街市小谷流616","officialUrl":"https://koyaru-morinoyu.jp/","googleMapsUrl":"https://www.google.com/maps/search/?api=1&query=%E5%B0%8F%E8%B0%B7%E6%B5%81%E6%B8%A9%E6%B3%89%20%E6%A3%AE%E3%81%AE%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E5%85%AB%E8%A1%97%E5%B8%82%E5%B0%8F%E8%B0%B7%E6%B5%81616","lat":35.620274,"lng":140.274454,"tags":["天然温泉","露天風呂","サウナ","食事処"],"notes":"里山の森に囲まれた日帰り天然温泉。露天風呂とサウナを備える、佐倉方面から足を伸ばす候補。","lastCheckedAt":"2026-06-14"}
+{
+  "id": "koyaru-morinoyu",
+  "name": "小谷流温泉 森の湯",
+  "city": "八街市",
+  "area": "小谷流",
+  "address": "千葉県八街市小谷流616",
+  "officialUrl": "https://koyaru-morinoyu.jp/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E5%B0%8F%E8%B0%B7%E6%B5%81%E6%B8%A9%E6%B3%89%20%E6%A3%AE%E3%81%AE%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E5%85%AB%E8%A1%97%E5%B8%82%E5%B0%8F%E8%B0%B7%E6%B5%81616",
+  "lat": 35.620274,
+  "lng": 140.274454,
+  "tags": [
+    "天然温泉",
+    "露天風呂",
+    "サウナ",
+    "食事処"
+  ],
+  "tagGroups": {
+    "bath": [
+      "天然温泉",
+      "露天風呂"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": [
+      "食事処"
+    ]
+  },
+  "notes": "里山の森に囲まれた日帰り天然温泉。露天風呂とサウナを備える、佐倉方面から足を伸ばす候補。",
+  "lastCheckedAt": "2026-06-14"
+}

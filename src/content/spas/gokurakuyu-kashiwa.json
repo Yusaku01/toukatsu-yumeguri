@@ -1,1 +1,31 @@
-{"id":"gokurakuyu-kashiwa","name":"極楽湯 柏店","city":"柏市","area":"大山台","address":"千葉県柏市大山台1-18","officialUrl":"https://www.gokurakuyu.ne.jp/tempo/kashiwa/","googleMapsUrl":"https://www.google.com/maps/search/?api=1&query=%E6%A5%B5%E6%A5%BD%E6%B9%AF%20%E6%9F%8F%E5%BA%97%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%9F%8F%E5%B8%82%E5%A4%A7%E5%B1%B1%E5%8F%B01-18","lat":35.881292,"lng":139.966778,"tags":["露天風呂","サウナ","岩盤浴","食事処"],"notes":"柏の葉・国道16号方面から使いやすい、岩盤浴と食事処を備えた大型温浴施設。","lastCheckedAt":"2026-06-14"}
+{
+  "id": "gokurakuyu-kashiwa",
+  "name": "極楽湯 柏店",
+  "city": "柏市",
+  "area": "大山台",
+  "address": "千葉県柏市大山台1-18",
+  "officialUrl": "https://www.gokurakuyu.ne.jp/tempo/kashiwa/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A5%B5%E6%A5%BD%E6%B9%AF%20%E6%9F%8F%E5%BA%97%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%9F%8F%E5%B8%82%E5%A4%A7%E5%B1%B1%E5%8F%B01-18",
+  "lat": 35.881292,
+  "lng": 139.966778,
+  "tags": [
+    "露天風呂",
+    "サウナ",
+    "岩盤浴",
+    "食事処"
+  ],
+  "tagGroups": {
+    "bath": [
+      "露天風呂",
+      "岩盤浴"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": [
+      "食事処"
+    ]
+  },
+  "notes": "柏の葉・国道16号方面から使いやすい、岩盤浴と食事処を備えた大型温浴施設。",
+  "lastCheckedAt": "2026-06-14"
+}

@@ -1,1 +1,27 @@
-{"id":"heiwa-yu-land","name":"平和湯ランド","city":"松戸市","area":"五香西","address":"千葉県松戸市五香西1-12-12","officialUrl":"https://chiba1126sento.com/?page_id=278","googleMapsUrl":"https://www.google.com/maps/search/?api=1&query=%E5%B9%B3%E5%92%8C%E6%B9%AF%E3%83%A9%E3%83%B3%E3%83%89%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%9D%BE%E6%88%B8%E5%B8%82%E4%BA%94%E9%A6%99%E8%A5%BF1-12-12","lat":35.7919838,"lng":139.966301,"tags":["サウナ","銭湯","駅近"],"notes":"五香エリアの街の銭湯。遠赤サウナや薬湯、水風呂を備える。","lastCheckedAt":"2026-06-14"}
+{
+  "id": "heiwa-yu-land",
+  "name": "平和湯ランド",
+  "city": "松戸市",
+  "area": "五香西",
+  "address": "千葉県松戸市五香西1-12-12",
+  "officialUrl": "https://chiba1126sento.com/?page_id=278",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E5%B9%B3%E5%92%8C%E6%B9%AF%E3%83%A9%E3%83%B3%E3%83%89%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%9D%BE%E6%88%B8%E5%B8%82%E4%BA%94%E9%A6%99%E8%A5%BF1-12-12",
+  "lat": 35.7919838,
+  "lng": 139.966301,
+  "tags": [
+    "サウナ",
+    "銭湯",
+    "駅近"
+  ],
+  "tagGroups": {
+    "sauna": [
+      "サウナ"
+    ],
+    "other": [
+      "銭湯",
+      "駅近"
+    ]
+  },
+  "notes": "五香エリアの街の銭湯。遠赤サウナや薬湯、水風呂を備える。",
+  "lastCheckedAt": "2026-06-14"
+}

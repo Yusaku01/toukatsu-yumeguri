@@ -1,1 +1,31 @@
-{"id":"shisui-onsen-yuraku-no-sato","name":"酒々井温泉 湯楽の里","city":"酒々井町","area":"飯積","address":"千葉県印旛郡酒々井町飯積1-1-1","officialUrl":"https://www.yurakirari.com/yura/shisui/","googleMapsUrl":"https://www.google.com/maps/search/?api=1&query=%E9%85%92%E3%80%85%E4%BA%95%E6%B8%A9%E6%B3%89%20%E6%B9%AF%E6%A5%BD%E3%81%AE%E9%87%8C%20%E5%8D%83%E8%91%89%E7%9C%8C%E5%8D%B0%E6%97%9B%E9%83%A1%E9%85%92%E3%80%85%E4%BA%95%E7%94%BA%E9%A3%AF%E7%A9%8D1-1-1","lat":35.719579,"lng":140.294047,"tags":["天然温泉","露天風呂","サウナ","食事処"],"notes":"酒々井IC・酒々井プレミアム・アウトレット近くの天然温泉。北総方面のドライブ候補。","lastCheckedAt":"2026-06-14"}
+{
+  "id": "shisui-onsen-yuraku-no-sato",
+  "name": "酒々井温泉 湯楽の里",
+  "city": "酒々井町",
+  "area": "飯積",
+  "address": "千葉県印旛郡酒々井町飯積1-1-1",
+  "officialUrl": "https://www.yurakirari.com/yura/shisui/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E9%85%92%E3%80%85%E4%BA%95%E6%B8%A9%E6%B3%89%20%E6%B9%AF%E6%A5%BD%E3%81%AE%E9%87%8C%20%E5%8D%83%E8%91%89%E7%9C%8C%E5%8D%B0%E6%97%9B%E9%83%A1%E9%85%92%E3%80%85%E4%BA%95%E7%94%BA%E9%A3%AF%E7%A9%8D1-1-1",
+  "lat": 35.719579,
+  "lng": 140.294047,
+  "tags": [
+    "天然温泉",
+    "露天風呂",
+    "サウナ",
+    "食事処"
+  ],
+  "tagGroups": {
+    "bath": [
+      "天然温泉",
+      "露天風呂"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": [
+      "食事処"
+    ]
+  },
+  "notes": "酒々井IC・酒々井プレミアム・アウトレット近くの天然温泉。北総方面のドライブ候補。",
+  "lastCheckedAt": "2026-06-14"
+}
