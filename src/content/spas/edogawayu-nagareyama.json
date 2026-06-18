@@ -1,0 +1,31 @@
+{
+  "id": "edogawayu-nagareyama",
+  "name": "江戸川湯",
+  "city": "流山市",
+  "area": "江戸川台東",
+  "address": "千葉県流山市江戸川台東3-4",
+  "officialUrl": "https://chiba1126sento.com/?page_id=415",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%B1%9F%E6%88%B8%E5%B7%9D%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%B5%81%E5%B1%B1%E5%B8%82%E6%B1%9F%E6%88%B8%E5%B7%9D%E5%8F%B0%E6%9D%B13-4",
+  "lat": 35.8997467,
+  "lng": 139.9127108,
+  "tags": [
+    "露天風呂",
+    "サウナ",
+    "銭湯",
+    "駅近"
+  ],
+  "tagGroups": {
+    "bath": [
+      "露天風呂"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "other": [
+      "銭湯",
+      "駅近"
+    ]
+  },
+  "notes": "江戸川台駅周辺で使いやすい、露天風呂とスチームサウナのある街の銭湯。",
+  "lastCheckedAt": "2026-06-14"
+}

@@ -1,0 +1,31 @@
+{
+  "id": "yamatonoyu-narita",
+  "name": "成田の命泉 大和の湯",
+  "city": "成田市",
+  "area": "大竹",
+  "address": "千葉県成田市大竹1630",
+  "officialUrl": "https://yamatonoyu.com/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%88%90%E7%94%B0%E3%81%AE%E5%91%BD%E6%B3%89%20%E5%A4%A7%E5%92%8C%E3%81%AE%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%88%90%E7%94%B0%E5%B8%82%E5%A4%A7%E7%AB%B91630",
+  "lat": 35.816791,
+  "lng": 140.271541,
+  "tags": [
+    "天然温泉",
+    "露天風呂",
+    "サウナ",
+    "食事処"
+  ],
+  "tagGroups": {
+    "bath": [
+      "天然温泉",
+      "露天風呂"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": [
+      "食事処"
+    ]
+  },
+  "notes": "成田市大竹の日帰り天然温泉。露天風呂やサウナを備え、落ち着いた大人向けの北総候補。",
+  "lastCheckedAt": "2026-06-14"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "ryusen-no-yu-narita",
+  "name": "湯けむり 天然秘湯 龍泉の湯",
+  "city": "成田市",
+  "area": "松崎",
+  "address": "千葉県成田市松崎1249",
+  "officialUrl": "https://ryusennoyu.com/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%B9%AF%E3%81%91%E3%82%80%E3%82%8A%20%E5%A4%A9%E7%84%B6%E7%A7%98%E6%B9%AF%20%E9%BE%8D%E6%B3%89%E3%81%AE%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%88%90%E7%94%B0%E5%B8%82%E6%9D%BE%E5%B4%8E1249",
+  "lat": 35.801343,
+  "lng": 140.298866,
+  "tags": [
+    "天然温泉",
+    "露天風呂",
+    "サウナ",
+    "食事処",
+    "炭酸泉"
+  ],
+  "tagGroups": {
+    "bath": [
+      "天然温泉",
+      "露天風呂",
+      "炭酸泉"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": [
+      "食事処"
+    ]
+  },
+  "notes": "成田湯川駅方面の天然温泉。日本庭園を眺める露天風呂やロウリュサウナを備える。",
+  "lastCheckedAt": "2026-06-14"
+}

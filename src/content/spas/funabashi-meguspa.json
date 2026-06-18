@@ -1,0 +1,35 @@
+{
+  "id": "funabashi-meguspa",
+  "name": "ふなばしメグスパ",
+  "city": "船橋市",
+  "area": "大神保町",
+  "address": "千葉県船橋市大神保町1356-3",
+  "officialUrl": "https://f-meguspa.jp/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E3%81%B5%E3%81%AA%E3%81%B0%E3%81%97%E3%83%A1%E3%82%B0%E3%82%B9%E3%83%91%20%E5%8D%83%E8%91%89%E7%9C%8C%E8%88%B9%E6%A9%8B%E5%B8%82%E5%A4%A7%E7%A5%9E%E4%BF%9D%E7%94%BA1356-3",
+  "lat": 35.7746,
+  "lng": 140.068913,
+  "tags": [
+    "露天風呂",
+    "サウナ",
+    "食事処",
+    "炭酸泉",
+    "公共施設"
+  ],
+  "tagGroups": {
+    "bath": [
+      "露天風呂",
+      "炭酸泉"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": [
+      "食事処"
+    ],
+    "other": [
+      "公共施設"
+    ]
+  },
+  "notes": "船橋市北部清掃工場の余熱を利用した温浴施設。露天炭酸泉やフィンランドサウナ、スチームサウナを備える。",
+  "lastCheckedAt": "2026-06-14"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "refresh-plaza-kashiwa",
+  "name": "リフレッシュプラザ柏",
+  "city": "柏市",
+  "area": "南増尾",
+  "address": "千葉県柏市南増尾58-3",
+  "officialUrl": "https://kashiwa-refreshplaza.net/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E3%83%AA%E3%83%95%E3%83%AC%E3%83%83%E3%82%B7%E3%83%A5%E3%83%97%E3%83%A9%E3%82%B6%E6%9F%8F%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%9F%8F%E5%B8%82%E5%8D%97%E5%A2%97%E5%B0%BE58-3",
+  "lat": 35.817249,
+  "lng": 139.97301,
+  "tags": [
+    "露天風呂",
+    "サウナ",
+    "公共施設"
+  ],
+  "tagGroups": {
+    "bath": [
+      "露天風呂"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "other": [
+      "公共施設"
+    ]
+  },
+  "notes": "南部クリーンセンターの余熱を利用した健康増進施設。プールやトレーニングと併用しやすい。",
+  "lastCheckedAt": "2026-06-14"
+}

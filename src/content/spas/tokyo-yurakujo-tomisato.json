@@ -1,0 +1,31 @@
+{
+  "id": "tokyo-yurakujo-tomisato",
+  "name": "東京湯楽城",
+  "city": "富里市",
+  "area": "七栄",
+  "address": "千葉県富里市七栄650-35",
+  "officialUrl": "https://chi-hotelsresorts.com/yurakujo/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E4%BA%AC%E6%B9%AF%E6%A5%BD%E5%9F%8E%20%E5%8D%83%E8%91%89%E7%9C%8C%E5%AF%8C%E9%87%8C%E5%B8%82%E4%B8%83%E6%A0%84650-35",
+  "lat": 35.7440561,
+  "lng": 140.3445886,
+  "tags": [
+    "露天風呂",
+    "サウナ",
+    "岩盤浴",
+    "食事処"
+  ],
+  "tagGroups": {
+    "bath": [
+      "露天風呂",
+      "岩盤浴"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": [
+      "食事処"
+    ]
+  },
+  "notes": "成田・富里エリアの大型温浴テーマパーク。岩盤浴や食事処、ホテル併設の滞在利用にも向く。",
+  "lastCheckedAt": "2026-06-14"
+}

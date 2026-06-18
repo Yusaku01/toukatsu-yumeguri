@@ -1,0 +1,31 @@
+{
+  "id": "hananoyu-narita",
+  "name": "崋の湯",
+  "city": "成田市",
+  "area": "公津の杜",
+  "address": "千葉県成田市公津の杜2-40-1",
+  "officialUrl": "https://hananoyu-narita.com/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E5%B4%8B%E3%81%AE%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%88%90%E7%94%B0%E5%B8%82%E5%85%AC%E6%B4%A5%E3%81%AE%E6%9D%9C2-40-1",
+  "lat": 35.764363,
+  "lng": 140.302118,
+  "tags": [
+    "露天風呂",
+    "サウナ",
+    "岩盤浴",
+    "食事処"
+  ],
+  "tagGroups": {
+    "bath": [
+      "露天風呂",
+      "岩盤浴"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": [
+      "食事処"
+    ]
+  },
+  "notes": "公津の杜駅から行きやすい成田のスーパー銭湯。和洋の湯と女性専用岩盤浴を備える。",
+  "lastCheckedAt": "2026-06-14"
+}

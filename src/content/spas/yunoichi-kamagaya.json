@@ -1,0 +1,31 @@
+{
+  "id": "yunoichi-kamagaya",
+  "name": "湯乃市 鎌ヶ谷店",
+  "city": "鎌ケ谷市",
+  "area": "鎌ケ谷",
+  "address": "千葉県鎌ケ谷市鎌ケ谷9-1-13",
+  "officialUrl": "https://yunoichi.com/kamagaya/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%B9%AF%E4%B9%83%E5%B8%82%20%E9%8E%8C%E3%83%B6%E8%B0%B7%E5%BA%97%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%8E%8C%E3%82%B1%E8%B0%B7%E5%B8%82%E9%8E%8C%E3%82%B1%E8%B0%B79-1-13",
+  "lat": 35.752852,
+  "lng": 140.004982,
+  "tags": [
+    "露天風呂",
+    "サウナ",
+    "食事処",
+    "炭酸泉"
+  ],
+  "tagGroups": {
+    "bath": [
+      "露天風呂",
+      "炭酸泉"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": [
+      "食事処"
+    ]
+  },
+  "notes": "木下街道沿い。高濃度炭酸泉とサウナを楽しめる鎌ケ谷のスーパー銭湯。",
+  "lastCheckedAt": "2026-06-14"
+}
