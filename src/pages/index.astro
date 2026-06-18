@@ -1,19 +1,49 @@
 ---
-import SiteHeader from "../components/SiteHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { getFeatureFilterCounts } from "../lib/filters";
 import { getCityCounts, getSpas } from "../lib/spas";
 
 const spas = await getSpas();
 const cityCounts = getCityCounts(spas);
+const featureCounts = getFeatureFilterCounts(spas);
 const totalSpaCount = spas.length;
+const pageTitle = "東葛の温浴施設を地図で探す";
+const pageDescription = `松戸・柏・流山を中心に、東葛周辺の温浴施設${totalSpaCount}件を地図と特徴フィルターで探せる湯めぐりマップです。`;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: `${pageTitle} | 東葛湯めぐりマップ`,
+  description: pageDescription,
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: totalSpaCount,
+    itemListElement: spas.map((spa, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "LocalBusiness",
+        name: spa.name,
+        address: spa.address,
+        url: spa.officialUrl,
+        hasMap: spa.googleMapsUrl,
+      },
+    })),
+  },
+};
 ---
 
-<BaseLayout bodyClass="map-page">
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  bodyClass="prototype-map-page"
+  canonicalPath="/"
+  jsonLd={structuredData}
+>
   <fragment slot="head">
-    <link rel="preconnect" href="https://tile.mierune.co.jp" />
+    <link rel="preconnect" href="https://tile.openstreetmap.jp" />
     <link
       rel="preload"
-      href="https://tile.mierune.co.jp/mierune/9/455/200@2x.png"
+      href="https://tile.openstreetmap.jp/styles/osm-bright-ja/13/7280/3221.png"
       as="image"
       type="image/png"
       fetchpriority="high"
@@ -21,897 +51,965 @@ const totalSpaCount = spas.length;
     />
     <link
       rel="preload"
-      href="https://tile.mierune.co.jp/mierune/9/455/202@2x.png"
+      href="https://tile.openstreetmap.jp/styles/osm-bright-ja/13/7281/3221.png"
       as="image"
       type="image/png"
       fetchpriority="high"
       media="(max-width: 900px)"
     />
   </fragment>
-  <SiteHeader current="map" />
-  <main
-    id="content"
-    class="map-shell"
-    tabindex="-1"
-    transition:name="page-content"
-  >
-    <section class="map-stage" aria-label="温浴施設の地図">
-      <div id="map" class="map-canvas" data-spas={JSON.stringify(spas)}></div>
-      <search class="map-search" aria-label="温浴施設の絞り込み">
+  <main id="content" class="prototype-map" tabindex="-1">
+    <h1 class="visually-hidden">{pageTitle}</h1>
+    <p id="prototype-map-instructions" class="visually-hidden">
+      地域や特徴のボタンで温浴施設を絞り込み、地図上のピンを選ぶと施設情報を確認できます。
+    </p>
+    <div
+      id="prototype-map-canvas"
+      role="region"
+      aria-label="温浴施設の地図"
+      aria-describedby="prototype-map-instructions"
+      data-spas={JSON.stringify(spas)}
+    >
+    </div>
+
+    <header class="prototype-header" aria-label="サイトナビゲーション">
+      <a class="prototype-brand" href="/" aria-label="東葛湯めぐりマップ">
+        <span class="prototype-brand-pin-shell" aria-hidden="true">
+          <span class="prototype-brand-pin"></span>
+        </span>
+        <span>東葛湯めぐりマップ</span>
+      </a>
+      <details class="prototype-menu">
+        <summary>
+          <span class="prototype-icon prototype-icon--menu" aria-hidden="true"
+          ></span>
+          <span>MENU</span>
+        </summary>
+        <nav aria-label="サイトメニュー">
+          <a href="/">現在の地図</a>
+          <a href="/list/">一覧</a>
+          <a href="/terms/">利用規約</a>
+        </nav>
+      </details>
+    </header>
+
+    <search class="prototype-filters" aria-label="温浴施設の絞り込み">
+      <div
+        class="prototype-chip-row"
+        role="group"
+        aria-label="地域で絞り込み"
+        data-prototype-city-list
+      >
         <button
-          class="city-filter-scroll city-filter-scroll--prev"
           type="button"
-          data-city-filter-scroll="prev"
-          aria-label="市区町村フィルターを左へ送る"
+          data-prototype-city="all"
+          aria-pressed="true"
+          aria-label={`すべての施設を表示。${totalSpaCount}件`}
         >
-          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M15 18l-6-6 6-6"
-              stroke="currentColor"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"></path>
-          </svg>
+          <span>すべて</span>
+          <span class="prototype-count">{totalSpaCount}</span>
         </button>
+        {
+          cityCounts.map(({ city, count }) => (
+            <button
+              type="button"
+              data-prototype-city={city}
+              aria-pressed="false"
+              aria-label={`${city}の施設に絞り込む。${count}件`}
+            >
+              <span>{city}</span>
+              <span class="prototype-count">{count}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="prototype-filter-line">
         <div
-          class="city-filter"
-          data-city-filter-list
-          aria-label="市区町村で絞り込み"
+          class="prototype-chip-row"
+          role="group"
+          aria-label="特徴で絞り込み"
+          data-prototype-feature-list
         >
-          <button type="button" data-city-filter="all" aria-pressed="true"
-            ><span class="city-filter-label">すべて</span>
-            <span class="city-filter-count">{totalSpaCount}</span></button
-          >
           {
-            cityCounts.map(({ city, count }) => (
+            featureCounts.map(({ id, label, count }) => (
               <button
                 type="button"
-                data-city-filter={city}
+                data-prototype-feature={id}
                 aria-pressed="false"
+                aria-label={`${label}で絞り込む。${count}件`}
               >
-                <span class="city-filter-label">{city}</span>
-                <span class="city-filter-count">{count}</span>
+                <span
+                  class:list={["prototype-icon", `prototype-icon--${id}`]}
+                  aria-hidden="true"
+                />
+                <span>{label}</span>
               </button>
             ))
           }
         </div>
-        <button
-          class="city-filter-scroll city-filter-scroll--next"
-          type="button"
-          data-city-filter-scroll="next"
-          aria-label="市区町村フィルターを右へ送る"
+      </div>
+
+      <div class="prototype-filter-status-row">
+        <div
+          class="prototype-status-copy"
+          aria-live="polite"
+          aria-atomic="true"
         >
-          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M9 6l6 6-6 6"
-              stroke="currentColor"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"></path>
-          </svg>
+          <p class="prototype-status" data-prototype-status>
+            {totalSpaCount}件
+          </p>
+        </div>
+        <button
+          class="prototype-clear"
+          type="button"
+          data-prototype-clear
+          hidden
+        >
+          <span
+            class="prototype-icon prototype-icon--refresh"
+            aria-hidden="true"></span>
+          <span>クリア</span>
         </button>
-      </search>
-    </section>
+      </div>
+    </search>
+
     <aside
-      id="map-panel"
-      class="map-panel"
+      class="prototype-place-sheet"
       aria-label="選択した温浴施設"
-      aria-expanded="false"
       aria-hidden="true"
-      data-map-panel
+      data-prototype-panel
     >
       <button
-        class="panel-grip"
+        class="prototype-grip"
         type="button"
-        data-panel-grip
-        aria-controls="map-panel"
-        aria-label="施設一覧パネルを広げる"
+        data-prototype-grip
+        aria-label="施設カードをたたむ"
       >
         <span aria-hidden="true"></span>
       </button>
-      <button
-        class="panel-close"
-        type="button"
-        data-panel-close
-        aria-label="施設パネルを閉じる"
-      >
-        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M6 6l12 12M18 6L6 18"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"></path>
-        </svg>
-      </button>
-      <div class="spa-list" data-spa-list></div>
+      <div class="prototype-card-host" data-prototype-card></div>
     </aside>
   </main>
   <script>
     import "../scripts/map";
   </script>
-  <script>
-    const mobileQuery = window.matchMedia("(max-width: 900px)");
-
-    const collapsedHeight = 30;
-    const expandedHeight = 78;
-    const minimumHeight = 24;
-    const expandedSnapThreshold = (collapsedHeight + expandedHeight) / 2;
-
-    const initPanelSheet = () => {
-      const panel = document.querySelector<HTMLElement>(".map-panel");
-      const shell = document.querySelector<HTMLElement>(".map-shell");
-      const grip =
-        document.querySelector<HTMLButtonElement>("[data-panel-grip]");
-      const closeButton =
-        document.querySelector<HTMLButtonElement>("[data-panel-close]");
-      if (!panel || !shell || !grip || panel.dataset.sheetReady === "true") {
-        return;
-      }
-
-      panel.dataset.sheetReady = "true";
-
-      let panelHeight = collapsedHeight;
-      let startY = 0;
-      let startHeight = collapsedHeight;
-      let ignoreNextClick = false;
-
-      const updatePanelHeight = (clientY: number) => {
-        const delta = startY - clientY;
-        if (Math.abs(delta) > 6) {
-          ignoreNextClick = true;
-        }
-
-        setPanelHeight(startHeight + (delta / window.innerHeight) * 100);
-      };
-
-      const setPanelHeight = (height: number) => {
-        const clampedHeight = Math.min(
-          expandedHeight,
-          Math.max(minimumHeight, height),
-        );
-
-        panelHeight = clampedHeight;
-        shell.style.setProperty("--mobile-panel-height", `${clampedHeight}svh`);
-        panel.setAttribute(
-          "aria-expanded",
-          clampedHeight > collapsedHeight ? "true" : "false",
-        );
-        grip.setAttribute(
-          "aria-label",
-          clampedHeight > collapsedHeight
-            ? "施設一覧パネルをたたむ"
-            : "施設一覧パネルを広げる",
-        );
-      };
-
-      const getContentFitHeight = () => {
-        const panelContent = panel.querySelector<HTMLElement>(".spa-list");
-        if (!panelContent) return collapsedHeight;
-
-        const rootFontSize = Number.parseFloat(
-          window.getComputedStyle(document.documentElement).fontSize,
-        );
-        const panelChromeHeight = rootFontSize * 3.25;
-
-        const heightInViewport =
-          ((panelContent.scrollHeight + panelChromeHeight) /
-            window.innerHeight) *
-          100;
-
-        return Math.min(
-          expandedHeight,
-          Math.max(collapsedHeight, heightInViewport),
-        );
-      };
-
-      const openPanel = () => {
-        if (!mobileQuery.matches) {
-          setPanelHeight(collapsedHeight);
-          return;
-        }
-
-        requestAnimationFrame(() => {
-          setPanelHeight(getContentFitHeight());
-        });
-      };
-
-      const snapPanelHeight = () => {
-        setPanelHeight(
-          panelHeight >= expandedSnapThreshold
-            ? expandedHeight
-            : collapsedHeight,
-        );
-        panel.classList.remove("is-dragging");
-      };
-
-      const handlePointerMove = (event: PointerEvent) => {
-        if (!mobileQuery.matches) return;
-        updatePanelHeight(event.clientY);
-      };
-
-      const handleTouchMove = (event: TouchEvent) => {
-        if (!mobileQuery.matches || event.touches.length === 0) return;
-        if (event.cancelable) event.preventDefault();
-        updatePanelHeight(event.touches[0].clientY);
-      };
-
-      const startDrag = (clientY: number) => {
-        startY = clientY;
-        startHeight = panelHeight;
-        panel.classList.add("is-dragging");
-      };
-
-      const stopDrag = () => {
-        window.removeEventListener("pointermove", handlePointerMove);
-        window.removeEventListener("touchmove", handleTouchMove);
-        snapPanelHeight();
-      };
-
-      grip.addEventListener("pointerdown", (event) => {
-        if (!mobileQuery.matches || !panel.classList.contains("is-open")) {
-          return;
-        }
-        if (event.pointerType === "touch") return;
-
-        startDrag(event.clientY);
-        grip.setPointerCapture(event.pointerId);
-
-        window.addEventListener("pointermove", handlePointerMove);
-        window.addEventListener("pointerup", stopDrag, { once: true });
-        window.addEventListener("pointercancel", stopDrag, { once: true });
-      });
-
-      grip.addEventListener(
-        "touchstart",
-        (event) => {
-          if (!mobileQuery.matches || event.touches.length === 0) return;
-          if (!panel.classList.contains("is-open")) return;
-          if (event.cancelable) event.preventDefault();
-
-          startDrag(event.touches[0].clientY);
-          window.addEventListener("touchmove", handleTouchMove, {
-            passive: false,
-          });
-          window.addEventListener("touchend", stopDrag, { once: true });
-          window.addEventListener("touchcancel", stopDrag, { once: true });
-        },
-        { passive: false },
-      );
-
-      grip.addEventListener("click", () => {
-        if (!mobileQuery.matches || !panel.classList.contains("is-open")) {
-          return;
-        }
-
-        if (ignoreNextClick) {
-          ignoreNextClick = false;
-          return;
-        }
-
-        setPanelHeight(
-          panelHeight > collapsedHeight ? collapsedHeight : expandedHeight,
-        );
-      });
-
-      closeButton?.addEventListener("click", () => {
-        panel.dispatchEvent(new CustomEvent("spa-panel-close"));
-      });
-
-      mobileQuery.addEventListener("change", () => {
-        if (mobileQuery.matches) {
-          if (panel.classList.contains("is-open")) {
-            openPanel();
-          }
-          return;
-        }
-
-        shell.style.removeProperty("--mobile-panel-height");
-        panel.classList.remove("is-dragging");
-        panel.setAttribute("aria-expanded", "false");
-      });
-
-      panel.addEventListener("spa-panel-open", openPanel);
-    };
-
-    document.addEventListener("astro:page-load", initPanelSheet);
-    initPanelSheet();
-  </script>
 </BaseLayout>
 
 <style>
-  .map-shell {
-    --mobile-panel-height: 30svh;
-    --mobile-panel-closed-height: 2.75rem;
-    --map-panel-block-start: 8.55rem;
-    --map-control-bottom: calc(1rem + var(--safe-bottom));
-    --map-control-gap: 2rem;
-    --map-zoom-height: 4.25rem;
-    --map-transition-duration: 0.3s;
-    --map-transition-easing: cubic-bezier(0.2, 0, 0, 1);
-
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(22rem, 28rem) 1fr;
-    width: 100vw;
-    height: 100vh;
-    min-height: 560px;
-  }
-
-  .map-stage {
-    position: relative;
-    grid-column: 1 / -1;
-    grid-row: 1;
-    min-width: 0;
-    min-height: 0;
-  }
-
-  .map-canvas {
-    width: 100%;
-    height: 100%;
-    background:
-      linear-gradient(120deg, rgb(112 200 215 / 16%), transparent 48%), #dce8e4;
-  }
-
-  :global(.map-tile--soft) {
-    filter: saturate(0.75) contrast(0.95) brightness(1.03);
-  }
-
-  .map-panel {
-    position: relative;
-    z-index: 500;
-    grid-column: 1;
-    grid-row: 1;
-    align-self: start;
-    width: min(25.5rem, calc(100vw - 1.5rem));
-    max-height: calc(100vh - var(--map-panel-block-start) - 0.75rem);
-    margin: var(--map-panel-block-start) 0 0 0.75rem;
+  :global(body.prototype-map-page) {
     overflow: hidden;
-    background: rgb(255 250 244 / 98%);
-    border: 1px solid rgb(64 19 6 / 12%);
-    border-radius: var(--radius-card);
-    box-shadow: 0 2px 8px rgb(45 22 14 / 16%);
-    opacity: 0;
+    background: #fffaf7;
+  }
+
+  .prototype-map {
+    --prototype-top-panel-height: clamp(13.25rem, 26svh, 13.55rem);
+    --prototype-ink: #3e2013;
+    --prototype-muted: #7d6559;
+    --prototype-line: rgb(80 45 28 / 13%);
+    --prototype-paper: rgb(255 251 246 / 96%);
+    --prototype-paper-solid: #fffaf7;
+    --prototype-brand: #c82006;
+    --prototype-brand-pressed: #a91b05;
+    --prototype-brand-dark: #451406;
+    --prototype-blue: #0f6ea6;
+    --prototype-blue-soft: #e6f5fb;
+    --prototype-surface-hover: #fff6ef;
+    --prototype-surface-pressed: #f5e8dd;
+    --prototype-tag-surface: #fff3ea;
+    --prototype-ease: cubic-bezier(0.2, 0, 0, 1);
+    position: relative;
+    inline-size: min(100dvw, 520px);
+    max-inline-size: 520px;
+    block-size: 100svh;
+    min-block-size: 0;
+    margin-inline: auto;
+    overflow: hidden;
+    color: var(--prototype-ink);
+    background: #fffaf7;
+  }
+
+  .prototype-map::before {
+    position: absolute;
+    z-index: 760;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: var(--prototype-top-panel-height);
     pointer-events: none;
-    transform: translateX(-100%);
+    content: "";
+    background:
+      linear-gradient(180deg, rgb(255 251 246 / 98%), rgb(255 251 246 / 94%)),
+      #fffaf7;
+  }
+
+  #prototype-map-canvas {
+    inline-size: 100%;
+    block-size: 100%;
+    background: #eef0ec;
+  }
+
+  .prototype-map :global(.prototype-leaflet-pin) {
+    transform-origin: 50% 100%;
+    scale: 1;
+    translate: 0 0;
     transition:
-      opacity var(--map-transition-duration) var(--map-transition-easing),
-      transform var(--map-transition-duration) var(--map-transition-easing);
+      scale 180ms var(--prototype-ease),
+      translate 180ms var(--prototype-ease),
+      filter 180ms var(--prototype-ease);
   }
 
-  .map-panel.is-open {
-    opacity: 1;
+  .prototype-map :global(.prototype-leaflet-pin.is-selected) {
+    filter: saturate(1.12) contrast(1.04);
+    scale: 1.12;
+    translate: 0 -0.2rem;
+  }
+
+  .prototype-header {
+    position: absolute;
+    z-index: 900;
+    inset-block-start: max(1.35rem, env(safe-area-inset-top));
+    inset-inline: 0.86rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .prototype-brand,
+  .prototype-menu summary {
+    min-block-size: 2.7rem;
+    border-radius: 999px;
+    backdrop-filter: blur(14px);
     pointer-events: auto;
-    transform: translateX(0);
   }
 
-  .map-panel:not(.is-open) .panel-close {
+  .prototype-brand {
+    display: inline-flex;
+    gap: 0.52rem;
+    align-items: center;
+    max-inline-size: calc(100% - 6.6rem);
+    padding: 0.48rem 0.82rem 0.48rem 0.54rem;
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--prototype-ink);
+    text-decoration: none;
+    background: var(--prototype-paper);
+    border: 1px solid var(--prototype-line);
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  .prototype-brand:hover {
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 22%);
+    transform: translateY(-1px);
+  }
+
+  .prototype-brand:active {
+    background: var(--prototype-surface-pressed);
+    border-color: rgb(80 45 28 / 26%);
+    transform: translateY(1px);
+  }
+
+  .prototype-brand-pin-shell {
+    display: inline-grid;
+    flex: 0 0 auto;
+    inline-size: 1.74rem;
+    block-size: 1.74rem;
+    place-items: center;
+  }
+
+  .prototype-brand-pin {
+    display: block;
+    color: var(--prototype-brand);
+    inline-size: 1.15rem;
+    block-size: 1.15rem;
+    background: currentColor;
+    -webkit-mask: url("/onsen.svg") center / contain no-repeat;
+    mask: url("/onsen.svg") center / contain no-repeat;
+  }
+
+  .prototype-brand span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .prototype-menu {
+    position: relative;
+    pointer-events: auto;
+  }
+
+  .prototype-menu summary {
+    display: inline-flex;
+    gap: 0.42rem;
+    align-items: center;
+    padding: 0.58rem 0.76rem;
+    font-size: 0.95rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-ink);
+    list-style: none;
+    cursor: pointer;
+    background: var(--prototype-paper);
+    border: 1px solid var(--prototype-line);
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  .prototype-menu summary:hover,
+  .prototype-menu[open] summary {
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 22%);
+    transform: translateY(-1px);
+  }
+
+  .prototype-menu summary:active {
+    background: var(--prototype-surface-pressed);
+    border-color: rgb(80 45 28 / 26%);
+    transform: translateY(1px);
+  }
+
+  .prototype-menu summary::-webkit-details-marker {
     display: none;
   }
 
-  .panel-close {
+  .prototype-menu nav {
     position: absolute;
-    z-index: 2;
-    inset-block-start: 0.65rem;
-    inset-inline-end: 0.65rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.45rem;
-    height: 2.45rem;
-    color: var(--color-brand-dark);
-    background: rgb(255 255 255 / 88%);
-    border: 1px solid rgb(64 19 6 / 12%);
-    border-radius: 999px;
-    box-shadow: 0 1px 4px rgb(45 22 14 / 14%);
-    scale: 1;
-    translate: 0 0;
-    transition-duration: var(--map-transition-duration);
-    transition-property:
-      background-color, border-color, box-shadow, color, scale, translate;
-    transition-timing-function: var(--map-transition-easing);
-  }
-
-  .spa-list {
+    inset-block-start: calc(100% + 0.5rem);
+    inset-inline-end: 0;
     display: grid;
-    max-height: calc(100vh - var(--map-panel-block-start) - 0.75rem);
-    padding: 0;
-    overflow: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
+    inline-size: max-content;
+    min-inline-size: 8.5rem;
+    padding: 0.45rem;
+    background: var(--prototype-paper-solid);
+    border: 1px solid var(--prototype-line);
+    border-radius: 0.85rem;
   }
 
-  :global(.map-panel .spa-card) {
-    display: grid;
-    gap: 1.15rem;
-    align-content: start;
-    padding: 3.55rem 1.25rem 1.25rem;
-    text-align: start;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    transition:
-      opacity var(--map-transition-duration) var(--map-transition-easing),
-      transform var(--map-transition-duration) var(--map-transition-easing);
+  .prototype-menu[open] nav {
+    animation: prototype-menu-reveal 180ms var(--prototype-ease) both;
   }
 
-  @starting-style {
-    :global(.map-panel .spa-card) {
+  .prototype-menu a {
+    padding: 0.55rem 0.7rem;
+    font-weight: 800;
+    color: inherit;
+    text-decoration: none;
+    border-radius: 0.55rem;
+  }
+
+  .prototype-menu a:hover {
+    background: var(--prototype-surface-pressed);
+  }
+
+  @keyframes prototype-menu-reveal {
+    from {
       opacity: 0;
-      transform: translateY(0.5rem);
+      transform: translateY(-0.28rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
-  :global(.map-panel .spa-card-main) {
-    min-width: 0;
+  .prototype-filters {
+    position: absolute;
+    z-index: 820;
+    inset-block-start: 5rem;
+    inset-inline: 0.86rem 0;
+    display: grid;
+    gap: 0.54rem;
+    pointer-events: none;
   }
 
-  :global(.map-panel .spa-meta) {
+  .prototype-chip-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: 0.36rem;
     align-items: center;
-    margin: 0 0 0.75rem;
-    font-size: 0.76rem;
-    font-weight: 800;
-    color: var(--color-brand);
+    overflow-x: auto;
+    padding-block: 0.38rem;
+    margin-block: -0.38rem;
+    scroll-padding-inline: 1rem;
+    scrollbar-width: none;
+    pointer-events: auto;
   }
 
-  :global(.map-panel .spa-meta span) {
+  .prototype-chip-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .prototype-chip-row button,
+  .prototype-clear {
     display: inline-flex;
+    flex: 0 0 auto;
+    gap: 0.38rem;
     align-items: center;
-    min-height: 1.6rem;
-    padding: 0.16rem 0.52rem;
-    background: #fff3ea;
-    border-radius: var(--radius-pill);
+    justify-content: center;
+    min-block-size: 2.25rem;
+    padding: 0.36rem 0.58rem;
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-ink);
+    white-space: nowrap;
+    background: var(--prototype-paper);
+    border: 1px solid var(--prototype-line);
+    border-radius: 999px;
+    backdrop-filter: blur(13px);
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
   }
 
-  :global(.map-panel .spa-card h2) {
+  .prototype-chip-row button:hover:not([aria-pressed="true"]),
+  .prototype-clear:hover {
+    color: var(--prototype-ink);
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 22%);
+  }
+
+  .prototype-chip-row button:active:not([aria-pressed="true"]),
+  .prototype-clear:active {
+    color: var(--prototype-ink);
+    background: var(--prototype-surface-pressed);
+    border-color: rgb(80 45 28 / 26%);
+    transform: translateY(1px);
+  }
+
+  .prototype-chip-row button[aria-pressed="true"] {
+    color: #fff;
+    background:
+      linear-gradient(135deg, rgb(255 132 82 / 24%), transparent 54%),
+      var(--prototype-brand);
+    border-color: var(--prototype-brand);
+  }
+
+  .prototype-chip-row button[aria-pressed="true"]:hover,
+  .prototype-chip-row button[aria-pressed="true"]:active {
+    color: #fff;
+    background:
+      linear-gradient(135deg, rgb(255 128 84 / 18%), transparent 54%),
+      var(--prototype-brand-pressed);
+    border-color: var(--prototype-brand-pressed);
+  }
+
+  .prototype-chip-row button[aria-pressed="true"]:active {
+    transform: translateY(1px);
+  }
+
+  [data-prototype-feature-list] {
+    gap: 0.3rem;
+  }
+
+  [data-prototype-feature-list] button {
+    gap: 0.28rem;
+    min-block-size: 1.94rem;
+    padding: 0.28rem 0.48rem;
+    font-size: 0.67rem;
+    font-weight: 800;
+    color: color-mix(in oklab, var(--prototype-ink), transparent 12%);
+    background: rgb(255 251 246 / 58%);
+    border-color: rgb(80 45 28 / 9%);
+    backdrop-filter: blur(8px);
+  }
+
+  [data-prototype-feature-list] button:hover:not([aria-pressed="true"]) {
+    color: var(--prototype-ink);
+    background: rgb(255 246 239 / 78%);
+    border-color: rgb(80 45 28 / 16%);
+  }
+
+  [data-prototype-feature-list] button[aria-pressed="true"] {
+    color: var(--prototype-brand-dark);
+    background: #fff0e6;
+    border-color: rgb(200 32 6 / 28%);
+  }
+
+  [data-prototype-feature-list] button[aria-pressed="true"]:hover,
+  [data-prototype-feature-list] button[aria-pressed="true"]:active {
+    color: var(--prototype-brand-dark);
+    background: #ffe7d8;
+    border-color: rgb(200 32 6 / 36%);
+  }
+
+  .prototype-count {
+    display: inline-grid;
+    inline-size: 1.36rem;
+    block-size: 1.36rem;
+    padding: 0;
+    place-items: center;
+    aspect-ratio: 1;
+    font-size: 0.72em;
+    line-height: 1;
+    color: color-mix(in oklab, currentColor, transparent 22%);
+    background: rgb(80 45 28 / 6%);
+    border-radius: 50%;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .prototype-chip-row button[aria-pressed="true"] .prototype-count {
+    color: #fff;
+    background: rgb(69 20 6 / 20%);
+  }
+
+  .prototype-filter-line,
+  .prototype-filter-status-row {
+    min-inline-size: 0;
+    padding-inline-end: 1rem;
+  }
+
+  .prototype-filter-status-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: center;
+    min-block-size: 2.25rem;
+  }
+
+  .prototype-status-copy {
+    display: grid;
+    gap: 0.04rem;
+    min-inline-size: 0;
+  }
+
+  .prototype-status {
     margin: 0;
-    font-size: 1.42rem;
+    font-size: 0.86rem;
+    font-weight: 850;
+    line-height: 1.35;
+    color: var(--prototype-ink);
+    white-space: nowrap;
+  }
+
+  .prototype-chip-row .prototype-icon,
+  .prototype-clear .prototype-icon {
+    inline-size: 0.92rem;
+    block-size: 0.92rem;
+  }
+
+  [data-prototype-feature-list] .prototype-icon {
+    inline-size: 0.82rem;
+    block-size: 0.82rem;
+  }
+
+  .prototype-clear {
+    min-inline-size: 4.85rem;
+    color: var(--prototype-muted);
+    background: transparent;
+    border-color: transparent;
+    backdrop-filter: none;
+    pointer-events: auto;
+  }
+
+  .prototype-clear:hover {
+    color: var(--prototype-brand-dark);
+    background: rgb(255 243 234 / 72%);
+    border-color: transparent;
+  }
+
+  .prototype-clear:active {
+    color: var(--prototype-brand-dark);
+    background: rgb(245 232 221 / 74%);
+    border-color: transparent;
+  }
+
+  .prototype-clear[hidden] {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  :global(.prototype-icon) {
+    display: inline-block;
+    inline-size: 1.02rem;
+    block-size: 1.02rem;
+    flex: 0 0 auto;
+    background: currentColor;
+    -webkit-mask: var(--prototype-icon-url) center / contain no-repeat;
+    mask: var(--prototype-icon-url) center / contain no-repeat;
+  }
+
+  :global(.prototype-icon--menu) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/menu.svg");
+  }
+
+  :global(.prototype-icon--sauna) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/flame.svg");
+  }
+
+  :global(.prototype-icon--onsen) {
+    --prototype-icon-url: url("/onsen.svg");
+  }
+
+  :global(.prototype-icon--bath) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/droplets.svg");
+  }
+
+  :global(.prototype-icon--ganbanyoku) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/layers-2.svg");
+  }
+
+  :global(.prototype-icon--food) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/utensils.svg");
+  }
+
+  :global(.prototype-icon--station) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/train-front.svg");
+  }
+
+  :global(.prototype-icon--refresh) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/rotate-cw.svg");
+  }
+
+  :global(.prototype-icon--map-pin) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/map-pin.svg");
+  }
+
+  :global(.prototype-icon--map) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/map.svg");
+  }
+
+  :global(.prototype-icon--bus) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/bus-front.svg");
+  }
+
+  :global(.prototype-icon--external) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/external-link.svg");
+  }
+
+  :global(.prototype-icon--chevron) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/chevron-right.svg");
+  }
+
+  .prototype-place-sheet {
+    position: absolute;
+    z-index: 880;
+    inset-inline: 0;
+    inset-block-end: env(safe-area-inset-bottom);
+    display: grid;
+    grid-template-rows: auto auto;
+    align-content: start;
+    block-size: auto;
+    max-block-size: min(86svh, calc(100svh - 1rem));
+    padding: 0 0.84rem 1rem;
+    background: var(--prototype-paper-solid);
+    border: 1px solid rgb(80 45 28 / 10%);
+    border-block-end: 0;
+    border-start-start-radius: 1.52rem;
+    border-start-end-radius: 1.52rem;
+    translate: 0 calc(100% - 0.3rem);
+    transition: translate 240ms var(--prototype-ease);
+  }
+
+  .prototype-place-sheet:not(.has-selection) {
+    visibility: hidden;
+    pointer-events: none;
+    translate: 0 100%;
+  }
+
+  .prototype-place-sheet.is-open {
+    translate: 0 0;
+  }
+
+  .prototype-place-sheet.is-dragging {
+    transition: none;
+  }
+
+  .prototype-grip {
+    touch-action: none;
+    display: grid;
+    min-block-size: 1.85rem;
+    padding: 0;
+    place-items: center;
+    background: transparent;
+    border: 0;
+  }
+
+  .prototype-grip span {
+    display: block;
+    inline-size: 2.15rem;
+    block-size: 0.24rem;
+    background: rgb(80 45 28 / 46%);
+    border-radius: 999px;
+  }
+
+  .prototype-card-host {
+    inline-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+    container: inline-size / place-card;
+  }
+
+  :global(.prototype-selected-card) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    block-size: auto;
+  }
+
+  :global(.prototype-place-body) {
+    display: grid;
+    gap: 0.82rem;
+    align-content: start;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  :global(.prototype-place-title) {
+    display: flex;
+    gap: 0.42rem;
+    align-items: center;
+    margin: 0;
+    font-size: clamp(1.22rem, 4.2cqi, 1.42rem);
+    font-weight: 900;
     line-height: 1.32;
     letter-spacing: 0;
+    overflow-wrap: anywhere;
   }
 
-  :global(.map-panel .spa-summary) {
-    margin: 0.75rem 0 0;
-    font-size: 0.98rem;
-    line-height: 1.7;
-    color: var(--color-text);
-  }
-
-  :global(.map-panel .spa-detail-list) {
+  :global(.prototype-place-detail-list) {
     display: grid;
-    gap: 0;
-    margin-block-start: 1.05rem;
-    border-block: 1px solid var(--color-border);
+    --prototype-dot-divider: radial-gradient(
+      circle,
+      rgb(80 45 28 / 18%) 0 1.2px,
+      transparent 1.35px
+    );
+    background:
+      var(--prototype-dot-divider) left top / 0.48rem 0.25rem repeat-x,
+      var(--prototype-dot-divider) left bottom / 0.48rem 0.25rem repeat-x;
   }
 
-  :global(.map-panel .spa-detail-row) {
+  :global(.prototype-place-detail-row) {
+    position: relative;
     display: grid;
-    grid-template-columns: 4.25rem minmax(0, 1fr);
-    gap: 0.8rem;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: 0.68rem;
     align-items: center;
-    padding-block: 0.9rem;
+    min-inline-size: 0;
+    padding-block: 0.74rem;
   }
 
-  :global(.map-panel .spa-detail-row:not(:last-child)) {
-    border-bottom: 1px solid var(--color-border);
+  :global(.prototype-place-detail-row:not(:last-child))::after {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -0.125rem;
+    display: block;
+    block-size: 0.25rem;
+    pointer-events: none;
+    content: "";
+    background: var(--prototype-dot-divider) left center / 0.48rem 0.25rem
+      repeat-x;
   }
 
-  :global(.map-panel .spa-detail-label) {
+  :global(.prototype-place-detail-label) {
     font-size: 0.78rem;
-    font-weight: 800;
+    font-weight: 850;
     line-height: 1.35;
-    color: var(--color-muted);
+    color: var(--prototype-muted);
+    white-space: nowrap;
   }
 
-  :global(.map-panel .spa-card address) {
-    margin: 0;
-    font-style: normal;
-    line-height: 1.65;
-    color: var(--color-text);
-  }
-
-  :global(.map-panel .spa-summary + .spa-detail-list) {
-    margin-block-start: 1.15rem;
-  }
-
-  :global(.map-panel .tag-groups) {
+  :global(.prototype-place-features) {
     display: grid;
     gap: 0.48rem;
-    min-width: 0;
+    min-inline-size: 0;
   }
 
-  :global(.map-panel .tag-group) {
+  :global(.prototype-feature-group) {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 0.38rem;
     align-items: center;
+    min-inline-size: 0;
   }
 
-  :global(.map-panel .tag-group-label) {
+  :global(.prototype-feature-label) {
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 850;
     line-height: 1.35;
-    color: var(--color-muted);
+    color: var(--prototype-muted);
+    white-space: nowrap;
   }
 
-  :global(.map-panel .tag-list) {
+  :global(.prototype-feature-tags) {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 0.38rem;
+    align-items: center;
+    min-inline-size: 0;
     padding: 0;
     margin: 0;
     list-style: none;
   }
 
-  :global(.map-panel .tag-list li) {
+  :global(.prototype-feature-tags li) {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.6rem;
     padding: 0.24rem 0.58rem;
+    min-inline-size: 0;
     font-size: 0.78rem;
-    font-weight: 800;
-    color: var(--color-brand-dark);
-    background: #fff3ea;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-brand-dark);
+    background: var(--prototype-tag-surface);
     border: 1px solid rgb(184 42 11 / 14%);
-    border-radius: var(--radius-pill);
+    border-radius: 999px;
   }
 
-  :global(.map-panel .spa-actions) {
+  :global(.prototype-feature-label),
+  :global(.prototype-place-detail-label),
+  :global(.prototype-feature-tags li span) {
+    text-box: trim-both cap alphabetic;
+  }
+
+  :global(.prototype-place-detail) {
+    display: flex;
+    gap: 0.44rem;
+    align-items: center;
+    min-inline-size: 0;
+    margin: 0;
+    font-size: 0.94rem;
+    font-style: normal;
+    line-height: 1.6;
+    color: var(--prototype-ink);
+  }
+
+  :global(.prototype-place-detail span:last-child) {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  :global(.prototype-place-detail .prototype-icon) {
+    inline-size: 1.08rem;
+    block-size: 1.08rem;
+    color: var(--prototype-muted);
+  }
+
+  :global(.prototype-place-actions) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
-    padding-block-start: 0.15rem;
+    padding-block-start: 0.1rem;
   }
 
-  :global(.map-panel .external-link) {
-    justify-content: center;
-    min-height: 2.75rem;
-    text-align: center;
-    scale: 1;
-    translate: 0 0;
-    transition-duration: var(--map-transition-duration);
-    transition-property:
-      background-color, border-color, box-shadow, color, scale, translate;
-    transition-timing-function: var(--map-transition-easing);
-  }
-
-  .panel-grip {
-    display: none;
-  }
-
-  .map-search {
-    position: fixed;
-    z-index: 700;
-    inset-block-start: 1.1rem;
-    inset-inline: clamp(17rem, 24vw, 20rem) 6.25rem;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 0.45rem;
-    align-items: center;
-    pointer-events: none;
-  }
-
-  .city-filter {
-    display: flex;
-    gap: 0.45rem;
-    align-items: center;
-    min-height: 3rem;
-    padding-block: 0.15rem;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    pointer-events: auto;
-    scrollbar-width: none;
-  }
-
-  .city-filter::-webkit-scrollbar {
-    display: none;
-  }
-
-  .city-filter-scroll {
-    display: grid;
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
-    place-items: center;
-    color: var(--color-brand-dark);
-    pointer-events: auto;
-    cursor: pointer;
-    background: rgb(255 250 244 / 94%);
-    border: 1px solid rgb(64 19 6 / 12%);
-    border-radius: var(--radius-pill);
-    box-shadow: var(--shadow-chip);
-    backdrop-filter: blur(12px);
-    scale: 1;
-    translate: 0 0;
-    transition-duration: var(--map-transition-duration);
-    transition-property:
-      background-color, border-color, box-shadow, color, opacity, scale,
-      translate;
-    transition-timing-function: var(--map-transition-easing);
-  }
-
-  .city-filter-scroll:disabled {
-    cursor: default;
-    opacity: 0.42;
-  }
-
-  .city-filter-scroll .icon {
-    inline-size: 0.95rem;
-    block-size: 0.95rem;
-  }
-
-  .city-filter button {
+  :global(.prototype-place-action) {
     display: inline-flex;
-    flex: 0 0 auto;
-    gap: 0.35rem;
+    gap: 0.4rem;
     align-items: center;
     justify-content: center;
-    min-height: 2.7rem;
-    padding: 0.55rem 0.85rem;
-    font-weight: 800;
-    color: var(--color-brand-dark);
-    white-space: nowrap;
-    background: rgb(255 250 244 / 94%);
-    border: 1px solid rgb(64 19 6 / 12%);
-    border-radius: var(--radius-pill);
-    box-shadow: var(--shadow-chip);
-    backdrop-filter: blur(12px);
-  }
-
-  .city-filter-label {
-    white-space: nowrap;
-  }
-
-  .city-filter-count {
-    display: inline-grid;
-    place-items: center;
-    inline-size: 1.55rem;
-    block-size: 1.55rem;
-    flex: 0 0 auto;
-    font-size: 0.76em;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: rgb(64 19 6 / 70%);
-    background: rgb(64 19 6 / 7%);
-    border-radius: 50%;
-  }
-
-  .city-filter button {
-    min-height: 2.15rem;
-    padding: 0.4rem 0.68rem;
+    min-block-size: 2.75rem;
+    padding: 0.5rem 0.7rem;
+    min-inline-size: 0;
     font-size: 0.9rem;
-    scale: 1;
-    translate: 0 0;
-    transition-duration: var(--map-transition-duration);
-    transition-property:
-      background-color, border-color, box-shadow, color, scale, translate;
-    transition-timing-function: var(--map-transition-easing);
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-ink);
+    text-decoration: none;
+    background: var(--prototype-tag-surface);
+    border: 1px solid rgb(80 45 28 / 10%);
+    border-radius: 999px;
   }
 
-  .city-filter button[aria-pressed="true"] {
-    color: var(--color-surface-strong);
-    background: var(--color-brand);
-    border-color: var(--color-brand);
+  :global(.prototype-place-action span:last-child) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.25;
   }
 
-  .city-filter button[aria-pressed="true"] .city-filter-count {
-    color: var(--color-brand);
-    background: rgb(255 250 244 / 94%);
+  :global(.prototype-place-action .prototype-icon) {
+    inline-size: 1.08rem;
+    block-size: 1.08rem;
   }
 
-  .map-stage :global(.leaflet-bottom.leaflet-right) {
-    margin-block-end: var(--map-control-bottom);
-    margin-inline-end: 0.6rem;
+  :global(.prototype-place-action--primary) {
+    color: #fff;
+    background: var(--prototype-brand);
+    border-color: var(--prototype-brand);
   }
 
-  .map-stage :global(.leaflet-control-locate a) {
-    display: grid;
-    place-items: center;
-    color: #000;
-  }
-
-  .map-stage :global(.leaflet-control-locate a[aria-disabled="true"]) {
-    cursor: progress;
-    opacity: 0.72;
-  }
-
-  .map-stage :global(.leaflet-control-locate svg) {
-    width: 18px;
-    height: 18px;
-  }
-
-  .panel-close:active,
-  :global(.map-panel .external-link:active),
-  .city-filter-scroll:active:not(:disabled),
-  .city-filter button:active {
-    scale: 0.98;
-    translate: 0 0;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .panel-close:hover {
-      color: var(--color-surface-strong);
-      background: var(--color-brand);
-      border-color: var(--color-brand);
-      box-shadow: 0 8px 20px rgb(45 22 14 / 20%);
-      scale: 1.06;
-      translate: 0 -1px;
+  @media (forced-colors: active) {
+    :global(.prototype-place-detail-list) {
+      background: none;
+      border-block: 1px solid CanvasText;
     }
 
-    :global(.map-panel .external-link:hover) {
-      background: rgb(255 255 255 / 86%);
-      border-color: rgb(184 42 11 / 30%);
-      box-shadow: 0 8px 20px rgb(45 22 14 / 14%);
-      scale: 1.02;
-      translate: 0 -1px;
-    }
-
-    :global(.map-panel .primary-link:hover) {
-      background: var(--color-brand-dark);
-      border-color: var(--color-brand-dark);
-    }
-
-    .city-filter button:hover:not([aria-pressed="true"]) {
-      color: var(--color-surface-strong);
-      background: var(--color-brand);
-      border-color: var(--color-brand);
-      box-shadow: 0 8px 20px rgb(45 22 14 / 16%);
-      scale: 1.03;
-      translate: 0 -2px;
-    }
-
-    .city-filter button:hover:not([aria-pressed="true"]) .city-filter-count {
-      color: var(--color-brand);
-      background: rgb(255 250 244 / 94%);
-    }
-
-    .city-filter-scroll:hover:not(:disabled) {
-      color: var(--color-surface-strong);
-      background: var(--color-brand);
-      border-color: var(--color-brand);
-      box-shadow: 0 8px 20px rgb(45 22 14 / 16%);
-      scale: 1.05;
-      translate: 0 -1px;
+    :global(.prototype-place-detail-row:not(:last-child))::after {
+      block-size: 0;
+      background: none;
+      border-block-end: 1px solid CanvasText;
     }
   }
 
-  @media (max-width: 900px) {
-    .map-shell {
-      --map-control-bottom: calc(
-        var(--mobile-panel-closed-height) + 0.7rem + var(--safe-bottom)
-      );
-
-      display: block;
-      min-height: 100svh;
+  @container place-card (max-width: 32rem) {
+    :global(.prototype-selected-card) {
+      grid-template-columns: minmax(0, 1fr);
     }
 
-    .map-stage,
-    .map-canvas {
-      height: 100svh;
+    :global(.prototype-feature-group) {
+      gap: 0.35rem;
     }
 
-    .map-search {
-      inset-block-start: 4.85rem;
-      inset-inline: 0.75rem 0;
-      display: block;
+    :global(.prototype-feature-tags li) {
+      min-block-size: 1.54rem;
+      padding-inline: 0.52rem;
+    }
+  }
+
+  .prototype-map :global(.leaflet-control-zoom) {
+    display: none;
+  }
+
+  .prototype-map :global(.leaflet-bottom.leaflet-right) {
+    z-index: 770;
+    margin-block-end: 0.45rem;
+    margin-inline-end: 0.35rem;
+  }
+
+  .prototype-map :global(.leaflet-control-attribution.leaflet-control) {
+    padding: 0.18rem 0.35rem;
+    overflow: visible;
+    font-size: 0.58rem;
+    line-height: 1.25;
+    text-align: end;
+    white-space: normal;
+    background: rgb(255 250 244 / 82%);
+    border-radius: 999px;
+  }
+
+  @media (min-width: 521px) {
+    .prototype-map {
+      border-inline: 1px solid rgb(80 45 28 / 10%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prototype-place-sheet,
+    .prototype-menu summary,
+    .prototype-chip-row button,
+    .prototype-clear,
+    .prototype-map :global(.prototype-leaflet-pin) {
+      transition-duration: 0.01ms;
     }
 
-    .map-shell.is-panel-open .map-search {
-      inset-inline: 0.75rem 0;
-    }
-
-    .city-filter-scroll {
-      display: none;
-    }
-
-    .map-stage :global(.leaflet-control-attribution.leaflet-control) {
-      margin-right: 10px;
-      font-size: 0.65rem;
-    }
-
-    .map-panel {
-      position: fixed;
-      z-index: 900;
-      inset-inline: 0;
-      inset-block-end: var(--safe-bottom);
-      width: auto;
-      height: var(--mobile-panel-closed-height);
-      max-height: calc(86svh - var(--safe-bottom));
-      margin: 0;
-      border-inline: 0;
-      border-end-end-radius: 0;
-      border-end-start-radius: 0;
-      box-shadow: 0 -2px 12px rgb(45 22 14 / 16%);
-      transition:
-        height var(--map-transition-duration) var(--map-transition-easing),
-        max-height var(--map-transition-duration) var(--map-transition-easing),
-        transform var(--map-transition-duration) var(--map-transition-easing);
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(calc(100% - var(--mobile-panel-closed-height)));
-    }
-
-    .map-panel.is-open {
-      height: auto;
-      max-height: var(--mobile-panel-height);
-      transform: translateY(0);
-    }
-
-    .map-panel:not(.is-open) .spa-list {
-      display: none;
-    }
-
-    .spa-list {
-      max-height: calc(var(--mobile-panel-height) - 3.25rem);
-      overscroll-behavior: contain;
-      scrollbar-gutter: stable;
-    }
-
-    :global(.map-panel .spa-card) {
-      min-height: auto;
-      margin-block-end: 20px;
-      padding: 0 1rem 1rem;
-    }
-
-    :global(.map-panel .spa-card h2) {
-      padding-inline-end: 2.4rem;
-      font-size: 1.22rem;
-    }
-
-    :global(.map-panel .spa-summary) {
-      font-size: 0.94rem;
-      line-height: 1.62;
-    }
-
-    :global(.map-panel .spa-detail-list) {
-      margin-block-start: 0.95rem;
-    }
-
-    :global(.map-panel .spa-detail-row) {
-      grid-template-columns: 3.75rem minmax(0, 1fr);
-      gap: 0.65rem;
-      padding-block: 0.75rem;
-    }
-
-    .panel-close {
-      inset-block-start: 2.85rem;
-      inset-inline-end: 0.75rem;
-      width: 2.25rem;
-      height: 2.25rem;
-    }
-
-    .panel-grip {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      min-height: 2.5rem;
-      padding: 0.75rem 0 0.55rem;
-      cursor: grab;
-      touch-action: none;
-      background: transparent;
-      border: 0;
-    }
-
-    .panel-grip span {
-      display: block;
-      width: 2.6rem;
-      height: 0.25rem;
-      background: rgb(64 19 6 / 22%);
-      border-radius: var(--radius-pill);
-    }
-
-    .map-panel.is-dragging {
-      transition: none;
-    }
-
-    .map-panel.is-dragging .panel-grip {
-      cursor: grabbing;
-    }
-
-    .map-stage :global(.leaflet-bottom.leaflet-right) {
-      z-index: 800;
-      margin-block-end: var(--map-control-bottom);
-      margin-inline-end: 0.25rem;
+    .prototype-menu[open] nav {
+      animation-duration: 0.01ms;
     }
   }
 </style>

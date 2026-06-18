@@ -1,78 +1,221 @@
+import {
+  isFeatureFilterId,
+  spaMatchesFeatureFilters,
+  type FeatureFilterId,
+} from "../lib/filters";
+import {
+  getCityFromSlug,
+  getCitySlug,
+  getFeatureIdsFromSearchParams,
+} from "../lib/filter-url";
 import { formatDistance, getDistanceInMeters } from "../lib/geo";
+import { sortSpasForDisplay } from "../lib/sort";
 import type { Coordinates, Spa } from "../lib/types";
 
-const initListPage = () => {
-  const locateButton =
-    document.querySelector<HTMLButtonElement>("[data-locate-list]");
-  if (!locateButton || locateButton.dataset.ready === "true") return;
+const initPrototypeList = () => {
+  const root = document.querySelector<HTMLElement>("[data-prototype-list]");
+  if (!root || root.dataset.ready === "true") return;
+  root.dataset.ready = "true";
 
-  locateButton.dataset.ready = "true";
-
-  const statusElement = document.querySelector<HTMLElement>(
-    "[data-location-status]",
+  const locateButton = root.querySelector<HTMLButtonElement>(
+    "[data-prototype-locate]",
   );
-  const listElement = document.querySelector<HTMLElement>("[data-spa-list]");
+  const locationStatusElement = root.querySelector<HTMLElement>(
+    "[data-prototype-location-status]",
+  );
+  const filterStatusElement = root.querySelector<HTMLElement>(
+    "[data-prototype-filter-status]",
+  );
+  const filterClearButton = root.querySelector<HTMLButtonElement>(
+    "[data-prototype-filter-clear]",
+  );
+  const listElement = root.querySelector<HTMLElement>(
+    "[data-prototype-spa-list]",
+  );
   const cards = Array.from(
-    document.querySelectorAll<HTMLElement>("[data-spa-card]"),
+    root.querySelectorAll<HTMLElement>("[data-prototype-spa-card]"),
   );
-  const dataElement = document.querySelector<HTMLElement>("[data-spas-json]");
+  const cityChips = Array.from(
+    root.querySelectorAll<HTMLButtonElement>("[data-prototype-city]"),
+  );
+  const featureChips = Array.from(
+    root.querySelectorAll<HTMLButtonElement>("[data-prototype-feature]"),
+  );
+  const dataElement = root.querySelector<HTMLElement>(
+    "[data-prototype-spas-json]",
+  );
   const spas: Spa[] = JSON.parse(dataElement?.dataset.spas ?? "[]");
+  const cardsBySpaId = new Map(
+    cards.map((card) => [card.dataset.prototypeSpaCard, card]),
+  );
 
-  const updateDistances = (currentLocation: Coordinates) => {
+  let activeCity = "all";
+  let activeFeatureIds = new Set<FeatureFilterId>();
+  let currentLocation: Coordinates | undefined;
+
+  const getCityFromUrl = (searchParams: URLSearchParams) => {
+    const citySlug = searchParams.get("city");
+    if (!citySlug) return "all";
+
+    const city = getCityFromSlug(citySlug) ?? citySlug;
+    return cityChips.some((chip) => chip.dataset.prototypeCity === city)
+      ? city
+      : "all";
+  };
+
+  const syncStateFromUrl = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    activeCity = getCityFromUrl(searchParams);
+    activeFeatureIds = new Set(getFeatureIdsFromSearchParams(searchParams));
+  };
+
+  const updateUrl = () => {
+    const url = new URL(window.location.href);
+
+    if (activeCity === "all") {
+      url.searchParams.delete("city");
+    } else {
+      url.searchParams.set("city", getCitySlug(activeCity));
+    }
+
+    if (activeFeatureIds.size === 0) {
+      url.searchParams.delete("features");
+    } else {
+      url.searchParams.set("features", [...activeFeatureIds].join(","));
+    }
+    url.searchParams.delete("tags");
+
+    window.history.replaceState({}, "", url);
+  };
+
+  const getVisibleSpas = () =>
+    spas.filter(
+      (spa) =>
+        (activeCity === "all" || spa.city === activeCity) &&
+        spaMatchesFeatureFilters(spa, activeFeatureIds),
+    );
+
+  const updateDistances = (location: Coordinates) => {
     cards.forEach((card) => {
-      const spa = spas.find((item) => item.id === card.dataset.spaCard);
-      const distanceElement =
-        card.querySelector<HTMLElement>("[data-distance]");
+      const spa = spas.find(
+        (item) => item.id === card.dataset.prototypeSpaCard,
+      );
+      const distanceElement = card.querySelector<HTMLElement>(
+        "[data-prototype-distance]",
+      );
       if (!spa || !distanceElement) return;
 
       distanceElement.textContent = formatDistance(
-        getDistanceInMeters(currentLocation, spa),
+        getDistanceInMeters(location, spa),
       );
       distanceElement.hidden = false;
     });
   };
 
-  locateButton.addEventListener("click", () => {
+  const applyFilter = (shouldUpdateUrl = true) => {
+    const visibleSpas = sortSpasForDisplay(getVisibleSpas(), currentLocation);
+    const visibleCards = visibleSpas
+      .map((spa) => cardsBySpaId.get(spa.id))
+      .filter((card): card is HTMLElement => Boolean(card));
+
+    listElement?.replaceChildren(...visibleCards);
+
+    cityChips.forEach((chip) => {
+      chip.setAttribute(
+        "aria-pressed",
+        String(chip.dataset.prototypeCity === activeCity),
+      );
+    });
+
+    featureChips.forEach((chip) => {
+      const id = chip.dataset.prototypeFeature;
+      const selected = Boolean(
+        id && isFeatureFilterId(id) && activeFeatureIds.has(id),
+      );
+      chip.setAttribute("aria-pressed", String(selected));
+    });
+
+    const hasActiveFilters = activeCity !== "all" || activeFeatureIds.size > 0;
+    if (filterStatusElement) {
+      filterStatusElement.textContent = `${visibleSpas.length}件`;
+    }
+    if (filterClearButton) {
+      filterClearButton.hidden = !hasActiveFilters;
+    }
+    if (shouldUpdateUrl) updateUrl();
+  };
+
+  cityChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      activeCity = chip.dataset.prototypeCity ?? "all";
+      applyFilter();
+    });
+  });
+
+  featureChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const id = chip.dataset.prototypeFeature;
+      if (!id || !isFeatureFilterId(id)) return;
+
+      if (activeFeatureIds.has(id)) {
+        activeFeatureIds.delete(id);
+      } else {
+        activeFeatureIds.add(id);
+      }
+      applyFilter();
+    });
+  });
+
+  filterClearButton?.addEventListener("click", () => {
+    activeCity = "all";
+    activeFeatureIds = new Set();
+    applyFilter();
+  });
+
+  locateButton?.addEventListener("click", () => {
     if (!navigator.geolocation) {
-      if (statusElement)
-        statusElement.textContent = "現在地を取得できない環境です";
+      if (locationStatusElement) {
+        locationStatusElement.textContent = "現在地を取得できない環境です";
+      }
       return;
     }
 
     locateButton.disabled = true;
-    if (statusElement) statusElement.textContent = "現在地を確認しています";
+    if (locationStatusElement) {
+      locationStatusElement.textContent = "現在地を確認しています";
+    }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const currentLocation = {
+        currentLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
         updateDistances(currentLocation);
-        cards
-          .map((card) => {
-            const spa = spas.find((item) => item.id === card.dataset.spaCard);
-            return {
-              card,
-              distance: spa
-                ? getDistanceInMeters(currentLocation, spa)
-                : Infinity,
-            };
-          })
-          .sort((a, b) => a.distance - b.distance)
-          .forEach(({ card }) => listElement?.append(card));
-        if (statusElement) statusElement.textContent = "近い順に並べました";
+        applyFilter();
+        if (locationStatusElement) {
+          locationStatusElement.textContent = "近い順に並べました";
+        }
         locateButton.disabled = false;
       },
       () => {
-        if (statusElement)
-          statusElement.textContent = "現在地は許可されませんでした";
+        if (locationStatusElement) {
+          locationStatusElement.textContent = "現在地は許可されませんでした";
+        }
         locateButton.disabled = false;
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
     );
   });
+
+  window.addEventListener("popstate", () => {
+    syncStateFromUrl();
+    applyFilter(false);
+  });
+
+  syncStateFromUrl();
+  applyFilter(false);
 };
 
-document.addEventListener("astro:page-load", initListPage);
-initListPage();
+document.addEventListener("astro:page-load", initPrototypeList);
+initPrototypeList();

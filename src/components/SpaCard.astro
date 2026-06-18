@@ -18,19 +18,8 @@ const tagGroups = getSpaTagGroups(spa);
       <span data-distance hidden></span>
     </p>
     <h2>{spa.name}</h2>
+    {spa.notes && <p class="spa-summary">{spa.notes}</p>}
     <div class="spa-detail-list">
-      <div class="spa-detail-row">
-        <span class="spa-detail-label">住所</span>
-        <address>{spa.address}</address>
-      </div>
-      {
-        spa.notes && (
-          <div class="spa-detail-row">
-            <span class="spa-detail-label">メモ</span>
-            <p class="spa-notes">{spa.notes}</p>
-          </div>
-        )
-      }
       {
         tagGroups.length > 0 && (
           <div class="spa-detail-row">
@@ -54,6 +43,10 @@ const tagGroups = getSpaTagGroups(spa);
           </div>
         )
       }
+      <div class="spa-detail-row">
+        <span class="spa-detail-label">住所</span>
+        <address translate="no">{spa.address}</address>
+      </div>
     </div>
   </div>
   <div class="spa-actions">
@@ -62,6 +55,7 @@ const tagGroups = getSpaTagGroups(spa);
       href={spa.googleMapsUrl}
       target="_blank"
       rel="noopener noreferrer"
+      aria-label={`${spa.name}をGoogleマップで開く`}
     >
       Google マップ
     </a>
@@ -70,6 +64,7 @@ const tagGroups = getSpaTagGroups(spa);
       href={spa.officialUrl}
       target="_blank"
       rel="noopener noreferrer"
+      aria-label={`${spa.name}の公式サイトを開く`}
     >
       公式サイト
     </a>
@@ -135,14 +130,14 @@ const tagGroups = getSpaTagGroups(spa);
     color: var(--color-muted);
   }
 
-  .spa-notes {
-    margin: 0;
+  .spa-summary {
+    margin: 0.55rem 0 0;
     color: var(--color-muted);
   }
 
   .spa-detail-list {
     display: grid;
-    margin-block-start: 0.9rem;
+    margin-block-start: 0.95rem;
     border-block: 1px solid var(--color-border);
   }
 
@@ -217,8 +212,10 @@ const tagGroups = getSpaTagGroups(spa);
     block-size: 3.25rem;
     min-width: 0;
     min-height: 0;
+    overflow: hidden;
     padding-block: 0;
     text-align: center;
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
 </style>

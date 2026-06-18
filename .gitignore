@@ -28,3 +28,4 @@ yarn-error.log*
 coverage/
 playwright-report/
 test-results/
+tmp/
