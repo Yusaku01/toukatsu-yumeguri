@@ -1,46 +1,255 @@
 ---
-import SiteHeader from "../../components/SiteHeader.astro";
-import SpaCard from "../../components/SpaCard.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getSpas } from "../../lib/spas";
+import { getFeatureFilterCounts } from "../../lib/filters";
+import { getCityCounts, getSpas } from "../../lib/spas";
+import { getSpaTagGroups } from "../../lib/tag-groups";
 
 const spas = await getSpas();
+const cityCounts = getCityCounts(spas);
+const featureCounts = getFeatureFilterCounts(spas);
+const totalSpaCount = spas.length;
+const pageTitle = "温浴施設一覧";
+const pageDescription = `東葛周辺の温浴施設${totalSpaCount}件を、地域や特徴で絞り込みながら一覧で比較できます。`;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: `${pageTitle} | 東葛湯めぐりマップ`,
+  description: pageDescription,
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: totalSpaCount,
+    itemListElement: spas.map((spa, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "LocalBusiness",
+        name: spa.name,
+        address: spa.address,
+        url: spa.officialUrl,
+        hasMap: spa.googleMapsUrl,
+      },
+    })),
+  },
+};
 ---
 
-<BaseLayout title="一覧">
-  <SiteHeader current="list" />
-  <main
-    id="content"
-    class="list-page"
-    tabindex="-1"
-    transition:name="page-content"
-  >
-    <section class="list-hero" aria-labelledby="list-title">
-      <p class="eyebrow">温浴施設一覧</p>
-      <h1 id="list-title">地図なしで、さっと比べる</h1>
-      <p>
-        東葛地域と周辺の温浴施設を、地域順で並べています。現在地を許可すると近い順に並び替えます。
-      </p>
-      <button
-        type="button"
-        class="external-link primary-link locate-list-button"
-        data-locate-list
-        aria-describedby="location-status"
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  bodyClass="prototype-list-page"
+  canonicalPath="/list/"
+  jsonLd={structuredData}
+>
+  <main id="content" class="prototype-list" tabindex="-1" data-prototype-list>
+    <header class="prototype-header" aria-label="サイトナビゲーション">
+      <a class="prototype-brand" href="/" aria-label="東葛湯めぐりマップ">
+        <span class="prototype-brand-pin-shell" aria-hidden="true">
+          <span class="prototype-brand-pin"></span>
+        </span>
+        <span>東葛湯めぐりマップ</span>
+      </a>
+      <details class="prototype-menu">
+        <summary>
+          <span class="prototype-icon prototype-icon--menu" aria-hidden="true"
+          ></span>
+          <span>MENU</span>
+        </summary>
+        <nav aria-label="サイトメニュー">
+          <a href="/">地図</a>
+          <a href="/list/" aria-current="page">一覧</a>
+          <a href="/terms/">利用規約</a>
+        </nav>
+      </details>
+    </header>
+
+    <section class="prototype-page-head" aria-labelledby="prototype-list-title">
+      <h1 id="prototype-list-title">一覧</h1>
+    </section>
+
+    <search class="prototype-filters" aria-label="温浴施設の絞り込み">
+      <div class="prototype-chip-row" role="group" aria-label="地域で絞り込み">
+        <button
+          type="button"
+          data-prototype-city="all"
+          aria-pressed="true"
+          aria-label={`すべての施設を表示。${totalSpaCount}件`}
+        >
+          <span>すべて</span>
+          <span class="prototype-count">{totalSpaCount}</span>
+        </button>
+        {
+          cityCounts.map(({ city, count }) => (
+            <button
+              type="button"
+              data-prototype-city={city}
+              aria-pressed="false"
+              aria-label={`${city}の施設に絞り込む。${count}件`}
+            >
+              <span>{city}</span>
+              <span class="prototype-count">{count}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div
+        class="prototype-chip-row prototype-chip-row--feature"
+        role="group"
+        aria-label="特徴で絞り込み"
       >
-        ここから近い順
+        {
+          featureCounts.map(({ id, label, count }) => (
+            <button
+              type="button"
+              data-prototype-feature={id}
+              aria-pressed="false"
+              aria-label={`${label}で絞り込む。${count}件`}
+            >
+              <span
+                class:list={["prototype-icon", `prototype-icon--${id}`]}
+                aria-hidden="true"
+              />
+              <span>{label}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="prototype-filter-status-row">
+        <p
+          class="prototype-status"
+          aria-live="polite"
+          aria-atomic="true"
+          data-prototype-filter-status
+        >
+          {totalSpaCount}件
+        </p>
+        <button
+          class="prototype-clear"
+          type="button"
+          data-prototype-filter-clear
+          hidden
+        >
+          <span
+            class="prototype-icon prototype-icon--refresh"
+            aria-hidden="true"></span>
+          <span>クリア</span>
+        </button>
+      </div>
+    </search>
+
+    <div class="prototype-location-row">
+      <button
+        class="prototype-locate"
+        type="button"
+        data-prototype-locate
+        aria-describedby="prototype-location-status"
+      >
+        <span
+          class="prototype-icon prototype-icon--navigation"
+          aria-hidden="true"></span>
+        <span>ここから近い順</span>
       </button>
       <p
-        id="location-status"
-        class="muted"
-        data-location-status
+        id="prototype-location-status"
+        class="prototype-location-status"
+        data-prototype-location-status
         aria-live="polite"
       >
       </p>
-    </section>
+    </div>
+
     <section aria-label="温浴施設カード">
-      <div data-spas-json data-spas={JSON.stringify(spas)}></div>
-      <div class="list-grid" data-spa-list>
-        {spas.map((spa) => <SpaCard spa={spa} />)}
+      <div data-prototype-spas-json data-spas={JSON.stringify(spas)}></div>
+      <div class="prototype-card-list" data-prototype-spa-list>
+        {
+          spas.map((spa) => {
+            const tagGroups = getSpaTagGroups(spa);
+            return (
+              <article
+                class="prototype-spa-card"
+                data-prototype-spa-card={spa.id}
+              >
+                <div class="prototype-card-head">
+                  <p class="prototype-card-meta">
+                    <span>{spa.city}</span>
+                    {spa.area && <span>{spa.area}</span>}
+                    <span data-prototype-distance hidden />
+                  </p>
+                  <h2>{spa.name}</h2>
+                  {spa.notes && <p class="prototype-card-note">{spa.notes}</p>}
+                </div>
+
+                <div class="prototype-place-detail-list">
+                  {tagGroups.length > 0 && (
+                    <div class="prototype-place-detail-row">
+                      <span class="prototype-place-detail-label">特徴</span>
+                      <div
+                        class="prototype-place-features"
+                        role="group"
+                        aria-label={`${spa.name}の特徴`}
+                      >
+                        {tagGroups.map((group) => (
+                          <div class="prototype-feature-group">
+                            <span class="prototype-feature-label">
+                              {group.label}
+                            </span>
+                            <ul class="prototype-feature-tags">
+                              {group.tags.map((tag) => (
+                                <li>
+                                  <span>{tag}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div class="prototype-place-detail-row">
+                    <span class="prototype-place-detail-label">住所</span>
+                    <address class="prototype-place-detail" translate="no">
+                      <span
+                        class="prototype-icon prototype-icon--map-pin"
+                        aria-hidden="true"
+                      />
+                      <span>{spa.address}</span>
+                    </address>
+                  </div>
+                </div>
+
+                <div class="prototype-place-actions">
+                  <a
+                    class="prototype-place-action prototype-place-action--primary"
+                    href={spa.googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${spa.name}をGoogleマップで開く`}
+                  >
+                    <span
+                      class="prototype-icon prototype-icon--map"
+                      aria-hidden="true"
+                    />
+                    <span>Google マップ</span>
+                  </a>
+                  <a
+                    class="prototype-place-action"
+                    href={spa.officialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${spa.name}の公式サイトを開く`}
+                  >
+                    <span
+                      class="prototype-icon prototype-icon--external"
+                      aria-hidden="true"
+                    />
+                    <span>公式サイト</span>
+                  </a>
+                </div>
+              </article>
+            );
+          })
+        }
       </div>
     </section>
   </main>
@@ -50,81 +259,692 @@ const spas = await getSpas();
 </BaseLayout>
 
 <style>
-  .list-page {
-    width: min(1120px, calc(100% - 2rem));
-    padding: 7rem 0 4rem;
+  :global(body.prototype-list-page) {
+    background: #fffaf7;
+  }
+
+  .prototype-list {
+    --prototype-ink: #3e2013;
+    --prototype-muted: #7d6559;
+    --prototype-line: rgb(80 45 28 / 13%);
+    --prototype-paper: rgb(255 251 246 / 96%);
+    --prototype-paper-solid: #fffaf7;
+    --prototype-brand: #c82006;
+    --prototype-brand-pressed: #a91b05;
+    --prototype-brand-dark: #451406;
+    --prototype-surface-hover: #fff6ef;
+    --prototype-surface-pressed: #f5e8dd;
+    --prototype-tag-surface: #fff3ea;
+    --prototype-ease: cubic-bezier(0.2, 0, 0, 1);
+    inline-size: min(100dvw, 520px);
+    min-block-size: 100svh;
+    padding: max(1.35rem, env(safe-area-inset-top)) 0.86rem 2.2rem;
     margin-inline: auto;
+    color: var(--prototype-ink);
+    background: #fffaf7;
   }
 
-  .list-hero {
-    max-width: 45rem;
-    margin-block-end: 2rem;
+  .prototype-header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-end: 1.25rem;
   }
 
-  .eyebrow {
-    margin: 0 0 0.3rem;
+  .prototype-brand,
+  .prototype-menu summary {
+    min-block-size: 2.7rem;
+    border-radius: 999px;
+    backdrop-filter: blur(14px);
+  }
+
+  .prototype-brand {
+    display: inline-flex;
+    gap: 0.52rem;
+    align-items: center;
+    max-inline-size: calc(100% - 6.6rem);
+    padding: 0.48rem 0.82rem 0.48rem 0.54rem;
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--prototype-ink);
+    text-decoration: none;
+    background: var(--prototype-paper);
+    border: 1px solid var(--prototype-line);
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  .prototype-brand:hover {
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 22%);
+    transform: translateY(-1px);
+  }
+
+  .prototype-brand:active {
+    background: var(--prototype-surface-pressed);
+    border-color: rgb(80 45 28 / 26%);
+    transform: translateY(1px);
+  }
+
+  .prototype-brand-pin-shell {
+    display: inline-grid;
+    flex: 0 0 auto;
+    inline-size: 1.74rem;
+    block-size: 1.74rem;
+    place-items: center;
+  }
+
+  .prototype-brand-pin {
+    display: block;
+    color: var(--prototype-brand);
+    inline-size: 1.15rem;
+    block-size: 1.15rem;
+    background: currentColor;
+    -webkit-mask: url("/onsen.svg") center / contain no-repeat;
+    mask: url("/onsen.svg") center / contain no-repeat;
+  }
+
+  .prototype-brand span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .prototype-menu {
+    position: relative;
+  }
+
+  .prototype-menu summary {
+    display: inline-flex;
+    gap: 0.42rem;
+    align-items: center;
+    padding: 0.58rem 0.76rem;
+    font-size: 0.95rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-ink);
+    list-style: none;
+    cursor: pointer;
+    background: var(--prototype-paper);
+    border: 1px solid var(--prototype-line);
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  .prototype-menu summary:hover,
+  .prototype-menu[open] summary {
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 22%);
+    transform: translateY(-1px);
+  }
+
+  .prototype-menu summary:active {
+    background: var(--prototype-surface-pressed);
+    border-color: rgb(80 45 28 / 26%);
+    transform: translateY(1px);
+  }
+
+  .prototype-menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .prototype-menu nav {
+    position: absolute;
+    inset-block-start: calc(100% + 0.5rem);
+    inset-inline-end: 0;
+    z-index: 20;
+    display: grid;
+    inline-size: max-content;
+    min-inline-size: 8.5rem;
+    padding: 0.45rem;
+    background: var(--prototype-paper-solid);
+    border: 1px solid var(--prototype-line);
+    border-radius: 0.85rem;
+  }
+
+  .prototype-menu[open] nav {
+    animation: prototype-menu-reveal 180ms var(--prototype-ease) both;
+  }
+
+  .prototype-menu a {
+    padding: 0.55rem 0.7rem;
     font-weight: 800;
-    color: var(--color-brand);
+    color: inherit;
+    text-decoration: none;
+    border-radius: 0.55rem;
   }
 
-  h1 {
+  .prototype-menu a:hover,
+  .prototype-menu a[aria-current="page"] {
+    background: var(--prototype-surface-pressed);
+  }
+
+  @keyframes prototype-menu-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(-0.28rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .prototype-page-head {
+    display: grid;
+    gap: 0.32rem;
+    margin-block-end: 0.92rem;
+  }
+
+  .prototype-page-head h1 {
     margin: 0;
-    font-size: clamp(1.75rem, 5.4vw, 2.85rem);
-    line-height: 1.18;
+  }
+
+  .prototype-page-head h1 {
+    font-size: clamp(1.36rem, 6.2vw, 1.72rem);
+    font-weight: 900;
+    line-height: 1.22;
     letter-spacing: 0;
   }
 
-  .list-hero p {
-    color: var(--color-muted);
-  }
-
-  .locate-list-button {
-    width: fit-content;
-  }
-
-  .list-grid {
+  .prototype-filters {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-    gap: 1rem;
+    gap: 0.54rem;
+    margin-block-end: 0.78rem;
   }
 
-  :global(.list-grid .spa-detail-list) {
-    display: grid;
-    margin-block-start: 0.9rem;
-    border-block: 1px solid var(--color-border);
+  .prototype-chip-row {
+    display: flex;
+    gap: 0.36rem;
+    align-items: center;
+    padding-block: 0.38rem;
+    margin-block: -0.38rem;
+    overflow-x: auto;
+    scroll-padding-inline: 1rem;
+    scrollbar-width: none;
   }
 
-  :global(.list-grid .spa-detail-row) {
-    display: grid;
-    grid-template-columns: 3.75rem minmax(0, 1fr);
-    gap: 0.7rem;
-    align-items: start;
-    padding-block: 0.72rem;
+  .prototype-chip-row::-webkit-scrollbar {
+    display: none;
   }
 
-  :global(.list-grid .spa-detail-row:not(:last-child)) {
-    border-bottom: 1px solid var(--color-border);
+  .prototype-chip-row button,
+  .prototype-clear,
+  .prototype-locate {
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 0.38rem;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 2.25rem;
+    padding: 0.36rem 0.58rem;
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-ink);
+    white-space: nowrap;
+    cursor: pointer;
+    background: var(--prototype-paper);
+    border: 1px solid var(--prototype-line);
+    border-radius: 999px;
+    backdrop-filter: blur(13px);
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
   }
 
-  :global(.list-grid .spa-detail-label) {
-    font-size: 0.72rem;
+  .prototype-chip-row button:hover:not([aria-pressed="true"]),
+  .prototype-clear:hover,
+  .prototype-locate:hover {
+    color: var(--prototype-ink);
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 22%);
+  }
+
+  .prototype-chip-row button:active:not([aria-pressed="true"]),
+  .prototype-clear:active,
+  .prototype-locate:active {
+    color: var(--prototype-ink);
+    background: var(--prototype-surface-pressed);
+    border-color: rgb(80 45 28 / 26%);
+    transform: translateY(1px);
+  }
+
+  .prototype-chip-row button[aria-pressed="true"] {
+    color: #fff;
+    background:
+      linear-gradient(135deg, rgb(255 132 82 / 24%), transparent 54%),
+      var(--prototype-brand);
+    border-color: var(--prototype-brand);
+  }
+
+  .prototype-chip-row button[aria-pressed="true"]:hover,
+  .prototype-chip-row button[aria-pressed="true"]:active {
+    color: #fff;
+    background:
+      linear-gradient(135deg, rgb(255 128 84 / 18%), transparent 54%),
+      var(--prototype-brand-pressed);
+    border-color: var(--prototype-brand-pressed);
+  }
+
+  .prototype-chip-row--feature {
+    gap: 0.3rem;
+  }
+
+  .prototype-chip-row--feature button {
+    gap: 0.28rem;
+    min-block-size: 1.94rem;
+    padding: 0.28rem 0.48rem;
+    font-size: 0.67rem;
     font-weight: 800;
-    line-height: 1.5;
-    color: var(--color-muted);
+    color: color-mix(in oklab, var(--prototype-ink), transparent 12%);
+    background: rgb(255 251 246 / 58%);
+    border-color: rgb(80 45 28 / 9%);
+    backdrop-filter: blur(8px);
   }
 
-  :global(.list-grid .spa-card address),
-  :global(.list-grid .spa-notes) {
+  .prototype-chip-row--feature button[aria-pressed="true"] {
+    color: var(--prototype-brand-dark);
+    background: #fff0e6;
+    border-color: rgb(200 32 6 / 28%);
+  }
+
+  .prototype-count {
+    display: inline-grid;
+    inline-size: 1.36rem;
+    block-size: 1.36rem;
+    padding: 0;
+    place-items: center;
+    aspect-ratio: 1;
+    font-size: 0.72em;
+    line-height: 1;
+    color: color-mix(in oklab, currentColor, transparent 22%);
+    background: rgb(80 45 28 / 6%);
+    border-radius: 50%;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .prototype-chip-row button[aria-pressed="true"] .prototype-count {
+    color: #fff;
+    background: rgb(69 20 6 / 20%);
+  }
+
+  .prototype-filter-status-row,
+  .prototype-location-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .prototype-status {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 850;
+    line-height: 1.35;
+    color: var(--prototype-ink);
+    white-space: nowrap;
+  }
+
+  .prototype-clear {
+    min-inline-size: 4.85rem;
+    color: var(--prototype-muted);
+    background: transparent;
+    border-color: transparent;
+    backdrop-filter: none;
+  }
+
+  .prototype-clear[hidden] {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .prototype-location-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    margin-block-end: 0.95rem;
+  }
+
+  .prototype-locate {
+    color: var(--prototype-brand-dark);
+    background: var(--prototype-tag-surface);
+    border-color: rgb(184 42 11 / 14%);
+  }
+
+  .prototype-locate:disabled {
+    cursor: progress;
+    opacity: 0.72;
+  }
+
+  .prototype-location-status {
+    min-inline-size: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--prototype-muted);
+  }
+
+  .prototype-card-list {
+    display: grid;
+    gap: 0.78rem;
+  }
+
+  .prototype-spa-card {
+    display: grid;
+    gap: 0.82rem;
+    padding: 0.86rem;
+    background: var(--prototype-paper);
+    border: 1px solid rgb(80 45 28 / 10%);
+    border-radius: 0.98rem;
+  }
+
+  .prototype-card-head {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .prototype-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.34rem;
+    align-items: center;
     margin: 0;
   }
 
-  :global(.list-grid .tag-groups) {
-    margin-block-start: 0;
+  .prototype-card-meta span {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.54rem;
+    padding: 0.22rem 0.52rem;
+    font-size: 0.72rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-brand-dark);
+    background: var(--prototype-tag-surface);
+    border: 1px solid rgb(184 42 11 / 12%);
+    border-radius: 999px;
   }
 
-  @media (max-width: 720px) {
-    .list-page {
-      padding-block-start: 8.5rem;
+  .prototype-card-meta span[hidden] {
+    display: none;
+  }
+
+  .prototype-spa-card h2 {
+    margin: 0;
+    font-size: clamp(1.18rem, 4.8vw, 1.36rem);
+    font-weight: 900;
+    line-height: 1.32;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .prototype-card-note {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--prototype-muted);
+  }
+
+  .prototype-place-detail-list {
+    display: grid;
+    --prototype-dot-divider: radial-gradient(
+      circle,
+      rgb(80 45 28 / 18%) 0 1.2px,
+      transparent 1.35px
+    );
+    background:
+      var(--prototype-dot-divider) left top / 0.48rem 0.25rem repeat-x,
+      var(--prototype-dot-divider) left bottom / 0.48rem 0.25rem repeat-x;
+  }
+
+  .prototype-place-detail-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: 0.68rem;
+    align-items: center;
+    min-inline-size: 0;
+    padding-block: 0.74rem;
+  }
+
+  .prototype-place-detail-row:not(:last-child)::after {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -0.125rem;
+    display: block;
+    block-size: 0.25rem;
+    pointer-events: none;
+    content: "";
+    background: var(--prototype-dot-divider) left center / 0.48rem 0.25rem
+      repeat-x;
+  }
+
+  .prototype-place-detail-label {
+    font-size: 0.78rem;
+    font-weight: 850;
+    line-height: 1.35;
+    color: var(--prototype-muted);
+    white-space: nowrap;
+  }
+
+  .prototype-place-features {
+    display: grid;
+    gap: 0.48rem;
+    min-inline-size: 0;
+  }
+
+  .prototype-feature-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+    align-items: center;
+    min-inline-size: 0;
+  }
+
+  .prototype-feature-label {
+    font-size: 0.72rem;
+    font-weight: 850;
+    line-height: 1.35;
+    color: var(--prototype-muted);
+    white-space: nowrap;
+  }
+
+  .prototype-feature-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+    align-items: center;
+    min-inline-size: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .prototype-feature-tags li {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.6rem;
+    padding: 0.24rem 0.58rem;
+    min-inline-size: 0;
+    font-size: 0.78rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-brand-dark);
+    background: var(--prototype-tag-surface);
+    border: 1px solid rgb(184 42 11 / 14%);
+    border-radius: 999px;
+  }
+
+  .prototype-feature-label,
+  .prototype-place-detail-label,
+  .prototype-feature-tags li span {
+    text-box: trim-both cap alphabetic;
+  }
+
+  .prototype-place-detail {
+    display: flex;
+    gap: 0.44rem;
+    align-items: center;
+    min-inline-size: 0;
+    margin: 0;
+    font-size: 0.94rem;
+    font-style: normal;
+    line-height: 1.6;
+    color: var(--prototype-ink);
+  }
+
+  .prototype-place-detail span:last-child {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .prototype-place-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .prototype-place-action {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 2.75rem;
+    padding: 0.5rem 0.7rem;
+    min-inline-size: 0;
+    font-size: 0.9rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-ink);
+    text-decoration: none;
+    background: var(--prototype-tag-surface);
+    border: 1px solid rgb(80 45 28 / 10%);
+    border-radius: 999px;
+  }
+
+  .prototype-place-action span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.25;
+  }
+
+  .prototype-place-action--primary {
+    color: #fff;
+    background: var(--prototype-brand);
+    border-color: var(--prototype-brand);
+  }
+
+  .prototype-icon {
+    display: inline-block;
+    inline-size: 1.02rem;
+    block-size: 1.02rem;
+    flex: 0 0 auto;
+    background: currentColor;
+    -webkit-mask: var(--prototype-icon-url) center / contain no-repeat;
+    mask: var(--prototype-icon-url) center / contain no-repeat;
+  }
+
+  .prototype-chip-row .prototype-icon,
+  .prototype-clear .prototype-icon,
+  .prototype-locate .prototype-icon {
+    inline-size: 0.92rem;
+    block-size: 0.92rem;
+  }
+
+  .prototype-chip-row--feature .prototype-icon {
+    inline-size: 0.82rem;
+    block-size: 0.82rem;
+  }
+
+  .prototype-place-detail .prototype-icon,
+  .prototype-place-action .prototype-icon {
+    inline-size: 1.08rem;
+    block-size: 1.08rem;
+  }
+
+  .prototype-place-detail .prototype-icon {
+    color: var(--prototype-muted);
+  }
+
+  .prototype-icon--menu {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/menu.svg");
+  }
+
+  .prototype-icon--sauna {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/flame.svg");
+  }
+
+  .prototype-icon--onsen {
+    --prototype-icon-url: url("/onsen.svg");
+  }
+
+  .prototype-icon--bath {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/droplets.svg");
+  }
+
+  .prototype-icon--ganbanyoku {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/layers-2.svg");
+  }
+
+  .prototype-icon--food {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/utensils.svg");
+  }
+
+  .prototype-icon--station {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/train-front.svg");
+  }
+
+  .prototype-icon--refresh {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/rotate-cw.svg");
+  }
+
+  .prototype-icon--navigation {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/navigation.svg");
+  }
+
+  .prototype-icon--map-pin {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/map-pin.svg");
+  }
+
+  .prototype-icon--map {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/map.svg");
+  }
+
+  .prototype-icon--external {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/external-link.svg");
+  }
+
+  @media (min-width: 521px) {
+    .prototype-list {
+      border-inline: 1px solid rgb(80 45 28 / 10%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prototype-brand,
+    .prototype-menu summary,
+    .prototype-chip-row button,
+    .prototype-clear,
+    .prototype-locate {
+      transition-duration: 0.01ms;
+    }
+
+    .prototype-menu[open] nav {
+      animation-duration: 0.01ms;
     }
   }
 </style>

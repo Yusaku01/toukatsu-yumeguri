@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 
 export default defineConfig({
@@ -9,4 +9,15 @@ export default defineConfig({
   prefetch: {
     prefetchAll: false,
   },
+  fonts: [
+    {
+      provider: fontProviders.fontsource(),
+      name: "Zen Kaku Gothic New",
+      cssVariable: "--font-sans",
+      weights: [500, 700, 900],
+      styles: ["normal"],
+      subsets: ["latin", "japanese"],
+      fallbacks: ["sans-serif"],
+    },
+  ],
 });

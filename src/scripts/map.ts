@@ -1,158 +1,268 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { formatDistance, getDistanceInMeters } from "../lib/geo";
+import {
+  isFeatureFilterId,
+  spaMatchesFeatureFilters,
+  type FeatureFilterId,
+} from "../lib/filters";
+import {
+  getCityFromSlug,
+  getCitySlug,
+  getFeatureIdsFromSearchParams,
+} from "../lib/filter-url";
 import { getSpaTagGroups } from "../lib/tag-groups";
 import type { Coordinates, Spa } from "../lib/types";
 
 const TOKATSU_CENTER: Coordinates = { lat: 35.855, lng: 139.945 };
-const INITIAL_MAP_ZOOM = 11;
-const DESKTOP_MAX_INITIAL_MAP_ZOOM = 13;
-const FILTER_MAX_MAP_ZOOM = 13;
-const MOBILE_MAX_INITIAL_MAP_ZOOM = 9;
+const PROTOTYPE_INITIAL_CENTER: Coordinates = { lat: 35.835, lng: 139.93 };
+const INITIAL_ZOOM = 11;
+const PROTOTYPE_INITIAL_ZOOM = 12;
+const FILTER_MAX_ZOOM = 13;
 
 const pinIcon = L.icon({
   iconUrl: "/pin.svg",
-  iconSize: [30, 48],
-  iconAnchor: [15, 48],
-  popupAnchor: [0, -42],
+  iconSize: [28, 45],
+  iconAnchor: [14, 45],
+  popupAnchor: [0, -38],
+  className: "prototype-leaflet-pin",
 });
 
-const initMapPage = () => {
-  const mapElement = document.querySelector<HTMLElement>("#map");
-  if (!mapElement || mapElement.dataset.ready === "true") return;
+const transportNotes = new Map<string, string>([
+  ["yuraku-no-sato-matsudo", "松戸駅からバスで約10分"],
+  ["spa-metsa-otaka", "流山おおたかの森駅から徒歩圏"],
+  ["sumire-minami-kashiwa", "南柏駅から徒歩圏"],
+  ["aquaignis-yoshikawa-minami", "吉川美南駅から徒歩圏"],
+]);
 
+const appendText = <K extends keyof HTMLElementTagNameMap>(
+  parent: HTMLElement,
+  tagName: K,
+  text: string,
+  className?: string,
+): HTMLElementTagNameMap[K] => {
+  const element = document.createElement(tagName);
+  element.textContent = text;
+  if (className) element.className = className;
+  parent.append(element);
+  return element;
+};
+
+const appendIcon = (
+  parent: HTMLElement,
+  iconClass: string,
+  extraClassName?: string,
+) => {
+  const icon = document.createElement("span");
+  icon.className = ["prototype-icon", iconClass, extraClassName]
+    .filter(Boolean)
+    .join(" ");
+  icon.setAttribute("aria-hidden", "true");
+  parent.append(icon);
+  return icon;
+};
+
+const createSelectedCard = (spa: Spa) => {
+  const card = document.createElement("article");
+  card.className = "prototype-selected-card";
+
+  const body = document.createElement("div");
+  body.className = "prototype-place-body";
+
+  const title = document.createElement("h2");
+  title.className = "prototype-place-title";
+  appendText(title, "span", spa.name);
+  body.append(title);
+
+  const tagGroups = getSpaTagGroups(spa);
+  const detailList = document.createElement("div");
+  detailList.className = "prototype-place-detail-list";
+
+  if (tagGroups.length > 0) {
+    const featureRow = document.createElement("div");
+    featureRow.className = "prototype-place-detail-row";
+    appendText(featureRow, "span", "特徴", "prototype-place-detail-label");
+
+    const features = document.createElement("div");
+    features.className = "prototype-place-features";
+    features.setAttribute("role", "group");
+    features.setAttribute("aria-label", `${spa.name}の特徴`);
+
+    tagGroups.forEach((group) => {
+      const groupElement = document.createElement("div");
+      groupElement.className = "prototype-feature-group";
+      appendText(groupElement, "span", group.label, "prototype-feature-label");
+
+      const tagList = document.createElement("ul");
+      tagList.className = "prototype-feature-tags";
+      group.tags.forEach((tag) => {
+        const item = document.createElement("li");
+        appendText(item, "span", tag);
+        tagList.append(item);
+      });
+
+      groupElement.append(tagList);
+      features.append(groupElement);
+    });
+
+    featureRow.append(features);
+    detailList.append(featureRow);
+  }
+
+  const addressRow = document.createElement("div");
+  addressRow.className = "prototype-place-detail-row";
+  appendText(addressRow, "span", "住所", "prototype-place-detail-label");
+  const address = document.createElement("address");
+  address.className = "prototype-place-detail";
+  appendIcon(address, "prototype-icon--map-pin");
+  appendText(address, "span", spa.address);
+  addressRow.append(address);
+  detailList.append(addressRow);
+
+  const transport = transportNotes.get(spa.id);
+  if (transport) {
+    const transportDetailRow = document.createElement("div");
+    transportDetailRow.className = "prototype-place-detail-row";
+    appendText(
+      transportDetailRow,
+      "span",
+      "アクセス",
+      "prototype-place-detail-label",
+    );
+    const transportRow = document.createElement("p");
+    transportRow.className = "prototype-place-detail";
+    appendIcon(transportRow, "prototype-icon--bus");
+    appendText(transportRow, "span", transport);
+    transportDetailRow.append(transportRow);
+    detailList.append(transportDetailRow);
+  }
+
+  body.append(detailList);
+
+  const actions = document.createElement("div");
+  actions.className = "prototype-place-actions";
+
+  const googleMapsLink = document.createElement("a");
+  googleMapsLink.className =
+    "prototype-place-action prototype-place-action--primary";
+  googleMapsLink.href = spa.googleMapsUrl;
+  googleMapsLink.target = "_blank";
+  googleMapsLink.rel = "noopener noreferrer";
+  googleMapsLink.setAttribute("aria-label", `${spa.name}をGoogleマップで開く`);
+  appendIcon(googleMapsLink, "prototype-icon--map");
+  appendText(googleMapsLink, "span", "Google マップ");
+
+  const officialLink = document.createElement("a");
+  officialLink.className = "prototype-place-action";
+  officialLink.href = spa.officialUrl;
+  officialLink.target = "_blank";
+  officialLink.rel = "noopener noreferrer";
+  officialLink.setAttribute("aria-label", `${spa.name}の公式サイトを開く`);
+  appendIcon(officialLink, "prototype-icon--external");
+  appendText(officialLink, "span", "公式サイト");
+
+  actions.append(googleMapsLink, officialLink);
+  body.append(actions);
+
+  card.append(body);
+  return card;
+};
+
+const initPrototypeMap = () => {
+  const mapElement = document.querySelector<HTMLElement>(
+    "#prototype-map-canvas",
+  );
+  if (!mapElement || mapElement.dataset.ready === "true") return;
   mapElement.dataset.ready = "true";
 
-  const chips = Array.from(
-    document.querySelectorAll<HTMLButtonElement>("[data-city-filter]"),
-  );
-  const cityFilterList = document.querySelector<HTMLElement>(
-    "[data-city-filter-list]",
-  );
-  const cityFilterScrollButtons = Array.from(
-    document.querySelectorAll<HTMLButtonElement>("[data-city-filter-scroll]"),
-  );
-  const listElement = document.querySelector<HTMLElement>("[data-spa-list]");
-  const panelElement = document.querySelector<HTMLElement>("[data-map-panel]");
-  const shellElement = document.querySelector<HTMLElement>(".map-shell");
   const spas: Spa[] = JSON.parse(mapElement.dataset.spas ?? "[]");
-  const markers = new Map<string, L.Marker>();
-  const hoverTooltipQuery = window.matchMedia(
-    "(hover: hover) and (pointer: fine)",
+  const cityButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-prototype-city]"),
   );
-  const mobileInitialViewQuery = window.matchMedia("(max-width: 900px)");
+  const featureButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-prototype-feature]"),
+  );
+  const statusElement = document.querySelector<HTMLElement>(
+    "[data-prototype-status]",
+  );
+  const clearButton = document.querySelector<HTMLButtonElement>(
+    "[data-prototype-clear]",
+  );
+  const panelElement = document.querySelector<HTMLElement>(
+    "[data-prototype-panel]",
+  );
+  const cardHost = document.querySelector<HTMLElement>("[data-prototype-card]");
+  const gripButton = document.querySelector<HTMLButtonElement>(
+    "[data-prototype-grip]",
+  );
+
+  const markers = new Map<string, L.Marker>();
   let activeCity = "all";
-  let currentLocation: Coordinates | undefined;
-  let currentLocationMarker: L.CircleMarker | undefined;
-  let locateButton: HTMLAnchorElement | undefined;
-  let selectedSpaId: string | undefined;
+  let activeFeatureIds = new Set<FeatureFilterId>();
+  let selectedSpaId = "";
+  let suppressGripClick = false;
 
-  const updateCityFilterScrollButtons = () => {
-    if (!cityFilterList || cityFilterScrollButtons.length === 0) return;
+  const getCityFromUrl = (searchParams: URLSearchParams) => {
+    const citySlug = searchParams.get("city");
+    if (!citySlug) return "all";
 
-    const maxScrollLeft =
-      cityFilterList.scrollWidth - cityFilterList.clientWidth;
-    const canScroll = maxScrollLeft > 1;
-    const atStart = cityFilterList.scrollLeft <= 1;
-    const atEnd = cityFilterList.scrollLeft >= maxScrollLeft - 1;
-
-    cityFilterScrollButtons.forEach((button) => {
-      const direction = button.dataset.cityFilterScroll;
-      button.disabled =
-        !canScroll ||
-        (direction === "prev" && atStart) ||
-        (direction === "next" && atEnd);
-    });
+    const city = getCityFromSlug(citySlug) ?? citySlug;
+    return cityButtons.some((button) => button.dataset.prototypeCity === city)
+      ? city
+      : "all";
   };
 
-  cityFilterScrollButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      if (!cityFilterList) return;
+  const syncStateFromUrl = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    activeCity = getCityFromUrl(searchParams);
+    activeFeatureIds = new Set(getFeatureIdsFromSearchParams(searchParams));
+  };
 
-      const direction = button.dataset.cityFilterScroll === "prev" ? -1 : 1;
-      cityFilterList.scrollBy({
-        left: direction * cityFilterList.clientWidth * 0.72,
-        behavior: "smooth",
-      });
-    });
-  });
+  const updateUrl = () => {
+    const url = new URL(window.location.href);
 
-  cityFilterList?.addEventListener("scroll", updateCityFilterScrollButtons, {
-    passive: true,
-  });
-  window.addEventListener("resize", updateCityFilterScrollButtons);
+    if (activeCity === "all") {
+      url.searchParams.delete("city");
+    } else {
+      url.searchParams.set("city", getCitySlug(activeCity));
+    }
+
+    if (activeFeatureIds.size === 0) {
+      url.searchParams.delete("features");
+    } else {
+      url.searchParams.set("features", [...activeFeatureIds].join(","));
+    }
+    url.searchParams.delete("tags");
+
+    window.history.replaceState({}, "", url);
+  };
 
   const map = L.map(mapElement, {
     zoomControl: false,
     preferCanvas: true,
   });
 
-  L.tileLayer("https://tile.mierune.co.jp/mierune/{z}/{x}/{y}@2x.png", {
-    maxZoom: 18,
-    attribution:
-      '<a href="https://mierune.co.jp" target="_blank" rel="noopener noreferrer">MIERUNE Inc.</a> ' +
-      '<a href="https://www.openmaptiles.org/" target="_blank" rel="noopener noreferrer">&copy; OpenMapTiles</a> ' +
-      '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">&copy; OpenStreetMap contributors</a>',
-    className: "map-tile map-tile--soft",
-  }).addTo(map);
+  L.tileLayer(
+    "https://tile.openstreetmap.jp/styles/osm-bright-ja/{z}/{x}/{y}.png",
+    {
+      maxZoom: 18,
+      attribution:
+        '<a href="https://www.openmaptiles.org/" target="_blank" rel="noopener noreferrer">&copy; OpenMapTiles</a> ' +
+        '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">&copy; OpenStreetMap contributors</a>',
+      className: "prototype-map-tile",
+      detectRetina: true,
+    },
+  ).addTo(map);
 
   L.control.zoom({ position: "bottomright" }).addTo(map);
 
-  const locateControl = L.Control.extend({
-    options: {
-      position: "bottomright",
-    },
-
-    onAdd(controlMap: L.Map) {
-      const container = L.DomUtil.create(
-        "div",
-        "leaflet-control-locate leaflet-bar leaflet-control",
-      );
-      const button = L.DomUtil.create("a", "", container);
-      button.href = "#";
-      button.title = "現在地を表示";
-      button.role = "button";
-      button.setAttribute("aria-label", "現在地を表示");
-      button.setAttribute("aria-disabled", "false");
-      button.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
-        </svg>
-      `;
-
-      L.DomEvent.disableClickPropagation(container);
-      L.DomEvent.on(button, "click", (event) => {
-        L.DomEvent.preventDefault(event);
-        if (button.getAttribute("aria-disabled") === "true") return;
-
-        locateButton = button;
-        locateButton.setAttribute("aria-disabled", "true");
-
-        controlMap.locate({
-          enableHighAccuracy: false,
-          timeout: 8000,
-          maximumAge: 300000,
-          setView: false,
-        });
-      });
-
-      locateButton = button;
-      return container;
-    },
-  });
-
-  map.addControl(new locateControl());
-
   const getVisibleSpas = () =>
-    spas.filter((spa) => activeCity === "all" || spa.city === activeCity);
+    spas.filter(
+      (spa) =>
+        (activeCity === "all" || spa.city === activeCity) &&
+        spaMatchesFeatureFilters(spa, activeFeatureIds),
+    );
 
-  const getInitialMaxZoom = () =>
-    mobileInitialViewQuery.matches
-      ? MOBILE_MAX_INITIAL_MAP_ZOOM
-      : DESKTOP_MAX_INITIAL_MAP_ZOOM;
-
-  const fitVisibleMarkers = (maxZoom = FILTER_MAX_MAP_ZOOM) => {
+  const fitVisibleMarkers = (maxZoom = FILTER_MAX_ZOOM) => {
     const visibleMarkers = getVisibleSpas()
       .map((spa) => markers.get(spa.id))
       .filter((marker): marker is L.Marker => Boolean(marker));
@@ -163,169 +273,81 @@ const initMapPage = () => {
     map.fitBounds(bounds, { animate: false, maxZoom });
   };
 
-  const openPanel = () => {
-    if (!panelElement) return;
+  const updateMarkerSelection = () => {
+    markers.forEach((marker, id) => {
+      const isSelected = id === selectedSpaId;
+      marker.setZIndexOffset(isSelected ? 1000 : 0);
+      marker.getElement()?.classList.toggle("is-selected", isSelected);
+    });
+  };
 
-    panelElement.classList.add("is-open");
-    panelElement.removeAttribute("aria-hidden");
-    shellElement?.classList.add("is-panel-open");
-    panelElement.dispatchEvent(new CustomEvent("spa-panel-open"));
+  const updateResultCopy = (visibleSpas = getVisibleSpas()) => {
+    if (statusElement) {
+      statusElement.textContent = `${visibleSpas.length}件`;
+    }
+  };
+
+  const openPanel = () => {
+    if (panelElement) panelElement.style.transform = "";
+    panelElement?.classList.add("is-open");
+    panelElement?.removeAttribute("aria-hidden");
   };
 
   const closePanel = () => {
-    if (!panelElement) return;
-
-    selectedSpaId = undefined;
-    panelElement.classList.remove("is-open");
-    panelElement.setAttribute("aria-hidden", "true");
-    panelElement.setAttribute("aria-expanded", "false");
-    shellElement?.classList.remove("is-panel-open");
-    listElement?.replaceChildren();
+    if (panelElement) {
+      panelElement.style.transform = "";
+      if (panelElement.contains(document.activeElement)) {
+        (document.activeElement as HTMLElement | null)?.blur();
+      }
+    }
+    panelElement?.classList.remove("is-open");
+    panelElement?.setAttribute("aria-hidden", "true");
   };
 
-  panelElement?.addEventListener("spa-panel-close", closePanel);
-
-  const appendTextElement = (
-    parent: HTMLElement,
-    tagName: keyof HTMLElementTagNameMap,
-    text: string,
-    className?: string,
-  ) => {
-    const element = document.createElement(tagName);
-    element.textContent = text;
-    if (className) element.className = className;
-    parent.append(element);
-    return element;
-  };
-
-  const createSelectedCard = (spa: Spa) => {
-    const card = document.createElement("article");
-    card.className = "spa-card";
-    card.dataset.spaCard = spa.id;
-    card.dataset.selected = "";
-
-    const main = document.createElement("div");
-    main.className = "spa-card-main";
-
-    const meta = document.createElement("p");
-    meta.className = "spa-meta";
-    appendTextElement(meta, "span", spa.city);
-    if (spa.area) appendTextElement(meta, "span", spa.area);
-    if (currentLocation) {
-      appendTextElement(
-        meta,
-        "span",
-        formatDistance(getDistanceInMeters(currentLocation, spa)),
-      );
-    }
-
-    appendTextElement(main, "h2", spa.name);
-    main.prepend(meta);
-
-    if (spa.notes) appendTextElement(main, "p", spa.notes, "spa-summary");
-
-    const details = document.createElement("div");
-    details.className = "spa-detail-list";
-
-    const addressRow = document.createElement("div");
-    addressRow.className = "spa-detail-row";
-    appendTextElement(addressRow, "span", "住所", "spa-detail-label");
-    const address = appendTextElement(addressRow, "address", spa.address);
-    address.setAttribute("translate", "no");
-    details.append(addressRow);
-
-    const tagGroups = getSpaTagGroups(spa);
-    if (tagGroups.length > 0) {
-      const featureRow = document.createElement("div");
-      featureRow.className = "spa-detail-row";
-      appendTextElement(featureRow, "span", "特徴", "spa-detail-label");
-      const tagGroupList = document.createElement("div");
-      tagGroupList.className = "tag-groups";
-      tagGroupList.setAttribute("role", "group");
-      tagGroupList.setAttribute("aria-label", `${spa.name}の特徴`);
-      tagGroups.forEach((group) => {
-        const tagGroup = document.createElement("div");
-        tagGroup.className = "tag-group";
-        appendTextElement(tagGroup, "span", group.label, "tag-group-label");
-        const tagList = document.createElement("ul");
-        tagList.className = "tag-list";
-        group.tags.forEach((tag) => appendTextElement(tagList, "li", tag));
-        tagGroup.append(tagList);
-        tagGroupList.append(tagGroup);
-      });
-      featureRow.append(tagGroupList);
-      details.append(featureRow);
-    }
-
-    const actions = document.createElement("div");
-    actions.className = "spa-actions";
-
-    const googleMapsLink = document.createElement("a");
-    googleMapsLink.className = "external-link primary-link";
-    googleMapsLink.href = spa.googleMapsUrl;
-    googleMapsLink.target = "_blank";
-    googleMapsLink.rel = "noopener noreferrer";
-    googleMapsLink.textContent = "Google マップ";
-
-    const officialLink = document.createElement("a");
-    officialLink.className = "external-link";
-    officialLink.href = spa.officialUrl;
-    officialLink.target = "_blank";
-    officialLink.rel = "noopener noreferrer";
-    officialLink.textContent = "公式サイト";
-
-    actions.append(googleMapsLink, officialLink);
-    main.append(details);
-    card.append(main, actions);
-    return card;
+  const clearSelection = () => {
+    selectedSpaId = "";
+    cardHost?.replaceChildren();
+    closePanel();
+    panelElement?.classList.remove("has-selection");
+    updateMarkerSelection();
+    updateResultCopy();
   };
 
   const selectSpa = (spaId: string) => {
     const spa = spas.find((item) => item.id === spaId);
-    if (!spa || !listElement) return;
+    if (!spa || !cardHost) return;
 
-    listElement.replaceChildren(createSelectedCard(spa));
-    selectedSpaId = spaId;
+    selectedSpaId = spa.id;
+    panelElement?.classList.add("has-selection");
+    cardHost.replaceChildren(createSelectedCard(spa));
+    updateMarkerSelection();
+    updateResultCopy();
     openPanel();
   };
 
-  if (spas.length > 0) {
-    const bounds = L.latLngBounds(
-      spas.map((spa) => [spa.lat, spa.lng] as L.LatLngTuple),
-    ).pad(0.22);
-    map.fitBounds(bounds, { animate: false, maxZoom: getInitialMaxZoom() });
-  } else {
-    map.setView([TOKATSU_CENTER.lat, TOKATSU_CENTER.lng], INITIAL_MAP_ZOOM);
-  }
-
-  spas.forEach((spa) => {
-    const marker = L.marker([spa.lat, spa.lng], {
-      icon: pinIcon,
-      title: spa.name,
-    }).addTo(map);
-
-    marker.bindTooltip(
-      `<strong>${spa.name}</strong><br><span>${spa.city}${spa.area ? ` / ${spa.area}` : ""}</span>`,
-      {
-        className: "spa-marker-tooltip",
-        direction: "top",
-        offset: [0, -42],
-        opacity: 1,
-      },
-    );
-    marker.on("mouseover", () => {
-      if (hoverTooltipQuery.matches) marker.openTooltip();
+  const updateFilterUi = () => {
+    cityButtons.forEach((button) => {
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset.prototypeCity === activeCity),
+      );
     });
-    marker.on("mouseout", () => marker.closeTooltip());
-    marker.on("focus", () => {
-      if (hoverTooltipQuery.matches) marker.openTooltip();
-    });
-    marker.on("blur", () => marker.closeTooltip());
-    marker.on("click", () => selectSpa(spa.id));
-    markers.set(spa.id, marker);
-  });
 
-  const applyFilter = (maxZoom = FILTER_MAX_MAP_ZOOM) => {
+    featureButtons.forEach((button) => {
+      const id = button.dataset.prototypeFeature;
+      button.setAttribute(
+        "aria-pressed",
+        String(Boolean(id && activeFeatureIds.has(id as FeatureFilterId))),
+      );
+    });
+
+    const visibleSpas = getVisibleSpas();
+    const hasActiveFilters = activeCity !== "all" || activeFeatureIds.size > 0;
+    updateResultCopy(visibleSpas);
+    if (clearButton) clearButton.hidden = !hasActiveFilters;
+  };
+
+  const applyFilters = (shouldUpdateUrl = true) => {
     const visibleIds = new Set(getVisibleSpas().map((spa) => spa.id));
 
     markers.forEach((marker, id) => {
@@ -336,57 +358,149 @@ const initMapPage = () => {
       }
     });
 
-    chips.forEach((chip) => {
-      const selected = chip.dataset.cityFilter === activeCity;
-      chip.setAttribute("aria-pressed", String(selected));
-    });
+    updateFilterUi();
+    fitVisibleMarkers();
 
-    if (!selectedSpaId || !visibleIds.has(selectedSpaId)) {
-      closePanel();
-    } else {
+    if (selectedSpaId && visibleIds.has(selectedSpaId)) {
       selectSpa(selectedSpaId);
+    } else {
+      clearSelection();
     }
-    fitVisibleMarkers(maxZoom);
+    if (shouldUpdateUrl) updateUrl();
   };
 
-  chips.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      activeCity = chip.dataset.cityFilter ?? "all";
-      applyFilter();
+  map.setView(
+    spas.length > 0
+      ? [PROTOTYPE_INITIAL_CENTER.lat, PROTOTYPE_INITIAL_CENTER.lng]
+      : [TOKATSU_CENTER.lat, TOKATSU_CENTER.lng],
+    spas.length > 0 ? PROTOTYPE_INITIAL_ZOOM : INITIAL_ZOOM,
+  );
+
+  spas.forEach((spa) => {
+    const marker = L.marker([spa.lat, spa.lng], {
+      icon: pinIcon,
+      title: spa.name,
+    }).addTo(map);
+
+    marker.on("click", () => selectSpa(spa.id));
+    marker.bindTooltip(spa.name, {
+      direction: "top",
+      offset: [0, -38],
+      opacity: 1,
+    });
+    markers.set(spa.id, marker);
+  });
+
+  cityButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      activeCity = button.dataset.prototypeCity ?? "all";
+      applyFilters();
     });
   });
 
-  map.on("locationfound", (event) => {
-    currentLocation = {
-      lat: event.latlng.lat,
-      lng: event.latlng.lng,
+  featureButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.prototypeFeature;
+      if (!id || !isFeatureFilterId(id)) return;
+
+      if (activeFeatureIds.has(id)) {
+        activeFeatureIds.delete(id);
+      } else {
+        activeFeatureIds.add(id);
+      }
+      applyFilters();
+    });
+  });
+
+  clearButton?.addEventListener("click", () => {
+    activeCity = "all";
+    activeFeatureIds = new Set();
+    applyFilters();
+  });
+
+  window.addEventListener("popstate", () => {
+    syncStateFromUrl();
+    applyFilters(false);
+  });
+
+  gripButton?.addEventListener("pointerdown", (event) => {
+    if (!panelElement?.classList.contains("is-open")) return;
+
+    const pointerId = event.pointerId;
+    const panelHeight = panelElement.getBoundingClientRect().height;
+    const dismissDistance = Math.min(110, panelHeight * 0.38);
+    const startY = event.clientY;
+    let currentY = event.clientY;
+    let previousY = event.clientY;
+    let previousTime = event.timeStamp;
+    let velocityY = 0;
+    let didDrag = false;
+
+    panelElement.classList.add("is-dragging");
+    gripButton.setPointerCapture(pointerId);
+
+    const stopDrag = () => {
+      panelElement.classList.remove("is-dragging");
+      gripButton.releasePointerCapture(pointerId);
+      gripButton.removeEventListener("pointermove", handleMove);
+      gripButton.removeEventListener("pointerup", handleEnd);
+      gripButton.removeEventListener("pointercancel", handleCancel);
     };
-    currentLocationMarker?.remove();
-    currentLocationMarker = L.circleMarker(
-      [currentLocation.lat, currentLocation.lng],
-      {
-        radius: 8,
-        color: "#401306",
-        fillColor: "#ff7442",
-        fillOpacity: 0.85,
-        weight: 3,
-      },
-    )
-      .bindPopup("現在地")
-      .addTo(map);
-    map.setView([currentLocation.lat, currentLocation.lng], 12);
+
+    const handleMove = (moveEvent: PointerEvent) => {
+      currentY = moveEvent.clientY;
+      const dragY = Math.max(0, currentY - startY);
+      const elapsed = Math.max(1, moveEvent.timeStamp - previousTime);
+      velocityY = (currentY - previousY) / elapsed;
+      previousY = currentY;
+      previousTime = moveEvent.timeStamp;
+
+      if (dragY > 4) didDrag = true;
+      panelElement.style.transform = `translateY(${dragY}px)`;
+    };
+
+    const handleEnd = () => {
+      const dragY = Math.max(0, currentY - startY);
+      const shouldDismiss = dragY >= dismissDistance || velocityY > 0.55;
+      suppressGripClick = didDrag;
+      stopDrag();
+
+      if (shouldDismiss) {
+        closePanel();
+        return;
+      }
+
+      panelElement.style.transform = "";
+    };
+
+    const handleCancel = () => {
+      suppressGripClick = didDrag;
+      stopDrag();
+      panelElement.style.transform = "";
+    };
+
+    gripButton.addEventListener("pointermove", handleMove);
+    gripButton.addEventListener("pointerup", handleEnd);
+    gripButton.addEventListener("pointercancel", handleCancel);
+  });
+
+  gripButton?.addEventListener("click", () => {
+    if (suppressGripClick) {
+      suppressGripClick = false;
+      return;
+    }
+
+    if (panelElement?.classList.contains("is-open")) {
+      closePanel();
+      return;
+    }
     if (selectedSpaId) selectSpa(selectedSpaId);
-    locateButton?.setAttribute("aria-disabled", "false");
   });
 
-  map.on("locationerror", () => {
-    locateButton?.setAttribute("aria-disabled", "false");
-  });
-
-  closePanel();
-  applyFilter(getInitialMaxZoom());
-  updateCityFilterScrollButtons();
+  syncStateFromUrl();
+  applyFilters(false);
+  clearSelection();
 };
 
-document.addEventListener("astro:page-load", initMapPage);
-initMapPage();
+document.addEventListener("astro:page-load", initPrototypeMap);
+initPrototypeMap();
