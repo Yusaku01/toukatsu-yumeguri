@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import { defineConfig } from "eslint/config";
 import astro from "eslint-plugin-astro";
 import globals from "globals";
 import path from "node:path";
@@ -50,7 +51,7 @@ const localRules = {
   },
 };
 
-export default tseslint.config(
+export default defineConfig(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...astro.configs.recommended,
