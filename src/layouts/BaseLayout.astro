@@ -20,7 +20,10 @@ const title = Astro.props.title
   ? `${Astro.props.title} | ${siteName}`
   : siteName;
 const bodyClass = Astro.props.bodyClass ?? "";
-const analyticsToken = import.meta.env.PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN;
+const analyticsToken =
+  import.meta.env.PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN ||
+  "3940c661deaf4736a407f50c4a35c0e5";
+const analyticsConfig = JSON.stringify({ token: analyticsToken });
 const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? Astro.site?.toString();
 const ogImage = siteUrl ? new URL("/ogp.png", siteUrl).toString() : "/ogp.png";
 const ogUrl = siteUrl
@@ -68,18 +71,14 @@ const jsonLd = Astro.props.jsonLd
     }
     <ClientRouter fallback="animate" />
     <slot name="head" />
-    {
-      analyticsToken && (
-        <script
-          defer
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon={`{"token":"${analyticsToken}"}`}
-        />
-      )
-    }
   </head>
   <body class={bodyClass}>
     <a href="#content" class="skip-link">本文へ移動</a>
     <slot />
+    <script
+      is:inline
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={analyticsConfig}></script>
   </body>
 </html>
