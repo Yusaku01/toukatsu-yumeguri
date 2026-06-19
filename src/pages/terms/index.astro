@@ -14,7 +14,12 @@ const pageDescription =
 >
   <main id="content" class="prototype-terms" tabindex="-1">
     <header class="prototype-header" aria-label="サイトナビゲーション">
-      <a class="prototype-brand" href="/" aria-label="東葛湯めぐりマップ">
+      <a
+        class="prototype-brand"
+        href="/"
+        aria-label="東葛湯めぐりマップ"
+        data-astro-reload
+      >
         <span class="prototype-brand-pin-shell" aria-hidden="true">
           <span class="prototype-brand-pin"></span>
         </span>
@@ -27,7 +32,7 @@ const pageDescription =
           <span>MENU</span>
         </summary>
         <nav aria-label="サイトメニュー">
-          <a href="/">地図</a>
+          <a href="/" data-astro-reload>地図</a>
           <a href="/list/">一覧</a>
           <a href="/terms/" aria-current="page">利用規約</a>
         </nav>
@@ -65,7 +70,8 @@ const pageDescription =
           <div>
             <h2>アクセス解析</h2>
             <p>
-              Cloudflare Web Analyticsを利用しております。Cookieを使わず、個人を直接識別する情報の収集を目的としません。
+              Cloudflare Web
+              Analyticsを利用しております。Cookieを使わず、個人を直接識別する情報の収集を目的としません。
             </p>
           </div>
         </section>

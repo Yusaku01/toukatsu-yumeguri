@@ -42,7 +42,12 @@ const structuredData = {
 >
   <main id="content" class="prototype-list" tabindex="-1" data-prototype-list>
     <header class="prototype-header" aria-label="サイトナビゲーション">
-      <a class="prototype-brand" href="/" aria-label="東葛湯めぐりマップ">
+      <a
+        class="prototype-brand"
+        href="/"
+        aria-label="東葛湯めぐりマップ"
+        data-astro-reload
+      >
         <span class="prototype-brand-pin-shell" aria-hidden="true">
           <span class="prototype-brand-pin"></span>
         </span>
@@ -55,7 +60,7 @@ const structuredData = {
           <span>MENU</span>
         </summary>
         <nav aria-label="サイトメニュー">
-          <a href="/">地図</a>
+          <a href="/" data-astro-reload>地図</a>
           <a href="/list/" aria-current="page">一覧</a>
           <a href="/terms/">利用規約</a>
         </nav>
