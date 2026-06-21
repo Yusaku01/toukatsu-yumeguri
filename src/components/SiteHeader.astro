@@ -1,6 +1,6 @@
 ---
 type Props = {
-  current?: "map" | "list" | "terms";
+  current?: "map" | "list" | "my" | "terms";
 };
 
 const current = Astro.props.current ?? "map";
@@ -32,6 +32,9 @@ const mapReload = current === "map" ? undefined : true;
       >
       <a href="/list/" aria-current={current === "list" ? "page" : undefined}
         >一覧</a
+      >
+      <a href="/my/" aria-current={current === "my" ? "page" : undefined}
+        >マイページ</a
       >
       <a href="/terms/" aria-current={current === "terms" ? "page" : undefined}
         >利用規約</a

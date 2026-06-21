@@ -1,0 +1,219 @@
+---
+type Props = {
+  variant: "map" | "my";
+  ariaLabel: string;
+  gripLabel: string;
+};
+
+const { variant, ariaLabel, gripLabel } = Astro.props;
+const isMap = variant === "map";
+const sheetClass = isMap ? "prototype-place-sheet" : "prototype-my-sheet";
+const gripClass = isMap ? "prototype-grip" : "prototype-my-sheet-grip";
+const hostAttributes = isMap
+  ? { "data-prototype-card": "" }
+  : { "data-yumeguri-my-sheet-card": "" };
+const gripAttributes = isMap
+  ? { "data-prototype-grip": "" }
+  : { "data-yumeguri-my-sheet-grip": "" };
+const sheetAttributes = isMap
+  ? { "data-prototype-panel": "" }
+  : { "data-yumeguri-my-sheet": "", tabindex: "-1" };
+---
+
+{
+  !isMap && (
+    <div
+      class="prototype-my-sheet-backdrop"
+      data-yumeguri-my-sheet-backdrop
+      hidden
+    />
+  )
+}
+<aside
+  class={sheetClass}
+  aria-label={ariaLabel}
+  aria-hidden="true"
+  data-place-sheet={variant}
+  {...sheetAttributes}
+>
+  {
+    isMap ? (
+      <button
+        class={gripClass}
+        type="button"
+        aria-label={gripLabel}
+        data-place-sheet-grip
+        {...gripAttributes}
+      >
+        <span aria-hidden="true" />
+      </button>
+    ) : (
+      <div class={`${sheetClass}-head`}>
+        <button
+          class={gripClass}
+          type="button"
+          aria-label={gripLabel}
+          data-place-sheet-grip
+          {...gripAttributes}
+        >
+          <span aria-hidden="true" />
+        </button>
+      </div>
+    )
+  }
+  <div class="prototype-card-host" {...hostAttributes}></div>
+</aside>
+
+<style is:global>
+  .prototype-place-sheet {
+    position: absolute;
+    z-index: 880;
+    inset-inline: 0;
+    inset-block-end: env(safe-area-inset-bottom);
+    display: grid;
+    grid-template-rows: auto auto;
+    align-content: start;
+    block-size: auto;
+    max-block-size: min(90svh, calc(100svh - 0.5rem));
+    padding: 0 0.84rem 1.45rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--prototype-paper-solid);
+    border: 1px solid rgb(80 45 28 / 10%);
+    border-block-end: 0;
+    border-start-start-radius: 1.52rem;
+    border-start-end-radius: 1.52rem;
+    translate: 0 calc(100% - 0.3rem);
+    transition: translate 240ms var(--prototype-ease);
+  }
+
+  .prototype-place-sheet:not(.has-selection) {
+    visibility: hidden;
+    pointer-events: none;
+    translate: 0 100%;
+  }
+
+  .prototype-place-sheet.is-open {
+    translate: 0 0;
+  }
+
+  .prototype-place-sheet.is-dragging,
+  .prototype-my-sheet.is-dragging {
+    transition: none;
+  }
+
+  .prototype-grip {
+    touch-action: none;
+    display: grid;
+    inline-size: 100%;
+    min-block-size: 1.85rem;
+    padding: 0;
+    place-items: center;
+    background: transparent;
+    border: 0;
+  }
+
+  .prototype-grip span,
+  .prototype-my-sheet-grip > span {
+    display: block;
+    inline-size: 2.15rem;
+    block-size: 0.24rem;
+    background: rgb(80 45 28 / 46%);
+    border-radius: 999px;
+  }
+
+  .prototype-card-host {
+    inline-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+    container: inline-size / place-card;
+  }
+
+  .prototype-my-sheet-backdrop {
+    position: fixed;
+    z-index: 870;
+    inset: 0;
+    background: rgb(46 24 14 / 22%);
+    backdrop-filter: blur(2px);
+  }
+
+  .prototype-my-sheet-backdrop[hidden] {
+    display: none;
+  }
+
+  .prototype-my-sheet {
+    position: fixed;
+    z-index: 880;
+    inset-inline-start: 50%;
+    inset-block-end: env(safe-area-inset-bottom);
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    inline-size: min(100dvw, 520px);
+    max-block-size: min(88svh, calc(100svh - 0.75rem));
+    padding: 0 0.84rem 1.45rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: #fffaf7;
+    border: 1px solid rgb(80 45 28 / 10%);
+    border-block-end: 0;
+    border-start-start-radius: 1.52rem;
+    border-start-end-radius: 1.52rem;
+    box-shadow: 0 -1.1rem 2.6rem rgb(80 45 28 / 14%);
+    opacity: 0;
+    pointer-events: none;
+    translate: -50% 100%;
+    transition:
+      opacity 180ms var(--prototype-ease),
+      translate 240ms var(--prototype-ease);
+  }
+
+  .prototype-my-sheet.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    translate: -50% 0;
+  }
+
+  .prototype-my-sheet:focus {
+    outline: none;
+  }
+
+  .prototype-my-sheet-head {
+    position: sticky;
+    z-index: 1;
+    inset-block-start: 0;
+    display: grid;
+    place-items: center;
+    min-block-size: 2.45rem;
+    background: linear-gradient(180deg, #fffaf7 78%, rgb(255 250 247 / 0));
+  }
+
+  .prototype-my-sheet-grip {
+    touch-action: none;
+    display: grid;
+    inline-size: 100%;
+    min-block-size: 2.45rem;
+    padding: 0;
+    place-items: center;
+    cursor: grab;
+    background: transparent;
+    border: 0;
+  }
+
+  .prototype-my-sheet.is-dragging .prototype-my-sheet-grip {
+    cursor: grabbing;
+  }
+
+  .prototype-grip:focus-visible,
+  .prototype-my-sheet-grip:focus-visible {
+    outline: 3px solid rgb(15 110 166 / 36%);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prototype-place-sheet,
+    .prototype-my-sheet {
+      transition-duration: 0.01ms;
+    }
+  }
+</style>

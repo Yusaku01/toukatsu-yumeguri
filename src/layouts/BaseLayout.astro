@@ -1,6 +1,7 @@
 ---
 import { Font } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
+import StampPressOverlay from "../components/StampPressOverlay.astro";
 import "../styles/global.css";
 
 type Props = {
@@ -61,6 +62,8 @@ const jsonLd = Astro.props.jsonLd
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <Font cssVariable="--font-sans" />
@@ -75,6 +78,7 @@ const jsonLd = Astro.props.jsonLd
   <body class={bodyClass}>
     <a href="#content" class="skip-link">本文へ移動</a>
     <slot />
+    <StampPressOverlay />
     <script
       is:inline
       defer

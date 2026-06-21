@@ -1,0 +1,173 @@
+---
+type Props = {
+  spaId: string;
+  mainText?: string;
+  subText?: string;
+  dateText?: string;
+  position?: "card" | "sheet" | "title" | "overlay";
+  hidden?: boolean;
+};
+
+const {
+  spaId,
+  mainText = "湯巡り済み",
+  subText = "東葛湯巡り",
+  dateText = "",
+  position = "card",
+  hidden = true,
+} = Astro.props;
+const isReviewTrigger = position === "title";
+const RootTag = isReviewTrigger ? "button" : "span";
+const hiddenState = hidden ? "true" : "false";
+---
+
+<RootTag
+  class:list={["prototype-stamp-mark", `prototype-stamp-mark--${position}`]}
+  data-yumeguri-stamp
+  data-yumeguri-stamp-review={isReviewTrigger ? "" : undefined}
+  data-spa-id={spaId}
+  data-stamp-main={mainText}
+  data-stamp-sub={subText}
+  data-stamp-position={position}
+  type={isReviewTrigger ? "button" : undefined}
+  hidden={hidden}
+  aria-hidden={hiddenState}
+  aria-label={isReviewTrigger ? `${mainText}スタンプを拡大表示` : undefined}
+>
+  <svg class="prototype-stamp-steam" viewBox="0 0 80 90" aria-hidden="true">
+    <path
+      d="M24 80c20-16-10-22 6-40 8-9 4-17-2-26"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="7"
+      stroke-linecap="round"></path>
+    <path
+      d="M48 82c16-15-6-24 8-40 7-8 3-15-3-25"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="6"
+      stroke-linecap="round"></path>
+  </svg>
+  <svg
+    class="prototype-stamp-svg"
+    viewBox="0 0 160 160"
+    role="img"
+    aria-label={`${mainText}スタンプ`}
+  >
+    <defs>
+      <filter
+        id={`stamp-roughen-${spaId}-${position}`}
+        x="-12%"
+        y="-12%"
+        width="124%"
+        height="124%"
+      >
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.064"
+          numOctaves="4"
+          seed="7"
+          result="noise"></feTurbulence>
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="noise"
+          scale="2.25"
+          xChannelSelector="R"
+          yChannelSelector="G"></feDisplacementMap>
+      </filter>
+      <mask
+        id={`stamp-distress-${spaId}-${position}`}
+        maskUnits="userSpaceOnUse"
+        x="0"
+        y="0"
+        width="160"
+        height="160"
+        mask-type="luminance"
+      >
+        <rect width="160" height="160" fill="white"></rect>
+        <g fill="black" stroke="black" stroke-linecap="round">
+          <ellipse cx="37" cy="37" rx="5.8" ry="2.8" opacity="0.92"></ellipse>
+          <ellipse cx="56" cy="47" rx="3.4" ry="1.8" opacity="0.86"></ellipse>
+          <ellipse cx="101" cy="38" rx="6.6" ry="2.5" opacity="0.86"></ellipse>
+          <ellipse cx="119" cy="59" rx="4.2" ry="2" opacity="0.88"></ellipse>
+          <ellipse cx="36" cy="83" rx="4.6" ry="2.2" opacity="0.9"></ellipse>
+          <ellipse cx="62" cy="70" rx="3.5" ry="1.8" opacity="0.8"></ellipse>
+          <ellipse cx="86" cy="73" rx="4.5" ry="2" opacity="0.74"></ellipse>
+          <ellipse cx="96" cy="91" rx="6.4" ry="2.4" opacity="0.9"></ellipse>
+          <ellipse cx="121" cy="102" rx="7.2" ry="2.8" opacity="0.92"></ellipse>
+          <ellipse cx="42" cy="108" rx="4.8" ry="2.1" opacity="0.84"></ellipse>
+          <ellipse cx="50" cy="119" rx="7.2" ry="2.8" opacity="0.94"></ellipse>
+          <ellipse cx="84" cy="124" rx="3.8" ry="1.9" opacity="0.86"></ellipse>
+          <ellipse cx="109" cy="132" rx="6.2" ry="2.7" opacity="0.92"></ellipse>
+          <ellipse cx="130" cy="80" rx="3.2" ry="1.5" opacity="0.82"></ellipse>
+          <path
+            d="M28 57c12 3 22-4 34 0M91 54c18-4 28 5 41 1M37 101c22-3 36 5 54 1M65 112c18-5 35 3 51-1"
+            fill="none"
+            stroke-width="3.4"
+            opacity="0.66"></path>
+          <path
+            d="M27 134c22 5 39-6 59-1M80 30c22 5 35-4 51 1M45 78c17 4 35-4 52 0"
+            fill="none"
+            stroke-width="2.4"
+            opacity="0.68"></path>
+        </g>
+      </mask>
+    </defs>
+    <g
+      class="prototype-stamp-ink"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      filter={`url(#stamp-roughen-${spaId}-${position})`}
+      mask={`url(#stamp-distress-${spaId}-${position})`}
+    >
+      <circle cx="80" cy="80" r="71" stroke-width="6.5"></circle>
+      <circle cx="80" cy="80" r="61" stroke-width="2.4" opacity="0.76"></circle>
+      <circle
+        class="prototype-stamp-fill"
+        cx="80"
+        cy="80"
+        r="56"
+        fill="currentColor"
+        stroke="none"></circle>
+      <image
+        class="prototype-stamp-watermark"
+        href="/stamp-watermark.svg"
+        x="48"
+        y="35"
+        width="64"
+        height="79"
+        opacity="0.28"
+        preserveAspectRatio="xMidYMid meet"
+      />
+      <text
+        class="prototype-stamp-date"
+        x="80"
+        y="63"
+        fill="#fffaf4"
+        stroke="none"
+        text-anchor="middle"
+        data-yumeguri-stamp-date>{dateText}</text
+      >
+      <text
+        class="prototype-stamp-main"
+        x="80"
+        y="92"
+        fill="#fffaf4"
+        stroke="none"
+        text-anchor="middle"
+        data-yumeguri-stamp-main>{mainText}</text
+      >
+      <text
+        class="prototype-stamp-sub"
+        x="80"
+        y="113"
+        fill="#fffaf4"
+        stroke="none"
+        text-anchor="middle"
+        data-yumeguri-stamp-sub>{subText}</text
+      >
+    </g>
+  </svg>
+</RootTag>

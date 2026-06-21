@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://toukatsu-yumeguri.sakuspace.workers.dev/sitemap-index.xml

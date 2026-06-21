@@ -4,6 +4,7 @@ import {
   getCityFromSlug,
   getCitySlug,
   getFeatureIdsFromSearchParams,
+  getSpaIdFromSearchParams,
 } from "./filter-url";
 
 describe("filter URL helpers", () => {
@@ -28,5 +29,22 @@ describe("filter URL helpers", () => {
     expect(
       getFeatureIdsFromSearchParams(new URLSearchParams("tags=food")),
     ).toEqual(["food"]);
+  });
+
+  it("returns a shared spa id only when it is known", () => {
+    const spaIds = ["spa-metsa-otaka", "sumire-minami-kashiwa"];
+
+    expect(
+      getSpaIdFromSearchParams(
+        new URLSearchParams("spa=spa-metsa-otaka"),
+        spaIds,
+      ),
+    ).toBe("spa-metsa-otaka");
+    expect(
+      getSpaIdFromSearchParams(new URLSearchParams("spa=unknown"), spaIds),
+    ).toBeUndefined();
+    expect(
+      getSpaIdFromSearchParams(new URLSearchParams("city=kashiwa"), spaIds),
+    ).toBeUndefined();
   });
 });

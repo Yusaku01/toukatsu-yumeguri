@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import StampMark from "../../components/StampMark.astro";
 import { getFeatureFilterCounts } from "../../lib/filters";
 import { getCityCounts, getSpas } from "../../lib/spas";
 import { getSpaTagGroups } from "../../lib/tag-groups";
@@ -62,6 +63,7 @@ const structuredData = {
         <nav aria-label="サイトメニュー">
           <a href="/" data-astro-reload>地図</a>
           <a href="/list/" aria-current="page">一覧</a>
+          <a href="/my/">マイページ</a>
           <a href="/terms/">利用規約</a>
         </nav>
       </details>
@@ -181,8 +183,45 @@ const structuredData = {
                     {spa.area && <span>{spa.area}</span>}
                     <span data-prototype-distance hidden />
                   </p>
-                  <h2>{spa.name}</h2>
+                  <h2 class="prototype-title-with-stamp">
+                    <span>{spa.name}</span>
+                    <StampMark spaId={spa.id} position="title" />
+                  </h2>
                   {spa.notes && <p class="prototype-card-note">{spa.notes}</p>}
+                </div>
+
+                <div
+                  class="prototype-memory-actions"
+                  aria-label={`${spa.name}の訪問メモ`}
+                >
+                  <button
+                    class="prototype-memory-action prototype-memory-action--visited"
+                    type="button"
+                    data-yumeguri-action="visited"
+                    data-spa-id={spa.id}
+                    data-spa-name={spa.name}
+                    aria-pressed="false"
+                  >
+                    <span
+                      class="prototype-icon prototype-icon--check"
+                      aria-hidden="true"
+                    />
+                    <span data-yumeguri-action-label>行った</span>
+                  </button>
+                  <button
+                    class="prototype-memory-action prototype-memory-action--interested"
+                    type="button"
+                    data-yumeguri-action="interested"
+                    data-spa-id={spa.id}
+                    data-spa-name={spa.name}
+                    aria-pressed="false"
+                  >
+                    <span
+                      class="prototype-icon prototype-icon--bookmark"
+                      aria-hidden="true"
+                    />
+                    <span data-yumeguri-action-label>気になる</span>
+                  </button>
                 </div>
 
                 <div class="prototype-place-detail-list">
@@ -296,7 +335,7 @@ const structuredData = {
     gap: 0.75rem;
     align-items: center;
     justify-content: space-between;
-    margin-block-end: 1.25rem;
+    margin-block-end: 2rem;
   }
 
   .prototype-brand,
@@ -574,10 +613,12 @@ const structuredData = {
     place-items: center;
     aspect-ratio: 1;
     font-size: 0.72em;
+    font-weight: 900;
     line-height: 1;
-    color: color-mix(in oklab, currentColor, transparent 22%);
+    color: color-mix(in oklab, currentColor, transparent 10%);
     background: rgb(80 45 28 / 6%);
     border-radius: 50%;
+    text-shadow: 0 0 0 currentColor;
     text-box: trim-both cap alphabetic;
   }
 
@@ -650,10 +691,16 @@ const structuredData = {
   .prototype-spa-card {
     display: grid;
     gap: 0.82rem;
+    scroll-margin-block: 1.5rem;
     padding: 0.86rem;
     background: var(--prototype-paper);
     border: 1px solid rgb(80 45 28 / 10%);
     border-radius: 0.98rem;
+  }
+
+  .prototype-spa-card[data-selected] {
+    border-color: var(--prototype-brand);
+    box-shadow: 0 0 0 3px rgb(200 32 6 / 14%);
   }
 
   .prototype-card-head {
@@ -701,6 +748,82 @@ const structuredData = {
     font-size: 0.88rem;
     line-height: 1.7;
     color: var(--prototype-muted);
+  }
+
+  .prototype-memory-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+    margin-block-start: -0.1rem;
+  }
+
+  .prototype-memory-action {
+    display: inline-flex;
+    gap: 0.36rem;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 2.12rem;
+    padding: 0.38rem 0.72rem;
+    min-inline-size: 0;
+    font-size: 0.82rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-muted);
+    cursor: pointer;
+    background: rgb(255 251 247 / 88%);
+    border: 1px solid rgb(80 45 28 / 12%);
+    border-radius: 999px;
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  .prototype-memory-action:hover {
+    color: var(--prototype-ink);
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 20%);
+  }
+
+  .prototype-memory-action:active {
+    transform: translateY(1px);
+  }
+
+  .prototype-memory-action:focus-visible,
+  .prototype-place-action:focus-visible {
+    outline: 3px solid rgb(15 110 166 / 36%);
+    outline-offset: 3px;
+  }
+
+  .prototype-memory-action span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.25;
+  }
+
+  .prototype-memory-action--visited[aria-pressed="true"] {
+    color: #22604a;
+    background: #e9f5ef;
+    border-color: rgb(34 96 74 / 28%);
+  }
+
+  .prototype-memory-action--visited[aria-pressed="true"]:hover {
+    background: #dff0e8;
+    border-color: rgb(34 96 74 / 38%);
+  }
+
+  .prototype-memory-action--interested[aria-pressed="true"] {
+    color: #76470a;
+    background: #fff3d8;
+    border-color: rgb(166 104 18 / 30%);
+  }
+
+  .prototype-memory-action--interested[aria-pressed="true"]:hover {
+    background: #ffeabe;
+    border-color: rgb(166 104 18 / 40%);
   }
 
   .prototype-place-detail-list {
@@ -835,9 +958,25 @@ const structuredData = {
     line-height: 1;
     color: var(--prototype-ink);
     text-decoration: none;
+    cursor: pointer;
     background: var(--prototype-tag-surface);
     border: 1px solid rgb(80 45 28 / 10%);
     border-radius: 999px;
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  .prototype-place-action:hover {
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 20%);
+  }
+
+  .prototype-place-action:active {
+    background: var(--prototype-surface-pressed);
+    transform: translateY(1px);
   }
 
   .prototype-place-action span:last-child {
@@ -851,6 +990,11 @@ const structuredData = {
     color: #fff;
     background: var(--prototype-brand);
     border-color: var(--prototype-brand);
+  }
+
+  .prototype-place-action--primary:hover {
+    background: var(--prototype-brand-pressed);
+    border-color: var(--prototype-brand-pressed);
   }
 
   .prototype-icon {
@@ -876,6 +1020,7 @@ const structuredData = {
   }
 
   .prototype-place-detail .prototype-icon,
+  .prototype-memory-action .prototype-icon,
   .prototype-place-action .prototype-icon {
     inline-size: 1.08rem;
     block-size: 1.08rem;
@@ -933,6 +1078,18 @@ const structuredData = {
     --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/external-link.svg");
   }
 
+  .prototype-icon--check {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/circle-check.svg");
+  }
+
+  .prototype-icon--bookmark {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/bookmark.svg");
+  }
+
+  .prototype-icon--badge {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/badge-check.svg");
+  }
+
   @media (min-width: 521px) {
     .prototype-list {
       border-inline: 1px solid rgb(80 45 28 / 10%);
@@ -944,7 +1101,9 @@ const structuredData = {
     .prototype-menu summary,
     .prototype-chip-row button,
     .prototype-clear,
-    .prototype-locate {
+    .prototype-locate,
+    .prototype-memory-action,
+    .prototype-place-action {
       transition-duration: 0.01ms;
     }
 

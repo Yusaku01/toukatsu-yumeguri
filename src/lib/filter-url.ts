@@ -37,3 +37,13 @@ export const getFeatureIdsFromSearchParams = (
   getValidFeatureIdsFromParam(
     searchParams.get("features") ?? searchParams.get("tags"),
   );
+
+export const getSpaIdFromSearchParams = (
+  searchParams: URLSearchParams,
+  validSpaIds: Iterable<string>,
+): string | undefined => {
+  const spaId = searchParams.get("spa")?.trim();
+  if (!spaId) return undefined;
+
+  return new Set(validSpaIds).has(spaId) ? spaId : undefined;
+};

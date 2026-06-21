@@ -1,0 +1,29 @@
+---
+import StampMark from "./StampMark.astro";
+---
+
+<div
+  class="prototype-stamp-press-overlay"
+  data-yumeguri-stamp-overlay
+  hidden
+  aria-hidden="true"
+  aria-label="獲得スタンプ"
+  aria-modal="true"
+  role="dialog"
+  tabindex="-1"
+>
+  <div class="prototype-stamp-press-stage">
+    <StampMark spaId="stamp-press-overlay" position="overlay" hidden={false} />
+  </div>
+</div>
+<p
+  class="visually-hidden"
+  data-yumeguri-stamp-live
+  aria-live="polite"
+  aria-atomic="true"
+>
+</p>
+
+<script>
+  import "../scripts/stamp-press-overlay";
+</script>

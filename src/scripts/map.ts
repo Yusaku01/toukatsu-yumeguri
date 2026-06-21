@@ -9,9 +9,21 @@ import {
   getCityFromSlug,
   getCitySlug,
   getFeatureIdsFromSearchParams,
+  getSpaIdFromSearchParams,
 } from "../lib/filter-url";
-import { getSpaTagGroups } from "../lib/tag-groups";
 import type { Coordinates, Spa } from "../lib/types";
+import {
+  loadUserState,
+  saveUserState,
+  setLastFilters,
+} from "../lib/user-state";
+import { createPlaceCard } from "./place-card";
+import { bindPlaceSheetGrip } from "./place-sheet";
+import { bindYumeguriProgress } from "./user-progress";
+import {
+  bindUserStateControls,
+  refreshUserStateControls,
+} from "./user-state-controls";
 
 const TOKATSU_CENTER: Coordinates = { lat: 35.855, lng: 139.945 };
 const PROTOTYPE_INITIAL_CENTER: Coordinates = { lat: 35.835, lng: 139.93 };
@@ -26,146 +38,6 @@ const pinIcon = L.icon({
   popupAnchor: [0, -38],
   className: "prototype-leaflet-pin",
 });
-
-const transportNotes = new Map<string, string>([
-  ["yuraku-no-sato-matsudo", "松戸駅からバスで約10分"],
-  ["spa-metsa-otaka", "流山おおたかの森駅から徒歩圏"],
-  ["sumire-minami-kashiwa", "南柏駅から徒歩圏"],
-  ["aquaignis-yoshikawa-minami", "吉川美南駅から徒歩圏"],
-]);
-
-const appendText = <K extends keyof HTMLElementTagNameMap>(
-  parent: HTMLElement,
-  tagName: K,
-  text: string,
-  className?: string,
-): HTMLElementTagNameMap[K] => {
-  const element = document.createElement(tagName);
-  element.textContent = text;
-  if (className) element.className = className;
-  parent.append(element);
-  return element;
-};
-
-const appendIcon = (
-  parent: HTMLElement,
-  iconClass: string,
-  extraClassName?: string,
-) => {
-  const icon = document.createElement("span");
-  icon.className = ["prototype-icon", iconClass, extraClassName]
-    .filter(Boolean)
-    .join(" ");
-  icon.setAttribute("aria-hidden", "true");
-  parent.append(icon);
-  return icon;
-};
-
-const createSelectedCard = (spa: Spa) => {
-  const card = document.createElement("article");
-  card.className = "prototype-selected-card";
-
-  const body = document.createElement("div");
-  body.className = "prototype-place-body";
-
-  const title = document.createElement("h2");
-  title.className = "prototype-place-title";
-  appendText(title, "span", spa.name);
-  body.append(title);
-
-  const tagGroups = getSpaTagGroups(spa);
-  const detailList = document.createElement("div");
-  detailList.className = "prototype-place-detail-list";
-
-  if (tagGroups.length > 0) {
-    const featureRow = document.createElement("div");
-    featureRow.className = "prototype-place-detail-row";
-    appendText(featureRow, "span", "特徴", "prototype-place-detail-label");
-
-    const features = document.createElement("div");
-    features.className = "prototype-place-features";
-    features.setAttribute("role", "group");
-    features.setAttribute("aria-label", `${spa.name}の特徴`);
-
-    tagGroups.forEach((group) => {
-      const groupElement = document.createElement("div");
-      groupElement.className = "prototype-feature-group";
-      appendText(groupElement, "span", group.label, "prototype-feature-label");
-
-      const tagList = document.createElement("ul");
-      tagList.className = "prototype-feature-tags";
-      group.tags.forEach((tag) => {
-        const item = document.createElement("li");
-        appendText(item, "span", tag);
-        tagList.append(item);
-      });
-
-      groupElement.append(tagList);
-      features.append(groupElement);
-    });
-
-    featureRow.append(features);
-    detailList.append(featureRow);
-  }
-
-  const addressRow = document.createElement("div");
-  addressRow.className = "prototype-place-detail-row";
-  appendText(addressRow, "span", "住所", "prototype-place-detail-label");
-  const address = document.createElement("address");
-  address.className = "prototype-place-detail";
-  appendIcon(address, "prototype-icon--map-pin");
-  appendText(address, "span", spa.address);
-  addressRow.append(address);
-  detailList.append(addressRow);
-
-  const transport = transportNotes.get(spa.id);
-  if (transport) {
-    const transportDetailRow = document.createElement("div");
-    transportDetailRow.className = "prototype-place-detail-row";
-    appendText(
-      transportDetailRow,
-      "span",
-      "アクセス",
-      "prototype-place-detail-label",
-    );
-    const transportRow = document.createElement("p");
-    transportRow.className = "prototype-place-detail";
-    appendIcon(transportRow, "prototype-icon--bus");
-    appendText(transportRow, "span", transport);
-    transportDetailRow.append(transportRow);
-    detailList.append(transportDetailRow);
-  }
-
-  body.append(detailList);
-
-  const actions = document.createElement("div");
-  actions.className = "prototype-place-actions";
-
-  const googleMapsLink = document.createElement("a");
-  googleMapsLink.className =
-    "prototype-place-action prototype-place-action--primary";
-  googleMapsLink.href = spa.googleMapsUrl;
-  googleMapsLink.target = "_blank";
-  googleMapsLink.rel = "noopener noreferrer";
-  googleMapsLink.setAttribute("aria-label", `${spa.name}をGoogleマップで開く`);
-  appendIcon(googleMapsLink, "prototype-icon--map");
-  appendText(googleMapsLink, "span", "Google マップ");
-
-  const officialLink = document.createElement("a");
-  officialLink.className = "prototype-place-action";
-  officialLink.href = spa.officialUrl;
-  officialLink.target = "_blank";
-  officialLink.rel = "noopener noreferrer";
-  officialLink.setAttribute("aria-label", `${spa.name}の公式サイトを開く`);
-  appendIcon(officialLink, "prototype-icon--external");
-  appendText(officialLink, "span", "公式サイト");
-
-  actions.append(googleMapsLink, officialLink);
-  body.append(actions);
-
-  card.append(body);
-  return card;
-};
 
 const initPrototypeMap = () => {
   const mapElement = document.querySelector<HTMLElement>(
@@ -199,7 +71,15 @@ const initPrototypeMap = () => {
   let activeCity = "all";
   let activeFeatureIds = new Set<FeatureFilterId>();
   let selectedSpaId = "";
-  let suppressGripClick = false;
+  let refreshProgress = () => {};
+
+  const hasFilterParams = (searchParams: URLSearchParams) =>
+    searchParams.has("city") ||
+    searchParams.has("features") ||
+    searchParams.has("tags");
+
+  const hasUrlStateParams = (searchParams: URLSearchParams) =>
+    hasFilterParams(searchParams) || searchParams.has("spa");
 
   const getCityFromUrl = (searchParams: URLSearchParams) => {
     const citySlug = searchParams.get("city");
@@ -213,8 +93,31 @@ const initPrototypeMap = () => {
 
   const syncStateFromUrl = () => {
     const searchParams = new URLSearchParams(window.location.search);
+    const savedFilters = loadUserState().lastFilters;
+    selectedSpaId = "";
+
+    if (!hasUrlStateParams(searchParams) && savedFilters) {
+      const savedCity = savedFilters.citySlug
+        ? (getCityFromSlug(savedFilters.citySlug) ?? savedFilters.citySlug)
+        : "all";
+      activeCity = cityButtons.some(
+        (button) => button.dataset.prototypeCity === savedCity,
+      )
+        ? savedCity
+        : "all";
+      activeFeatureIds = new Set(
+        (savedFilters.featureIds ?? []).filter(isFeatureFilterId),
+      );
+      return;
+    }
+
     activeCity = getCityFromUrl(searchParams);
     activeFeatureIds = new Set(getFeatureIdsFromSearchParams(searchParams));
+    selectedSpaId =
+      getSpaIdFromSearchParams(
+        searchParams,
+        spas.map((spa) => spa.id),
+      ) ?? "";
   };
 
   const updateUrl = () => {
@@ -232,6 +135,12 @@ const initPrototypeMap = () => {
       url.searchParams.set("features", [...activeFeatureIds].join(","));
     }
     url.searchParams.delete("tags");
+
+    if (selectedSpaId) {
+      url.searchParams.set("spa", selectedSpaId);
+    } else {
+      url.searchParams.delete("spa");
+    }
 
     window.history.replaceState({}, "", url);
   };
@@ -287,10 +196,20 @@ const initPrototypeMap = () => {
     }
   };
 
+  const refreshMapLayout = () => {
+    requestAnimationFrame(() => {
+      map.invalidateSize({ animate: false });
+    });
+    window.setTimeout(() => {
+      map.invalidateSize({ animate: false });
+    }, 260);
+  };
+
   const openPanel = () => {
     if (panelElement) panelElement.style.transform = "";
     panelElement?.classList.add("is-open");
     panelElement?.removeAttribute("aria-hidden");
+    refreshMapLayout();
   };
 
   const closePanel = () => {
@@ -302,6 +221,7 @@ const initPrototypeMap = () => {
     }
     panelElement?.classList.remove("is-open");
     panelElement?.setAttribute("aria-hidden", "true");
+    refreshMapLayout();
   };
 
   const clearSelection = () => {
@@ -319,7 +239,8 @@ const initPrototypeMap = () => {
 
     selectedSpaId = spa.id;
     panelElement?.classList.add("has-selection");
-    cardHost.replaceChildren(createSelectedCard(spa));
+    cardHost.replaceChildren(createPlaceCard(spa));
+    refreshUserStateControls(cardHost);
     updateMarkerSelection();
     updateResultCopy();
     openPanel();
@@ -345,6 +266,7 @@ const initPrototypeMap = () => {
     const hasActiveFilters = activeCity !== "all" || activeFeatureIds.size > 0;
     updateResultCopy(visibleSpas);
     if (clearButton) clearButton.hidden = !hasActiveFilters;
+    refreshProgress();
   };
 
   const applyFilters = (shouldUpdateUrl = true) => {
@@ -366,7 +288,16 @@ const initPrototypeMap = () => {
     } else {
       clearSelection();
     }
-    if (shouldUpdateUrl) updateUrl();
+    if (shouldUpdateUrl) {
+      updateUrl();
+      saveUserState(
+        setLastFilters(loadUserState(), {
+          citySlug: activeCity === "all" ? undefined : getCitySlug(activeCity),
+          featureIds: [...activeFeatureIds],
+          sortMode: "default",
+        }),
+      );
+    }
   };
 
   map.setView(
@@ -382,7 +313,10 @@ const initPrototypeMap = () => {
       title: spa.name,
     }).addTo(map);
 
-    marker.on("click", () => selectSpa(spa.id));
+    marker.on("click", () => {
+      selectSpa(spa.id);
+      updateUrl();
+    });
     marker.bindTooltip(spa.name, {
       direction: "top",
       offset: [0, -38],
@@ -423,83 +357,23 @@ const initPrototypeMap = () => {
     applyFilters(false);
   });
 
-  gripButton?.addEventListener("pointerdown", (event) => {
-    if (!panelElement?.classList.contains("is-open")) return;
-
-    const pointerId = event.pointerId;
-    const panelHeight = panelElement.getBoundingClientRect().height;
-    const dismissDistance = Math.min(110, panelHeight * 0.38);
-    const startY = event.clientY;
-    let currentY = event.clientY;
-    let previousY = event.clientY;
-    let previousTime = event.timeStamp;
-    let velocityY = 0;
-    let didDrag = false;
-
-    panelElement.classList.add("is-dragging");
-    gripButton.setPointerCapture(pointerId);
-
-    const stopDrag = () => {
-      panelElement.classList.remove("is-dragging");
-      gripButton.releasePointerCapture(pointerId);
-      gripButton.removeEventListener("pointermove", handleMove);
-      gripButton.removeEventListener("pointerup", handleEnd);
-      gripButton.removeEventListener("pointercancel", handleCancel);
-    };
-
-    const handleMove = (moveEvent: PointerEvent) => {
-      currentY = moveEvent.clientY;
-      const dragY = Math.max(0, currentY - startY);
-      const elapsed = Math.max(1, moveEvent.timeStamp - previousTime);
-      velocityY = (currentY - previousY) / elapsed;
-      previousY = currentY;
-      previousTime = moveEvent.timeStamp;
-
-      if (dragY > 4) didDrag = true;
-      panelElement.style.transform = `translateY(${dragY}px)`;
-    };
-
-    const handleEnd = () => {
-      const dragY = Math.max(0, currentY - startY);
-      const shouldDismiss = dragY >= dismissDistance || velocityY > 0.55;
-      suppressGripClick = didDrag;
-      stopDrag();
-
-      if (shouldDismiss) {
-        closePanel();
-        return;
-      }
-
-      panelElement.style.transform = "";
-    };
-
-    const handleCancel = () => {
-      suppressGripClick = didDrag;
-      stopDrag();
-      panelElement.style.transform = "";
-    };
-
-    gripButton.addEventListener("pointermove", handleMove);
-    gripButton.addEventListener("pointerup", handleEnd);
-    gripButton.addEventListener("pointercancel", handleCancel);
-  });
-
-  gripButton?.addEventListener("click", () => {
-    if (suppressGripClick) {
-      suppressGripClick = false;
-      return;
-    }
-
-    if (panelElement?.classList.contains("is-open")) {
-      closePanel();
-      return;
-    }
-    if (selectedSpaId) selectSpa(selectedSpaId);
+  bindPlaceSheetGrip({
+    sheet: panelElement,
+    gripButton,
+    closeSheet: closePanel,
+    openSheet: () => {
+      if (selectedSpaId) selectSpa(selectedSpaId);
+    },
   });
 
   syncStateFromUrl();
+  refreshProgress = bindYumeguriProgress(
+    document.querySelector<HTMLElement>(".prototype-map") ?? mapElement,
+    spas,
+    () => activeCity,
+  );
   applyFilters(false);
-  clearSelection();
+  bindUserStateControls(mapElement.closest(".prototype-map") ?? mapElement);
 };
 
 document.addEventListener("astro:page-load", initPrototypeMap);

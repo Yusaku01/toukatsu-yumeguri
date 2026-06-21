@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import PlaceSheet from "../components/PlaceSheet.astro";
 import { getFeatureFilterCounts } from "../lib/filters";
 import { getCityCounts, getSpas } from "../lib/spas";
 
@@ -8,7 +9,7 @@ const cityCounts = getCityCounts(spas);
 const featureCounts = getFeatureFilterCounts(spas);
 const totalSpaCount = spas.length;
 const pageTitle = "東葛の温浴施設を地図で探す";
-const pageDescription = `松戸・柏・流山を中心に、東葛周辺の温浴施設${totalSpaCount}件を地図と特徴フィルターで探せる湯めぐりマップです。`;
+const pageDescription = `松戸・柏・流山などの東葛地域を中心に、温浴施設${totalSpaCount}件をすぐに探せるマップアプリです。`;
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "WebPage",
@@ -86,8 +87,9 @@ const structuredData = {
           <span>MENU</span>
         </summary>
         <nav aria-label="サイトメニュー">
-          <a href="/">現在の地図</a>
+          <a href="/">地図</a>
           <a href="/list/">一覧</a>
+          <a href="/my/">マイページ</a>
           <a href="/terms/">利用規約</a>
         </nav>
       </details>
@@ -174,22 +176,104 @@ const structuredData = {
       </div>
     </search>
 
-    <aside
-      class="prototype-place-sheet"
-      aria-label="選択した温浴施設"
+    <section
+      id="prototype-map-progress"
+      class="prototype-progress is-hidden"
+      data-yumeguri-progress
+      data-yumeguri-progress-mode="toast"
+      data-yumeguri-progress-timeout="3000"
+      aria-labelledby="prototype-map-progress-title"
       aria-hidden="true"
-      data-prototype-panel
     >
-      <button
-        class="prototype-grip"
-        type="button"
-        data-prototype-grip
-        aria-label="施設カードをたたむ"
+      <div class="prototype-progress-head">
+        <span class="prototype-icon prototype-icon--badge" aria-hidden="true"
+        ></span>
+        <div class="prototype-progress-copy">
+          <p class="prototype-progress-eyebrow">湯めぐり記録</p>
+          <p
+            id="prototype-map-progress-title"
+            class="prototype-progress-title"
+            data-yumeguri-progress-title
+          >
+            東葛 0/{totalSpaCount}
+          </p>
+        </div>
+        <button
+          class="prototype-progress-dismiss"
+          type="button"
+          data-yumeguri-progress-dismiss
+          aria-label="湯めぐり進捗を閉じる"
+        >
+          <span class="prototype-icon prototype-icon--close" aria-hidden="true"
+          ></span>
+        </button>
+      </div>
+      <div
+        class="prototype-progress-meter"
+        data-yumeguri-progress-meter
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax={totalSpaCount}
+        aria-valuenow="0"
+        aria-valuetext={`東葛 0/${totalSpaCount}`}
       >
-        <span aria-hidden="true"></span>
-      </button>
-      <div class="prototype-card-host" data-prototype-card></div>
-    </aside>
+        <span data-yumeguri-progress-bar></span>
+      </div>
+      <p
+        class="prototype-progress-note"
+        data-yumeguri-progress-copy
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        未訪問
+      </p>
+    </section>
+
+    <button
+      class="prototype-progress-open"
+      type="button"
+      data-yumeguri-progress-open
+      aria-controls="prototype-map-progress"
+      aria-expanded="false"
+      aria-label="湯めぐり記録を開く"
+      hidden
+    >
+      <span class="prototype-icon prototype-icon--badge" aria-hidden="true"
+      ></span>
+      <span>記録</span>
+    </button>
+    <script is:inline>
+      (() => {
+        const storageKey = "toukatsu-yumeguri:user-state:v1";
+        const progress = document.querySelector("[data-yumeguri-progress]");
+        const openButton = document.querySelector(
+          "[data-yumeguri-progress-open]",
+        );
+        if (!progress || !openButton) return;
+
+        try {
+          const rawState = window.localStorage.getItem(storageKey);
+          const state = rawState ? JSON.parse(rawState) : undefined;
+          const isDismissed = Boolean(state?.ui?.mapProgressToast?.dismissedAt);
+
+          if (isDismissed) {
+            openButton.hidden = false;
+            openButton.setAttribute("aria-expanded", "false");
+          }
+        } catch {
+          progress.classList.remove("is-hidden");
+          progress.removeAttribute("aria-hidden");
+          openButton.hidden = true;
+          openButton.setAttribute("aria-expanded", "true");
+        }
+      })();
+    </script>
+
+    <PlaceSheet
+      variant="map"
+      ariaLabel="選択した温浴施設"
+      gripLabel="施設カードをたたむ"
+    />
   </main>
   <script>
     import "../scripts/map";
@@ -203,7 +287,7 @@ const structuredData = {
   }
 
   .prototype-map {
-    --prototype-top-panel-height: clamp(13.25rem, 26svh, 13.55rem);
+    --prototype-top-panel-height: clamp(14.25rem, 28svh, 14.55rem);
     --prototype-ink: #3e2013;
     --prototype-muted: #7d6559;
     --prototype-line: rgb(80 45 28 / 13%);
@@ -250,18 +334,12 @@ const structuredData = {
 
   .prototype-map :global(.prototype-leaflet-pin) {
     transform-origin: 50% 100%;
-    scale: 1;
-    translate: 0 0;
-    transition:
-      scale 180ms var(--prototype-ease),
-      translate 180ms var(--prototype-ease),
-      filter 180ms var(--prototype-ease);
+    transition: filter 180ms var(--prototype-ease);
   }
 
   .prototype-map :global(.prototype-leaflet-pin.is-selected) {
-    filter: saturate(1.12) contrast(1.04);
-    scale: 1.12;
-    translate: 0 -0.2rem;
+    filter: saturate(1.16) contrast(1.06)
+      drop-shadow(0 0 0.45rem rgb(200 32 6 / 46%));
   }
 
   .prototype-header {
@@ -424,7 +502,7 @@ const structuredData = {
   .prototype-filters {
     position: absolute;
     z-index: 820;
-    inset-block-start: 5rem;
+    inset-block-start: 6rem;
     inset-inline: 0.86rem 0;
     display: grid;
     gap: 0.54rem;
@@ -552,10 +630,12 @@ const structuredData = {
     place-items: center;
     aspect-ratio: 1;
     font-size: 0.72em;
+    font-weight: 900;
     line-height: 1;
-    color: color-mix(in oklab, currentColor, transparent 22%);
+    color: color-mix(in oklab, currentColor, transparent 10%);
     background: rgb(80 45 28 / 6%);
     border-radius: 50%;
+    text-shadow: 0 0 0 currentColor;
     text-box: trim-both cap alphabetic;
   }
 
@@ -591,6 +671,190 @@ const structuredData = {
     line-height: 1.35;
     color: var(--prototype-ink);
     white-space: nowrap;
+  }
+
+  .prototype-progress {
+    position: absolute;
+    z-index: 880;
+    inset-block-start: 13.45rem;
+    inset-inline-start: 50%;
+    display: grid;
+    gap: 0.44rem;
+    inline-size: min(19.5rem, calc(100% - 1.72rem));
+    padding: 0.72rem 2.75rem 0.72rem 0.82rem;
+    pointer-events: auto;
+    background: rgb(255 251 247 / 92%);
+    border: 1px solid var(--prototype-line);
+    border-radius: 0.82rem;
+    backdrop-filter: blur(13px);
+    opacity: 1;
+    transform: translateX(-50%);
+    transform-origin: calc(100% - 1.2rem) 50%;
+    transition:
+      border-radius 320ms var(--prototype-ease),
+      opacity 260ms var(--prototype-ease),
+      transform 320ms var(--prototype-ease);
+  }
+
+  .prototype-progress.is-hidden {
+    pointer-events: none;
+    opacity: 0;
+    border-radius: 999px;
+    transform: translateX(calc(-50% + 8.7rem)) translateY(2rem) scale(0.42);
+  }
+
+  .prototype-progress-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    align-items: center;
+    min-inline-size: 0;
+  }
+
+  .prototype-progress-head > .prototype-icon {
+    inline-size: 1.3rem;
+    block-size: 1.3rem;
+    color: #22604a;
+  }
+
+  .prototype-progress-copy {
+    display: grid;
+    gap: 0.1rem;
+    min-inline-size: 0;
+  }
+
+  .prototype-progress-eyebrow,
+  .prototype-progress-title,
+  .prototype-progress-note {
+    margin: 0;
+  }
+
+  .prototype-progress-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 850;
+    line-height: 1.2;
+    color: var(--prototype-muted);
+  }
+
+  .prototype-progress-title {
+    min-inline-size: 0;
+    overflow: hidden;
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.28;
+    color: var(--prototype-ink);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .prototype-progress-dismiss {
+    position: absolute;
+    inset-block-start: 0.42rem;
+    inset-inline-end: 0.42rem;
+    display: inline-grid;
+    inline-size: 2rem;
+    block-size: 2rem;
+    padding: 0;
+    place-items: center;
+    color: color-mix(
+      in oklab,
+      var(--prototype-muted),
+      var(--prototype-ink) 18%
+    );
+    background: rgb(255 251 247 / 88%);
+    border: 1px solid rgb(80 45 28 / 10%);
+    border-radius: 999px;
+  }
+
+  .prototype-progress-dismiss:hover {
+    color: var(--prototype-ink);
+    background: rgb(80 45 28 / 7%);
+  }
+
+  .prototype-progress-dismiss .prototype-icon {
+    inline-size: 1rem;
+    block-size: 1rem;
+  }
+
+  .prototype-progress-meter {
+    overflow: hidden;
+    block-size: 0.48rem;
+    background: rgb(80 45 28 / 9%);
+    border-radius: 999px;
+  }
+
+  .prototype-progress-meter span {
+    display: block;
+    inline-size: 0%;
+    block-size: 100%;
+    background: var(--prototype-brand);
+    border-radius: inherit;
+    transition: inline-size 240ms var(--prototype-ease);
+  }
+
+  .prototype-progress-note {
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.45;
+    color: var(--prototype-muted);
+  }
+
+  .prototype-progress-open {
+    position: absolute;
+    z-index: 880;
+    inset-block-start: 15.35rem;
+    inset-inline-end: 0.86rem;
+    display: inline-flex;
+    gap: 0.34rem;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 2.2rem;
+    padding: 0.42rem 0.72rem;
+    font-size: 0.78rem;
+    font-weight: 900;
+    line-height: 1;
+    color: #22604a;
+    background: rgb(255 251 247 / 94%);
+    border: 1px solid rgb(34 96 74 / 20%);
+    border-radius: 999px;
+    box-shadow: 0 0.42rem 1.2rem rgb(80 45 28 / 10%);
+    backdrop-filter: blur(13px);
+    opacity: 1;
+    scale: 1;
+    transform-origin: center;
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      color 180ms var(--prototype-ease),
+      opacity 180ms var(--prototype-ease),
+      scale 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  @starting-style {
+    .prototype-progress-open {
+      opacity: 0;
+      scale: 0.86;
+    }
+  }
+
+  .prototype-progress-open[hidden] {
+    display: none;
+  }
+
+  .prototype-progress-open:hover {
+    color: #174f3c;
+    background: #f2fbf6;
+    border-color: rgb(34 96 74 / 32%);
+  }
+
+  .prototype-progress-open:active {
+    transform: translateY(1px);
+  }
+
+  .prototype-progress-open .prototype-icon {
+    inline-size: 1rem;
+    block-size: 1rem;
   }
 
   .prototype-chip-row .prototype-icon,
@@ -688,67 +952,24 @@ const structuredData = {
     --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/external-link.svg");
   }
 
+  :global(.prototype-icon--check) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/circle-check.svg");
+  }
+
+  :global(.prototype-icon--bookmark) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/bookmark.svg");
+  }
+
+  :global(.prototype-icon--close) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/x.svg");
+  }
+
+  :global(.prototype-icon--badge) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/badge-check.svg");
+  }
+
   :global(.prototype-icon--chevron) {
     --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/chevron-right.svg");
-  }
-
-  .prototype-place-sheet {
-    position: absolute;
-    z-index: 880;
-    inset-inline: 0;
-    inset-block-end: env(safe-area-inset-bottom);
-    display: grid;
-    grid-template-rows: auto auto;
-    align-content: start;
-    block-size: auto;
-    max-block-size: min(86svh, calc(100svh - 1rem));
-    padding: 0 0.84rem 1rem;
-    background: var(--prototype-paper-solid);
-    border: 1px solid rgb(80 45 28 / 10%);
-    border-block-end: 0;
-    border-start-start-radius: 1.52rem;
-    border-start-end-radius: 1.52rem;
-    translate: 0 calc(100% - 0.3rem);
-    transition: translate 240ms var(--prototype-ease);
-  }
-
-  .prototype-place-sheet:not(.has-selection) {
-    visibility: hidden;
-    pointer-events: none;
-    translate: 0 100%;
-  }
-
-  .prototype-place-sheet.is-open {
-    translate: 0 0;
-  }
-
-  .prototype-place-sheet.is-dragging {
-    transition: none;
-  }
-
-  .prototype-grip {
-    touch-action: none;
-    display: grid;
-    min-block-size: 1.85rem;
-    padding: 0;
-    place-items: center;
-    background: transparent;
-    border: 0;
-  }
-
-  .prototype-grip span {
-    display: block;
-    inline-size: 2.15rem;
-    block-size: 0.24rem;
-    background: rgb(80 45 28 / 46%);
-    border-radius: 999px;
-  }
-
-  .prototype-card-host {
-    inline-size: 100%;
-    min-inline-size: 0;
-    min-block-size: 0;
-    container: inline-size / place-card;
   }
 
   :global(.prototype-selected-card) {
@@ -780,6 +1001,83 @@ const structuredData = {
     line-height: 1.32;
     letter-spacing: 0;
     overflow-wrap: anywhere;
+  }
+
+  :global(.prototype-memory-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+    margin-block-start: -0.12rem;
+  }
+
+  :global(.prototype-memory-action) {
+    display: inline-flex;
+    gap: 0.36rem;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 2.12rem;
+    padding: 0.38rem 0.72rem;
+    min-inline-size: 0;
+    font-size: 0.82rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-muted);
+    cursor: pointer;
+    background: rgb(255 251 247 / 88%);
+    border: 1px solid rgb(80 45 28 / 12%);
+    border-radius: 999px;
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  :global(.prototype-memory-action:hover) {
+    color: var(--prototype-ink);
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 20%);
+  }
+
+  :global(.prototype-memory-action:active) {
+    transform: translateY(1px);
+  }
+
+  :global(.prototype-memory-action:focus-visible),
+  .prototype-progress-open:focus-visible,
+  :global(.prototype-place-action:focus-visible) {
+    outline: 3px solid rgb(15 110 166 / 36%);
+    outline-offset: 3px;
+  }
+
+  :global(.prototype-memory-action span:last-child) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.25;
+  }
+
+  :global(.prototype-memory-action--visited[aria-pressed="true"]) {
+    color: #22604a;
+    background: #e9f5ef;
+    border-color: rgb(34 96 74 / 28%);
+  }
+
+  :global(.prototype-memory-action--visited[aria-pressed="true"]:hover) {
+    background: #dff0e8;
+    border-color: rgb(34 96 74 / 38%);
+  }
+
+  :global(.prototype-memory-action--interested[aria-pressed="true"]) {
+    color: #76470a;
+    background: #fff3d8;
+    border-color: rgb(166 104 18 / 30%);
+  }
+
+  :global(.prototype-memory-action--interested[aria-pressed="true"]:hover) {
+    background: #ffeabe;
+    border-color: rgb(166 104 18 / 40%);
   }
 
   :global(.prototype-place-detail-list) {
@@ -901,11 +1199,16 @@ const structuredData = {
     color: var(--prototype-muted);
   }
 
+  :global(.prototype-memory-action .prototype-icon) {
+    inline-size: 1.02rem;
+    block-size: 1.02rem;
+  }
+
   :global(.prototype-place-actions) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
-    padding-block-start: 0.1rem;
+    padding-block: 0.1rem 0.45rem;
   }
 
   :global(.prototype-place-action) {
@@ -921,9 +1224,25 @@ const structuredData = {
     line-height: 1;
     color: var(--prototype-ink);
     text-decoration: none;
+    cursor: pointer;
     background: var(--prototype-tag-surface);
     border: 1px solid rgb(80 45 28 / 10%);
     border-radius: 999px;
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  :global(.prototype-place-action:hover) {
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 20%);
+  }
+
+  :global(.prototype-place-action:active) {
+    background: var(--prototype-surface-pressed);
+    transform: translateY(1px);
   }
 
   :global(.prototype-place-action span:last-child) {
@@ -942,6 +1261,11 @@ const structuredData = {
     color: #fff;
     background: var(--prototype-brand);
     border-color: var(--prototype-brand);
+  }
+
+  :global(.prototype-place-action--primary:hover) {
+    background: var(--prototype-brand-pressed);
+    border-color: var(--prototype-brand-pressed);
   }
 
   @media (forced-colors: active) {
@@ -1004,12 +1328,27 @@ const structuredData = {
     .prototype-menu summary,
     .prototype-chip-row button,
     .prototype-clear,
+    .prototype-map :global(.prototype-memory-action),
+    .prototype-progress,
+    .prototype-progress-open,
+    .prototype-progress-meter span,
+    .prototype-map :global(.prototype-place-action),
     .prototype-map :global(.prototype-leaflet-pin) {
       transition-duration: 0.01ms;
     }
 
     .prototype-menu[open] nav {
       animation-duration: 0.01ms;
+    }
+
+    .prototype-progress.is-hidden {
+      transform: translateX(-50%);
+    }
+
+    @starting-style {
+      .prototype-progress-open {
+        scale: 1;
+      }
     }
   }
 </style>

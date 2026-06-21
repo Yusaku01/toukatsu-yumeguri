@@ -1,0 +1,929 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PlaceSheet from "../../components/PlaceSheet.astro";
+import { getCityCounts, getSpas } from "../../lib/spas";
+
+const spas = await getSpas();
+const cityCounts = getCityCounts(spas);
+const totalSpaCount = spas.length;
+const pageTitle = "マイページ";
+const pageDescription =
+  "東葛湯めぐりマップで記録した行った施設、気になる施設、地域別の湯めぐり進捗を確認できます。";
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  bodyClass="prototype-my-page"
+  canonicalPath="/my/"
+  noindex
+>
+  <main
+    id="content"
+    class="prototype-my"
+    tabindex="-1"
+    data-yumeguri-my
+    data-spas={JSON.stringify(spas)}
+  >
+    <header class="prototype-header" aria-label="サイトナビゲーション">
+      <a
+        class="prototype-brand"
+        href="/"
+        aria-label="東葛湯めぐりマップ"
+        data-astro-reload
+      >
+        <span class="prototype-brand-pin-shell" aria-hidden="true">
+          <span class="prototype-brand-pin"></span>
+        </span>
+        <span>東葛湯めぐりマップ</span>
+      </a>
+      <details class="prototype-menu">
+        <summary>
+          <span class="prototype-icon prototype-icon--menu" aria-hidden="true"
+          ></span>
+          <span>MENU</span>
+        </summary>
+        <nav aria-label="サイトメニュー">
+          <a href="/" data-astro-reload>地図</a>
+          <a href="/list/">一覧</a>
+          <a href="/my/" aria-current="page">マイページ</a>
+          <a href="/terms/">利用規約</a>
+        </nav>
+      </details>
+    </header>
+
+    <article class="prototype-my-content">
+      <header class="prototype-page-head">
+        <h1>マイページ</h1>
+        <p>これまでの湯めぐりの記録</p>
+      </header>
+
+      <section class="prototype-section" aria-labelledby="storage-title">
+        <h2 id="storage-title">記録の保存</h2>
+        <div class="prototype-storage-card">
+          <p>
+            記録はこの端末のブラウザに保存されます。行った施設、気になる施設、スタンプ、進捗はいつでも削除でき、ブラウザデータを削除した場合も破棄されます。
+          </p>
+          <button
+            class="prototype-reset-button"
+            type="button"
+            data-yumeguri-reset-state
+          >
+            <span
+              class="prototype-icon prototype-icon--trash"
+              aria-hidden="true"></span>
+            <span>記録をリセット</span>
+          </button>
+          <p
+            class="prototype-reset-status"
+            data-yumeguri-reset-status
+            aria-live="polite"
+          >
+          </p>
+        </div>
+      </section>
+
+      <section class="prototype-section" aria-labelledby="all-progress-title">
+        <h2 id="all-progress-title">全体</h2>
+        <article
+          class="prototype-progress-card prototype-progress-card--primary"
+          data-yumeguri-progress-row="all"
+          aria-label="全体の湯めぐり進捗"
+        >
+          <div class="prototype-progress-card-head">
+            <span
+              class="prototype-icon prototype-icon--badge"
+              aria-hidden="true"></span>
+            <div>
+              <h3 data-yumeguri-row-title>東葛 0/{totalSpaCount}</h3>
+            </div>
+          </div>
+          <div class="prototype-progress-meter" aria-hidden="true">
+            <span data-yumeguri-row-bar></span>
+          </div>
+          <p class="prototype-progress-note" data-yumeguri-row-copy>未訪問</p>
+        </article>
+      </section>
+
+      <section
+        class="prototype-section"
+        aria-labelledby="city-progress-title"
+        data-yumeguri-city-progress-section
+      >
+        <h2 id="city-progress-title">地域別</h2>
+        <div class="prototype-city-progress-list">
+          {
+            cityCounts.map(({ city, count }) => (
+              <article
+                class="prototype-progress-card"
+                data-yumeguri-progress-row={city}
+              >
+                <div class="prototype-progress-card-head">
+                  <div>
+                    <h3 data-yumeguri-row-title>
+                      {city.replace(/市$/, "")} 0/{count}
+                    </h3>
+                  </div>
+                </div>
+                <div class="prototype-progress-meter" aria-hidden="true">
+                  <span data-yumeguri-row-bar />
+                </div>
+                <p class="prototype-progress-note" data-yumeguri-row-copy>
+                  未訪問
+                </p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="prototype-section" aria-labelledby="visited-title">
+        <h2 id="visited-title">これまでに訪れた施設</h2>
+        <p class="prototype-empty" data-yumeguri-empty-visits>
+          訪れた施設はありません
+        </p>
+        <div class="prototype-visited-list" data-yumeguri-visited-list></div>
+      </section>
+
+      <section class="prototype-section" aria-labelledby="interested-title">
+        <h2 id="interested-title">気になる施設</h2>
+        <p class="prototype-empty" data-yumeguri-empty-interests>
+          気になる施設はありません
+        </p>
+        <div class="prototype-visited-list" data-yumeguri-interested-list></div>
+      </section>
+    </article>
+
+    <PlaceSheet
+      variant="my"
+      ariaLabel="保存した施設の詳細"
+      gripLabel="施設詳細を閉じる"
+    />
+  </main>
+  <script>
+    import "../../scripts/my-page";
+  </script>
+</BaseLayout>
+
+<style>
+  :global(body.prototype-my-page) {
+    background: #fffaf7;
+  }
+
+  .prototype-my {
+    --prototype-ink: #3e2013;
+    --prototype-muted: #7d6559;
+    --prototype-line: rgb(80 45 28 / 13%);
+    --prototype-paper: rgb(255 251 246 / 96%);
+    --prototype-brand: #c82006;
+    --prototype-brand-pressed: #a91b05;
+    --prototype-brand-dark: #451406;
+    --prototype-surface-hover: #fff6ef;
+    --prototype-tag-surface: #fff3ea;
+    --prototype-ease: cubic-bezier(0.2, 0, 0, 1);
+    inline-size: min(100dvw, 520px);
+    min-block-size: 100svh;
+    padding: max(1.35rem, env(safe-area-inset-top)) 0.86rem 2.4rem;
+    margin-inline: auto;
+    color: var(--prototype-ink);
+    background: #fffaf7;
+  }
+
+  .prototype-header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-end: 2rem;
+  }
+
+  .prototype-brand,
+  .prototype-menu summary {
+    min-block-size: 2.7rem;
+    border-radius: 999px;
+    backdrop-filter: blur(14px);
+  }
+
+  .prototype-brand {
+    display: inline-flex;
+    gap: 0.52rem;
+    align-items: center;
+    max-inline-size: calc(100% - 6.6rem);
+    padding: 0.48rem 0.82rem 0.48rem 0.54rem;
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--prototype-ink);
+    text-decoration: none;
+    background: var(--prototype-paper);
+    border: 1px solid var(--prototype-line);
+  }
+
+  .prototype-brand:hover {
+    background: var(--prototype-surface-hover);
+  }
+
+  .prototype-brand-pin-shell {
+    flex: 0 0 auto;
+    display: inline-grid;
+    inline-size: 1.74rem;
+    block-size: 1.74rem;
+    place-items: center;
+  }
+
+  .prototype-brand-pin {
+    display: block;
+    inline-size: 1.15rem;
+    block-size: 1.15rem;
+    color: var(--prototype-brand);
+    background: currentColor;
+    -webkit-mask: url("/onsen.svg") center / contain no-repeat;
+    mask: url("/onsen.svg") center / contain no-repeat;
+  }
+
+  .prototype-menu {
+    position: relative;
+  }
+
+  .prototype-menu summary {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    padding: 0.48rem 0.72rem;
+    font-size: 0.86rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--prototype-ink);
+    list-style: none;
+    cursor: pointer;
+    background: var(--prototype-paper);
+    border: 1px solid var(--prototype-line);
+  }
+
+  .prototype-menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .prototype-menu nav {
+    position: absolute;
+    inset-block-start: calc(100% + 0.48rem);
+    inset-inline-end: 0;
+    display: grid;
+    min-inline-size: 8.8rem;
+    padding: 0.42rem;
+    background: rgb(255 251 246 / 98%);
+    border: 1px solid var(--prototype-line);
+    border-radius: 0.9rem;
+  }
+
+  .prototype-menu nav a {
+    padding: 0.58rem 0.68rem;
+    font-size: 0.88rem;
+    font-weight: 850;
+    color: var(--prototype-muted);
+    text-decoration: none;
+    border-radius: 0.62rem;
+  }
+
+  .prototype-menu nav a[aria-current="page"],
+  .prototype-menu nav a:hover {
+    color: var(--prototype-brand-dark);
+    background: var(--prototype-tag-surface);
+  }
+
+  .prototype-icon {
+    display: inline-block;
+    inline-size: 1.02rem;
+    block-size: 1.02rem;
+    flex: 0 0 auto;
+    background: currentColor;
+    -webkit-mask: var(--prototype-icon-url) center / contain no-repeat;
+    mask: var(--prototype-icon-url) center / contain no-repeat;
+  }
+
+  .prototype-icon--menu {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/menu.svg");
+  }
+
+  .prototype-icon--badge {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/badge-check.svg");
+  }
+
+  :global(.prototype-icon) {
+    display: inline-block;
+    inline-size: 1.02rem;
+    block-size: 1.02rem;
+    flex: 0 0 auto;
+    background: currentColor;
+    -webkit-mask: var(--prototype-icon-url) center / contain no-repeat;
+    mask: var(--prototype-icon-url) center / contain no-repeat;
+  }
+
+  :global(.prototype-icon--menu) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/menu.svg");
+  }
+
+  :global(.prototype-icon--badge) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/badge-check.svg");
+  }
+
+  :global(.prototype-icon--close) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/x.svg");
+  }
+
+  :global(.prototype-icon--chevron) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/chevron-right.svg");
+  }
+
+  :global(.prototype-icon--check) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/circle-check.svg");
+  }
+
+  :global(.prototype-icon--bookmark) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/bookmark.svg");
+  }
+
+  :global(.prototype-icon--trash) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/trash-2.svg");
+  }
+
+  :global(.prototype-icon--map-pin) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/map-pin.svg");
+  }
+
+  :global(.prototype-icon--map) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/map.svg");
+  }
+
+  :global(.prototype-icon--bus) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/bus-front.svg");
+  }
+
+  :global(.prototype-icon--external) {
+    --prototype-icon-url: url("https://unpkg.com/lucide-static@0.468.0/icons/external-link.svg");
+  }
+
+  .prototype-section,
+  .prototype-city-progress-list,
+  .prototype-visited-list {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .prototype-my-content {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .prototype-page-head h1,
+  .prototype-page-head p,
+  .prototype-section h2,
+  .prototype-progress-card h2,
+  .prototype-progress-card h3,
+  .prototype-progress-note,
+  .prototype-empty,
+  .prototype-visited-card p,
+  .prototype-visited-card h3 {
+    margin: 0;
+  }
+
+  .prototype-page-head {
+    display: grid;
+    gap: 0.32rem;
+  }
+
+  .prototype-page-head h1 {
+    font-size: clamp(1.36rem, 6.2vw, 1.72rem);
+    font-weight: 900;
+    line-height: 1.22;
+  }
+
+  .prototype-page-head p,
+  .prototype-empty {
+    font-size: 0.9rem;
+    color: var(--prototype-muted);
+  }
+
+  .prototype-section h2 {
+    font-size: 1.08rem;
+    font-weight: 900;
+    line-height: 1.3;
+  }
+
+  .prototype-progress-card,
+  .prototype-visited-card {
+    display: grid;
+    gap: 0.58rem;
+    padding: 0.82rem;
+    background: rgb(255 251 247 / 92%);
+    border: 1px solid var(--prototype-line);
+    border-radius: 1rem;
+  }
+
+  .prototype-progress-card--primary {
+    border-color: rgb(200 32 6 / 20%);
+  }
+
+  .prototype-storage-card {
+    display: grid;
+    gap: 0.72rem;
+    padding: 0.82rem;
+    background: rgb(255 251 247 / 92%);
+    border: 1px solid var(--prototype-line);
+    border-radius: 1rem;
+  }
+
+  .prototype-storage-card p {
+    margin: 0;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.65;
+    color: var(--prototype-muted);
+  }
+
+  .prototype-reset-button {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: center;
+    justify-self: start;
+    min-block-size: 2.38rem;
+    max-inline-size: 100%;
+    padding: 0.48rem 0.78rem;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 850;
+    line-height: 1.1;
+    color: #8f2616;
+    cursor: pointer;
+    background: #fff3ee;
+    border: 1px solid rgb(143 38 22 / 22%);
+    border-radius: 999px;
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  .prototype-reset-button:hover {
+    background: #ffe9e1;
+    border-color: rgb(143 38 22 / 34%);
+  }
+
+  .prototype-reset-button:disabled {
+    color: var(--prototype-muted);
+    cursor: not-allowed;
+    background: rgb(255 251 247 / 72%);
+    border-color: var(--prototype-line);
+    opacity: 0.72;
+  }
+
+  .prototype-reset-button:active {
+    transform: translateY(1px);
+  }
+
+  .prototype-reset-button span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .prototype-reset-status:empty {
+    display: none;
+  }
+
+  .prototype-progress-card[hidden],
+  .prototype-section[hidden] {
+    display: none;
+  }
+
+  .prototype-progress-card-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.65rem;
+    align-items: center;
+  }
+
+  .prototype-progress-card--primary .prototype-progress-card-head {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .prototype-progress-card-head > .prototype-icon {
+    inline-size: 1.3rem;
+    block-size: 1.3rem;
+    color: #22604a;
+  }
+
+  .prototype-progress-card h2,
+  .prototype-progress-card h3 {
+    overflow: hidden;
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.28;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .prototype-progress-meter {
+    overflow: hidden;
+    block-size: 0.48rem;
+    background: rgb(80 45 28 / 9%);
+    border-radius: 999px;
+  }
+
+  .prototype-progress-meter span {
+    display: block;
+    inline-size: 0%;
+    block-size: 100%;
+    background: var(--prototype-brand);
+    border-radius: inherit;
+  }
+
+  .prototype-progress-note {
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.45;
+    color: var(--prototype-muted);
+  }
+
+  .prototype-visited-card p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.34rem;
+    align-items: center;
+  }
+
+  .prototype-visited-card p span {
+    display: inline-flex;
+    min-block-size: 1.54rem;
+    padding: 0.22rem 0.52rem;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-brand-dark);
+    background: var(--prototype-tag-surface);
+    border: 1px solid rgb(184 42 11 / 12%);
+    border-radius: 999px;
+  }
+
+  .prototype-visited-card h3 {
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+
+  .prototype-visited-card a {
+    justify-self: start;
+    font-size: 0.86rem;
+    font-weight: 850;
+    color: var(--prototype-brand);
+  }
+
+  :global(.prototype-visited-card) {
+    position: relative;
+    box-sizing: border-box;
+    display: grid;
+    gap: 0.58rem;
+    inline-size: 100%;
+    padding: 0.86rem 3.1rem 0.86rem 0.82rem;
+    font: inherit;
+    color: inherit;
+    text-align: start;
+    cursor: pointer;
+    background: rgb(255 251 247 / 92%);
+    border: 1px solid var(--prototype-line);
+    border-radius: 1rem;
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  :global(.prototype-visited-card:hover) {
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 20%);
+  }
+
+  :global(.prototype-visited-card:active) {
+    transform: translateY(1px);
+  }
+
+  :global(.prototype-visited-card:focus-visible),
+  :global(.prototype-memory-action:focus-visible),
+  :global(.prototype-place-action:focus-visible),
+  .prototype-reset-button:focus-visible {
+    outline: 3px solid rgb(15 110 166 / 36%);
+    outline-offset: 3px;
+  }
+
+  :global(.prototype-visited-card p),
+  :global(.prototype-visited-card h3) {
+    margin: 0;
+  }
+
+  :global(.prototype-visited-card p) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.34rem;
+    align-items: center;
+  }
+
+  :global(.prototype-visited-card p span) {
+    display: inline-flex;
+    min-block-size: 1.54rem;
+    padding: 0.22rem 0.52rem;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-brand-dark);
+    background: var(--prototype-tag-surface);
+    border: 1px solid rgb(184 42 11 / 12%);
+    border-radius: 999px;
+  }
+
+  :global(.prototype-visited-card h3) {
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+
+  :global(.prototype-visited-card-affordance) {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: 0.82rem;
+    display: grid;
+    inline-size: 1.9rem;
+    block-size: 1.9rem;
+    place-items: center;
+    color: var(--prototype-muted);
+    background: rgb(255 243 234 / 78%);
+    border: 1px solid rgb(80 45 28 / 10%);
+    border-radius: 999px;
+    translate: 0 -50%;
+  }
+
+  :global(.prototype-visited-card-affordance .prototype-icon) {
+    inline-size: 0.95rem;
+    block-size: 0.95rem;
+  }
+
+  :global(.prototype-selected-card),
+  :global(.prototype-place-body) {
+    display: grid;
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  :global(.prototype-place-body) {
+    gap: 0.82rem;
+    align-content: start;
+  }
+
+  :global(.prototype-place-title) {
+    display: flex;
+    gap: 0.42rem;
+    align-items: center;
+    margin: 0;
+    font-size: clamp(1.22rem, 4.2cqi, 1.42rem);
+    font-weight: 900;
+    line-height: 1.32;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+
+  :global(.prototype-place-note) {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.65;
+    color: var(--prototype-muted);
+  }
+
+  :global(.prototype-memory-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+    margin-block-start: -0.12rem;
+  }
+
+  :global(.prototype-memory-action) {
+    display: inline-flex;
+    gap: 0.36rem;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 2.12rem;
+    min-inline-size: 0;
+    padding: 0.38rem 0.72rem;
+    font-size: 0.82rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-muted);
+    cursor: pointer;
+    background: rgb(255 251 247 / 88%);
+    border: 1px solid rgb(80 45 28 / 12%);
+    border-radius: 999px;
+    transition:
+      background-color 180ms var(--prototype-ease),
+      border-color 180ms var(--prototype-ease),
+      color 180ms var(--prototype-ease),
+      transform 180ms var(--prototype-ease);
+  }
+
+  :global(.prototype-memory-action:hover) {
+    color: var(--prototype-ink);
+    background: var(--prototype-surface-hover);
+    border-color: rgb(80 45 28 / 20%);
+  }
+
+  :global(.prototype-memory-action:active) {
+    transform: translateY(1px);
+  }
+
+  :global(.prototype-memory-action span:last-child) {
+    overflow: hidden;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :global(.prototype-memory-action--visited[aria-pressed="true"]) {
+    color: #22604a;
+    background: #e9f5ef;
+    border-color: rgb(34 96 74 / 28%);
+  }
+
+  :global(.prototype-memory-action--interested[aria-pressed="true"]) {
+    color: #76470a;
+    background: #fff3d8;
+    border-color: rgb(166 104 18 / 30%);
+  }
+
+  :global(.prototype-place-detail-list) {
+    display: grid;
+    --prototype-dot-divider: radial-gradient(
+      circle,
+      rgb(80 45 28 / 18%) 0 1.2px,
+      transparent 1.35px
+    );
+    background:
+      var(--prototype-dot-divider) left top / 0.48rem 0.25rem repeat-x,
+      var(--prototype-dot-divider) left bottom / 0.48rem 0.25rem repeat-x;
+  }
+
+  :global(.prototype-place-detail-row) {
+    position: relative;
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: 0.68rem;
+    align-items: center;
+    min-inline-size: 0;
+    padding-block: 0.74rem;
+  }
+
+  :global(.prototype-place-detail-row:not(:last-child))::after {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -0.125rem;
+    display: block;
+    block-size: 0.25rem;
+    pointer-events: none;
+    content: "";
+    background: var(--prototype-dot-divider) left center / 0.48rem 0.25rem
+      repeat-x;
+  }
+
+  :global(.prototype-place-detail-label) {
+    font-size: 0.78rem;
+    font-weight: 850;
+    line-height: 1.35;
+    color: var(--prototype-muted);
+    white-space: nowrap;
+  }
+
+  :global(.prototype-place-features) {
+    display: grid;
+    gap: 0.48rem;
+    min-inline-size: 0;
+  }
+
+  :global(.prototype-feature-group) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+    align-items: center;
+    min-inline-size: 0;
+  }
+
+  :global(.prototype-feature-label) {
+    font-size: 0.72rem;
+    font-weight: 850;
+    line-height: 1.35;
+    color: var(--prototype-muted);
+    white-space: nowrap;
+  }
+
+  :global(.prototype-feature-tags) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+    align-items: center;
+    min-inline-size: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  :global(.prototype-feature-tags li) {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.6rem;
+    min-inline-size: 0;
+    padding: 0.24rem 0.58rem;
+    font-size: 0.78rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-brand-dark);
+    background: var(--prototype-tag-surface);
+    border: 1px solid rgb(184 42 11 / 14%);
+    border-radius: 999px;
+  }
+
+  :global(.prototype-place-detail) {
+    display: flex;
+    gap: 0.44rem;
+    align-items: center;
+    min-inline-size: 0;
+    margin: 0;
+    font-size: 0.94rem;
+    font-style: normal;
+    line-height: 1.6;
+    color: var(--prototype-ink);
+  }
+
+  :global(.prototype-place-detail span:last-child) {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  :global(.prototype-place-detail .prototype-icon),
+  :global(.prototype-place-action .prototype-icon) {
+    inline-size: 1.08rem;
+    block-size: 1.08rem;
+  }
+
+  :global(.prototype-memory-action .prototype-icon) {
+    inline-size: 1.02rem;
+    block-size: 1.02rem;
+  }
+
+  :global(.prototype-place-actions) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding-block: 0.1rem 0.45rem;
+  }
+
+  :global(.prototype-place-action) {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 2.75rem;
+    min-inline-size: 0;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--prototype-ink);
+    text-decoration: none;
+    cursor: pointer;
+    background: var(--prototype-tag-surface);
+    border: 1px solid rgb(80 45 28 / 10%);
+    border-radius: 999px;
+  }
+
+  :global(.prototype-place-action--primary) {
+    color: #fff;
+    background: var(--prototype-brand);
+    border-color: var(--prototype-brand);
+  }
+
+  @media (min-width: 521px) {
+    .prototype-my {
+      border-inline: 1px solid rgb(80 45 28 / 10%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.prototype-visited-card),
+    :global(.prototype-memory-action),
+    .prototype-reset-button {
+      transition: none;
+    }
+  }
+</style>

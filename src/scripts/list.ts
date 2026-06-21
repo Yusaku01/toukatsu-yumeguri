@@ -7,10 +7,17 @@ import {
   getCityFromSlug,
   getCitySlug,
   getFeatureIdsFromSearchParams,
+  getSpaIdFromSearchParams,
 } from "../lib/filter-url";
 import { formatDistance, getDistanceInMeters } from "../lib/geo";
 import { sortSpasForDisplay } from "../lib/sort";
 import type { Coordinates, Spa } from "../lib/types";
+import {
+  loadUserState,
+  saveUserState,
+  setLastFilters,
+} from "../lib/user-state";
+import { bindUserStateControls } from "./user-state-controls";
 
 const initPrototypeList = () => {
   const root = document.querySelector<HTMLElement>("[data-prototype-list]");
@@ -52,6 +59,15 @@ const initPrototypeList = () => {
   let activeCity = "all";
   let activeFeatureIds = new Set<FeatureFilterId>();
   let currentLocation: Coordinates | undefined;
+  let selectedSpaId = "";
+
+  const hasFilterParams = (searchParams: URLSearchParams) =>
+    searchParams.has("city") ||
+    searchParams.has("features") ||
+    searchParams.has("tags");
+
+  const hasUrlStateParams = (searchParams: URLSearchParams) =>
+    hasFilterParams(searchParams) || searchParams.has("spa");
 
   const getCityFromUrl = (searchParams: URLSearchParams) => {
     const citySlug = searchParams.get("city");
@@ -65,8 +81,31 @@ const initPrototypeList = () => {
 
   const syncStateFromUrl = () => {
     const searchParams = new URLSearchParams(window.location.search);
+    const savedFilters = loadUserState().lastFilters;
+    selectedSpaId = "";
+
+    if (!hasUrlStateParams(searchParams) && savedFilters) {
+      const savedCity = savedFilters.citySlug
+        ? (getCityFromSlug(savedFilters.citySlug) ?? savedFilters.citySlug)
+        : "all";
+      activeCity = cityChips.some(
+        (chip) => chip.dataset.prototypeCity === savedCity,
+      )
+        ? savedCity
+        : "all";
+      activeFeatureIds = new Set(
+        (savedFilters.featureIds ?? []).filter(isFeatureFilterId),
+      );
+      return;
+    }
+
     activeCity = getCityFromUrl(searchParams);
     activeFeatureIds = new Set(getFeatureIdsFromSearchParams(searchParams));
+    selectedSpaId =
+      getSpaIdFromSearchParams(
+        searchParams,
+        spas.map((spa) => spa.id),
+      ) ?? "";
   };
 
   const updateUrl = () => {
@@ -84,6 +123,12 @@ const initPrototypeList = () => {
       url.searchParams.set("features", [...activeFeatureIds].join(","));
     }
     url.searchParams.delete("tags");
+
+    if (selectedSpaId) {
+      url.searchParams.set("spa", selectedSpaId);
+    } else {
+      url.searchParams.delete("spa");
+    }
 
     window.history.replaceState({}, "", url);
   };
@@ -112,13 +157,35 @@ const initPrototypeList = () => {
     });
   };
 
-  const applyFilter = (shouldUpdateUrl = true) => {
+  const applyFilter = (
+    shouldUpdateUrl = true,
+    shouldRevealSelection = false,
+  ) => {
     const visibleSpas = sortSpasForDisplay(getVisibleSpas(), currentLocation);
+    const visibleSpaIds = new Set(visibleSpas.map((spa) => spa.id));
+    if (selectedSpaId && !visibleSpaIds.has(selectedSpaId)) {
+      selectedSpaId = "";
+    }
+
     const visibleCards = visibleSpas
       .map((spa) => cardsBySpaId.get(spa.id))
       .filter((card): card is HTMLElement => Boolean(card));
 
     listElement?.replaceChildren(...visibleCards);
+    cards.forEach((card) => {
+      card.toggleAttribute(
+        "data-selected",
+        Boolean(
+          selectedSpaId && card.dataset.prototypeSpaCard === selectedSpaId,
+        ),
+      );
+    });
+    if (selectedSpaId && shouldRevealSelection) {
+      cardsBySpaId.get(selectedSpaId)?.scrollIntoView({
+        block: "center",
+        behavior: "auto",
+      });
+    }
 
     cityChips.forEach((chip) => {
       chip.setAttribute(
@@ -143,6 +210,15 @@ const initPrototypeList = () => {
       filterClearButton.hidden = !hasActiveFilters;
     }
     if (shouldUpdateUrl) updateUrl();
+    if (shouldUpdateUrl) {
+      saveUserState(
+        setLastFilters(loadUserState(), {
+          citySlug: activeCity === "all" ? undefined : getCitySlug(activeCity),
+          featureIds: [...activeFeatureIds],
+          sortMode: currentLocation ? "nearby" : "default",
+        }),
+      );
+    }
   };
 
   cityChips.forEach((chip) => {
@@ -210,11 +286,12 @@ const initPrototypeList = () => {
 
   window.addEventListener("popstate", () => {
     syncStateFromUrl();
-    applyFilter(false);
+    applyFilter(false, true);
   });
 
   syncStateFromUrl();
-  applyFilter(false);
+  applyFilter(false, true);
+  bindUserStateControls(root);
 };
 
 document.addEventListener("astro:page-load", initPrototypeList);

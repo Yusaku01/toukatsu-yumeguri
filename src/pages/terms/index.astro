@@ -34,6 +34,7 @@ const pageDescription =
         <nav aria-label="サイトメニュー">
           <a href="/" data-astro-reload>地図</a>
           <a href="/list/">一覧</a>
+          <a href="/my/">マイページ</a>
           <a href="/terms/" aria-current="page">利用規約</a>
         </nav>
       </details>
@@ -68,6 +69,16 @@ const pageDescription =
         <section class="prototype-section">
           <span class="prototype-section-number" aria-hidden="true">03</span>
           <div>
+            <h2>湯めぐり記録</h2>
+            <p>
+              記録はこの端末のブラウザ内に保存されます。行った施設、気になる施設、スタンプ、進捗はマイページから削除でき、ブラウザデータを削除した場合も破棄されます。
+            </p>
+          </div>
+        </section>
+
+        <section class="prototype-section">
+          <span class="prototype-section-number" aria-hidden="true">04</span>
+          <div>
             <h2>アクセス解析</h2>
             <p>
               Cloudflare Web
@@ -77,7 +88,7 @@ const pageDescription =
         </section>
 
         <section class="prototype-section">
-          <span class="prototype-section-number" aria-hidden="true">04</span>
+          <span class="prototype-section-number" aria-hidden="true">05</span>
           <div>
             <h2>連絡先・貢献</h2>
             <p>
@@ -144,7 +155,7 @@ const pageDescription =
     gap: 0.75rem;
     align-items: center;
     justify-content: space-between;
-    margin-block-end: 1.35rem;
+    margin-block-end: 2rem;
   }
 
   .prototype-brand,
