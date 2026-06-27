@@ -1,11 +1,14 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "toukatsu-yumeguri",
+  "main": "./src/worker.ts",
   "compatibility_date": "2026-05-24",
   "assets": {
     "directory": "./dist",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page",
+    "binding": "ASSETS",
+    "run_worker_first": ["/csp-report"],
   },
   "observability": {
     "enabled": true,

@@ -72,6 +72,6 @@ export default defineConfig(
     },
   },
   {
-    ignores: [".astro/", "dist/", "node_modules/"],
+    ignores: [".astro/", ".wrangler/", "dist/", "node_modules/"],
   },
 );
