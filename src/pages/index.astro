@@ -8,28 +8,51 @@ const spas = await getSpas();
 const cityCounts = getCityCounts(spas);
 const featureCounts = getFeatureFilterCounts(spas);
 const totalSpaCount = spas.length;
+const siteName = "東葛湯めぐりマップ";
+const fallbackSiteUrl = "https://toukatsu-yumeguri.sakuspace.workers.dev";
+const siteUrl =
+  import.meta.env.PUBLIC_SITE_URL ?? Astro.site?.toString() ?? fallbackSiteUrl;
+const homeUrl = new URL("/", siteUrl).toString();
 const pageTitle = "東葛の温浴施設を地図で探す";
 const pageDescription = `松戸・柏・流山などの東葛地域を中心に、温浴施設${totalSpaCount}件をすぐに探せるマップアプリです。`;
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "WebPage",
-  name: `${pageTitle} | 東葛湯めぐりマップ`,
-  description: pageDescription,
-  mainEntity: {
-    "@type": "ItemList",
-    numberOfItems: totalSpaCount,
-    itemListElement: spas.map((spa, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "LocalBusiness",
-        name: spa.name,
-        address: spa.address,
-        url: spa.officialUrl,
-        hasMap: spa.googleMapsUrl,
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${homeUrl}#website`,
+      name: siteName,
+      alternateName: [
+        "東葛湯めぐり",
+        "toukatsu-yumeguri.sakuspace.workers.dev",
+      ],
+      url: homeUrl,
+      inLanguage: "ja",
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${homeUrl}#webpage`,
+      name: `${pageTitle} | ${siteName}`,
+      description: pageDescription,
+      url: homeUrl,
+      isPartOf: { "@id": `${homeUrl}#website` },
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: totalSpaCount,
+        itemListElement: spas.map((spa, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": "LocalBusiness",
+            name: spa.name,
+            address: spa.address,
+            url: spa.officialUrl,
+            hasMap: spa.googleMapsUrl,
+          },
+        })),
       },
-    })),
-  },
+    },
+  ],
 };
 ---
 
