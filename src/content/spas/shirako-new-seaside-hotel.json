@@ -1,0 +1,28 @@
+{
+  "id": "shirako-new-seaside-hotel",
+  "name": "白子ニューシーサイドホテル",
+  "city": "白子町",
+  "area": "中里",
+  "address": "千葉県長生郡白子町中里4482-6",
+  "officialUrl": "https://www.new-seaside.com/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E7%99%BD%E5%AD%90%E3%83%8B%E3%83%A5%E3%83%BC%E3%82%B7%E3%83%BC%E3%82%B5%E3%82%A4%E3%83%89%E3%83%9B%E3%83%86%E3%83%AB%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%95%B7%E7%94%9F%E9%83%A1%E7%99%BD%E5%AD%90%E7%94%BA%E4%B8%AD%E9%87%8C4482-6",
+  "lat": 35.4328285,
+  "lng": 140.3945925,
+  "tags": [
+    "天然温泉",
+    "露天風呂",
+    "サウナ"
+  ],
+  "tagGroups": {
+    "bath": [
+      "天然温泉",
+      "露天風呂"
+    ],
+    "sauna": [
+      "サウナ"
+    ],
+    "food": []
+  },
+  "notes": "白子温泉の日帰り入浴を受け付ける。団体貸切や換水日は時間変更・利用不可の場合があるため事前確認を。",
+  "lastCheckedAt": "2026-09-26"
+}
