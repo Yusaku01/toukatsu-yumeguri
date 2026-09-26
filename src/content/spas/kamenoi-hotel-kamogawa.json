@@ -1,0 +1,19 @@
+{
+  "id": "kamenoi-hotel-kamogawa",
+  "name": "亀の井ホテル 鴨川",
+  "city": "鴨川市",
+  "area": "西町",
+  "address": "千葉県鴨川市西町1137",
+  "officialUrl": "https://kamenoi-hotels.com/kamogawa/onsen/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E4%BA%80%E3%81%AE%E4%BA%95%E3%83%9B%E3%83%86%E3%83%AB%20%E9%B4%A8%E5%B7%9D%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%B4%A8%E5%B7%9D%E5%B8%82%E8%A5%BF%E7%94%BA1137",
+  "lat": 35.115583,
+  "lng": 140.117183,
+  "tags": ["天然温泉", "露天風呂", "サウナ", "食事処"],
+  "tagGroups": {
+    "bath": ["天然温泉", "露天風呂"],
+    "sauna": ["サウナ"],
+    "food": ["食事処"]
+  },
+  "notes": "太平洋を望む展望大浴場と庭園大浴場の日帰り入浴に対応。男女入替制でサウナも備える。",
+  "lastCheckedAt": "2026-09-26"
+}
