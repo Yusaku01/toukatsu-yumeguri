@@ -1,0 +1,27 @@
+{
+  "id": "seishotei-shirasuna",
+  "name": "青松庭 白砂",
+  "city": "白子町",
+  "area": "古所",
+  "address": "千葉県長生郡白子町古所3291",
+  "officialUrl": "https://www.shirasuna.co.jp/huro2.html",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E9%9D%92%E6%9D%BE%E5%BA%AD%20%E7%99%BD%E7%A0%82%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%95%B7%E7%94%9F%E9%83%A1%E7%99%BD%E5%AD%90%E7%94%BA%E5%8F%A4%E6%89%803291",
+  "lat": 35.4444148,
+  "lng": 140.3969153,
+  "tags": [
+    "天然温泉",
+    "露天風呂",
+    "貸切風呂"
+  ],
+  "tagGroups": {
+    "bath": [
+      "天然温泉",
+      "露天風呂",
+      "貸切風呂"
+    ],
+    "sauna": [],
+    "food": []
+  },
+  "notes": "白子温泉の貸切露天風呂は日帰り利用可。フロントで当日予約が必要。展望・庭園風呂の利用条件は要確認。",
+  "lastCheckedAt": "2026-09-26"
+}
