@@ -1,0 +1,23 @@
+{
+  "id": "yasashigaura-onsenkan",
+  "name": "矢指ヶ浦温泉館",
+  "city": "旭市",
+  "area": "足川",
+  "address": "千葉県旭市足川3918",
+  "officialUrl": "https://wwwp.pref.chiba.lg.jp/pbbfmap/facility/740",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E7%9F%A2%E6%8C%87%E3%83%B6%E6%B5%A6%E6%B8%A9%E6%B3%89%E9%A4%A8%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%97%AD%E5%B8%82%E8%B6%B3%E5%B7%9D3918",
+  "lat": 35.6945835,
+  "lng": 140.6641014,
+  "tags": [
+    "天然温泉"
+  ],
+  "tagGroups": {
+    "bath": [
+      "天然温泉"
+    ],
+    "sauna": [],
+    "food": []
+  },
+  "notes": "旭市の小さな温泉宿。日帰り入浴の案内は県の施設情報に掲載されているが更新が古いため、訪問前に電話で営業・受付を確認。",
+  "lastCheckedAt": "2026-09-26"
+}
