@@ -1,0 +1,19 @@
+{
+  "id": "hotel-green-plaza-kamogawa",
+  "name": "ホテルグリーンプラザ鴨川",
+  "city": "鴨川市",
+  "area": "天津",
+  "address": "千葉県鴨川市天津3289-2",
+  "officialUrl": "https://www.hgp.co.jp/kamogawa/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E3%83%9B%E3%83%86%E3%83%AB%E3%82%B0%E3%83%AA%E3%83%BC%E3%83%B3%E3%83%97%E3%83%A9%E3%82%B6%E9%B4%A8%E5%B7%9D%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%B4%A8%E5%B7%9D%E5%B8%82%E5%A4%A9%E6%B4%A53289-2",
+  "lat": 35.1207835,
+  "lng": 140.1736004,
+  "tags": ["天然温泉"],
+  "tagGroups": {
+    "bath": ["天然温泉"],
+    "sauna": [],
+    "food": []
+  },
+  "notes": "小湊実入温泉を日帰り入浴で利用可。公式サイトの当日案内で受付状況を確認。",
+  "lastCheckedAt": "2026-09-26"
+}

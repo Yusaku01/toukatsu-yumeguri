@@ -1,0 +1,19 @@
+{
+  "id": "gyominan-maruki",
+  "name": "魚眠庵マルキ本館",
+  "city": "鴨川市",
+  "area": "横渚",
+  "address": "千葉県鴨川市横渚543",
+  "officialUrl": "https://www.gyominan.com/daytrip/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E9%AD%9A%E7%9C%A0%E5%BA%B5%E3%83%9E%E3%83%AB%E3%82%AD%E6%9C%AC%E9%A4%A8%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%B4%A8%E5%B7%9D%E5%B8%82%E6%A8%AA%E6%B8%9A543",
+  "lat": 35.1001634,
+  "lng": 140.1020785,
+  "tags": ["天然温泉", "露天風呂", "貸切風呂"],
+  "tagGroups": {
+    "bath": ["天然温泉", "露天風呂", "貸切風呂"],
+    "sauna": [],
+    "food": []
+  },
+  "notes": "鴨川温泉の大浴場を日帰り利用可。貸切露天風呂は完全予約制。混雑時や繁忙期は事前確認を。",
+  "lastCheckedAt": "2026-09-26"
+}

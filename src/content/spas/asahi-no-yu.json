@@ -1,0 +1,19 @@
+{
+  "id": "asahi-no-yu",
+  "name": "天然温泉 旭の湯",
+  "city": "旭市",
+  "area": "東足洗",
+  "address": "千葉県旭市東足洗2778-47",
+  "officialUrl": "https://hachifuku829.xrea.jp/asahtop.html",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E5%A4%A9%E7%84%B6%E6%B8%A9%E6%B3%89%20%E6%97%AD%E3%81%AE%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%97%AD%E5%B8%82%E6%9D%B1%E8%B6%B3%E6%B4%972778-47",
+  "lat": 35.6995658,
+  "lng": 140.6809763,
+  "tags": ["天然温泉", "露天風呂", "サウナ", "食事処"],
+  "tagGroups": {
+    "bath": ["天然温泉", "露天風呂"],
+    "sauna": ["サウナ"],
+    "food": ["食事処"]
+  },
+  "notes": "九十九里浜近くの日帰り温泉。褐色の天然温泉に加え、サウナや食堂を備える。",
+  "lastCheckedAt": "2026-09-26"
+}

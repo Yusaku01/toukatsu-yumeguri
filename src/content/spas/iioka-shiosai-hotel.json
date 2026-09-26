@@ -1,0 +1,19 @@
+{
+  "id": "iioka-shiosai-hotel",
+  "name": "いいおか潮騒ホテル",
+  "city": "旭市",
+  "area": "萩園",
+  "address": "千葉県旭市萩園1437",
+  "officialUrl": "https://www.iioka-s718.net/onsen/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E3%81%84%E3%81%84%E3%81%8A%E3%81%8B%E6%BD%AE%E9%A8%92%E3%83%9B%E3%83%86%E3%83%AB%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%97%AD%E5%B8%82%E8%90%A9%E5%9C%921437",
+  "lat": 35.7029845,
+  "lng": 140.7103834,
+  "tags": ["天然温泉"],
+  "tagGroups": {
+    "bath": ["天然温泉"],
+    "sauna": [],
+    "food": []
+  },
+  "notes": "飯岡温泉の黒褐色の源泉かけ流し大浴場を日帰り利用可。宿泊状況により入場制限の場合あり。",
+  "lastCheckedAt": "2026-09-26"
+}

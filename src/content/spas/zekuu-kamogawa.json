@@ -1,0 +1,19 @@
+{
+  "id": "zekuu-kamogawa",
+  "name": "房総鴨川温泉 是空",
+  "city": "鴨川市",
+  "area": "太海浜",
+  "address": "千葉県鴨川市太海浜24-1",
+  "officialUrl": "https://zekuu.jp/daytrip/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%88%BF%E7%B7%8F%E9%B4%A8%E5%B7%9D%E6%B8%A9%E6%B3%89%20%E6%98%AF%E7%A9%BA%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%B4%A8%E5%B7%9D%E5%B8%82%E5%A4%AA%E6%B5%B7%E6%B5%9C24-1",
+  "lat": 35.0761336,
+  "lng": 140.0950856,
+  "tags": ["天然温泉", "露天風呂"],
+  "tagGroups": {
+    "bath": ["天然温泉", "露天風呂"],
+    "sauna": [],
+    "food": []
+  },
+  "notes": "海を望む大浴場と貸切露天風呂を日帰り利用可。当日朝から電話予約を受け付け、換水日などは利用できない場合あり。",
+  "lastCheckedAt": "2026-09-26"
+}
