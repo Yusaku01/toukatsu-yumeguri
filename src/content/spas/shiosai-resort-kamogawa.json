@@ -1,0 +1,25 @@
+{
+  "id": "shiosai-resort-kamogawa",
+  "name": "潮騒リゾート鴨川",
+  "city": "鴨川市",
+  "area": "太海浜",
+  "address": "千葉県鴨川市太海浜73-1",
+  "officialUrl": "https://www.shiosai-resort.jp/spa/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%BD%AE%E9%A8%92%E3%83%AA%E3%82%BE%E3%83%BC%E3%83%88%E9%B4%A8%E5%B7%9D%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%B4%A8%E5%B7%9D%E5%B8%82%E5%A4%AA%E6%B5%B7%E6%B5%9C73-1",
+  "lat": 35.0771752,
+  "lng": 140.0980812,
+  "tags": [
+    "天然温泉",
+    "貸切風呂"
+  ],
+  "tagGroups": {
+    "bath": [
+      "天然温泉",
+      "貸切風呂"
+    ],
+    "sauna": [],
+    "food": []
+  },
+  "notes": "鴨川温泉の大浴場と半露天型貸切温泉を日帰り利用可。日帰りの支払いは現金のみ。",
+  "lastCheckedAt": "2026-09-26"
+}
