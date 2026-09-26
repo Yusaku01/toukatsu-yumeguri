@@ -1,0 +1,18 @@
+{
+  "id": "villa-sotobou-isumi",
+  "name": "九十九里ヴィラそとぼう",
+  "city": "いすみ市",
+  "area": "岬町和泉",
+  "address": "千葉県いすみ市岬町和泉4427-1",
+  "officialUrl": "https://www.villa-sotobou.com/%E6%97%A5%E5%B8%B0%E3%82%8A%E5%85%A5%E6%B5%B4/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E4%B9%9D%E5%8D%81%E4%B9%9D%E9%87%8C%E3%83%B4%E3%82%A3%E3%83%A9%E3%81%9D%E3%81%A8%E3%81%BC%E3%81%86%20%E5%8D%83%E8%91%89%E7%9C%8C%E3%81%84%E3%81%99%E3%81%BF%E5%B8%82%E5%B2%AC%E7%94%BA%E5%92%8C%E6%B3%894427-1",
+  "lat": 35.2941412,
+  "lng": 140.4044423,
+  "tags": ["人工温泉", "食事処"],
+  "tagGroups": {
+    "bath": ["人工温泉"],
+    "food": ["食事処"]
+  },
+  "notes": "いすみ市の海辺近くにあるホテル。ヘルストン人工温泉の日帰り入浴に対応する。",
+  "lastCheckedAt": "2026-09-26"
+}
