@@ -1,0 +1,19 @@
+{
+  "id": "miki-no-yu",
+  "name": "石と光の楽園 みきの湯",
+  "city": "東金市",
+  "area": "山田",
+  "address": "千葉県東金市山田1155-1",
+  "officialUrl": "https://www.mikinoyuspa.com/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E7%9F%B3%E3%81%A8%E5%85%89%E3%81%AE%E6%A5%BD%E5%9C%92%20%E3%81%BF%E3%81%8D%E3%81%AE%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E6%9D%B1%E9%87%91%E5%B8%82%E5%B1%B1%E7%94%B01155-1",
+  "lat": 35.5647544,
+  "lng": 140.2933348,
+  "tags": ["露天風呂", "サウナ", "食事処"],
+  "tagGroups": {
+    "bath": ["露天風呂"],
+    "sauna": ["サウナ"],
+    "food": ["食事処"]
+  },
+  "notes": "花崗岩の露天風呂やトゴール湯、サウナ、食事処を備える日帰り施設。トゴール湯は鉱物を利用したお湯で、天然温泉ではない。",
+  "lastCheckedAt": "2026-09-26"
+}
