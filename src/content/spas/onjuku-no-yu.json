@@ -1,0 +1,19 @@
+{
+  "id": "onjuku-no-yu",
+  "name": "御宿の湯",
+  "city": "御宿町",
+  "area": "浜",
+  "address": "千葉県夷隅郡御宿町浜2143-2",
+  "officialUrl": "https://www.onjukunoyu.com/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E5%BE%A1%E5%AE%BF%E3%81%AE%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E5%A4%B7%E9%9A%85%E9%83%A1%E5%BE%A1%E5%AE%BF%E7%94%BA%E6%B5%9C2143-2",
+  "lat": 35.1849281,
+  "lng": 140.3539213,
+  "tags": ["天然温泉", "サウナ", "駅近"],
+  "tagGroups": {
+    "bath": ["天然温泉"],
+    "sauna": ["サウナ"],
+    "other": ["駅近"]
+  },
+  "notes": "御宿駅から徒歩圏内にある、黒湯の源泉かけ流し温泉。ロウリュサウナを備える外房方面の周辺候補。",
+  "lastCheckedAt": "2026-09-26"
+}
