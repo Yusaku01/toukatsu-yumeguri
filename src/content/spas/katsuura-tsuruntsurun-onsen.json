@@ -1,0 +1,18 @@
+{
+  "id": "katsuura-tsuruntsurun-onsen",
+  "name": "勝浦つるんつるん温泉",
+  "city": "勝浦市",
+  "area": "松野",
+  "address": "千葉県勝浦市松野1143",
+  "officialUrl": "https://katsuura-ryokan.jp/ryokan/tsuruntsurun/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E5%8B%9D%E6%B5%A6%E3%81%A4%E3%82%8B%E3%82%93%E3%81%A4%E3%82%8B%E3%82%93%E6%B8%A9%E6%B3%89%20%E5%8D%83%E8%91%89%E7%9C%8C%E5%8B%9D%E6%B5%A6%E5%B8%82%E6%9D%BE%E9%87%8E1143",
+  "lat": 35.2047065,
+  "lng": 140.2818784,
+  "tags": ["天然温泉", "食事処"],
+  "tagGroups": {
+    "bath": ["天然温泉"],
+    "food": ["食事処"]
+  },
+  "notes": "勝浦市松野の日帰り温泉。食事も楽しめる、勝浦方面の周辺候補。",
+  "lastCheckedAt": "2026-09-26"
+}
