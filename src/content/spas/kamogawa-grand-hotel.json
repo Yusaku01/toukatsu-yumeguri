@@ -1,0 +1,19 @@
+{
+  "id": "kamogawa-grand-hotel",
+  "name": "鴨川グランドホテル",
+  "city": "鴨川市",
+  "area": "広場",
+  "address": "千葉県鴨川市広場820",
+  "officialUrl": "https://www.kgh.ne.jp/04/spa/uminokairou/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E9%B4%A8%E5%B7%9D%E3%82%B0%E3%83%A9%E3%83%B3%E3%83%89%E3%83%9B%E3%83%86%E3%83%AB%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%B4%A8%E5%B7%9D%E5%B8%82%E5%BA%83%E5%A0%B4820",
+  "lat": 35.1113615,
+  "lng": 140.1128879,
+  "tags": ["天然温泉", "露天風呂", "サウナ", "食事処"],
+  "tagGroups": {
+    "bath": ["天然温泉", "露天風呂"],
+    "sauna": ["サウナ"],
+    "food": ["食事処"]
+  },
+  "notes": "海を眺められる大浴場「湯屋 海の回廊」を日帰り利用できる。混雑時は入場制限の場合あり。",
+  "lastCheckedAt": "2026-09-26"
+}

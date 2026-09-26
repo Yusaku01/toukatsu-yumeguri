@@ -1,0 +1,19 @@
+{
+  "id": "eden-katsuura",
+  "name": "edén Spa",
+  "city": "勝浦市",
+  "area": "吉尾",
+  "address": "千葉県勝浦市吉尾272 勝浦海中公園内",
+  "officialUrl": "https://eden-katsuura.com/spa",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ed%C3%A9n%20Spa%20%E5%8D%83%E8%91%89%E7%9C%8C%E5%8B%9D%E6%B5%A6%E5%B8%82%E5%90%89%E5%B0%BE272%20%E5%8B%9D%E6%B5%A6%E6%B5%B7%E4%B8%AD%E5%85%AC%E5%9C%92%E5%86%85",
+  "lat": 35.1355222,
+  "lng": 140.2849524,
+  "tags": ["天然温泉", "サウナ", "食事処"],
+  "tagGroups": {
+    "bath": ["天然温泉"],
+    "sauna": ["サウナ"],
+    "food": ["食事処"]
+  },
+  "notes": "太平洋を望む水着着用の温泉スパとサウナ。温泉は君津市からの運び湯で、レストランも併設。",
+  "lastCheckedAt": "2026-09-26"
+}

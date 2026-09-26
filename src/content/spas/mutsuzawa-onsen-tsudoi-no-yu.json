@@ -1,0 +1,19 @@
+{
+  "id": "mutsuzawa-onsen-tsudoi-no-yu",
+  "name": "むつざわ温泉 つどいの湯",
+  "city": "睦沢町",
+  "area": "森",
+  "address": "千葉県長生郡睦沢町森2番1",
+  "officialUrl": "https://mutsuzawa-swt.jp/facility_onsen",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E3%82%80%E3%81%A4%E3%81%96%E3%82%8F%E6%B8%A9%E6%B3%89%20%E3%81%A4%E3%81%A9%E3%81%84%E3%81%AE%E6%B9%AF%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%95%B7%E7%94%9F%E9%83%A1%E7%9D%A6%E6%B2%A2%E7%94%BA%E6%A3%AE2%E7%95%AA1",
+  "lat": 35.3537341,
+  "lng": 140.30327,
+  "tags": ["天然温泉", "露天風呂", "サウナ", "食事処"],
+  "tagGroups": {
+    "bath": ["天然温泉", "露天風呂"],
+    "sauna": ["サウナ"],
+    "food": ["食事処"]
+  },
+  "notes": "道の駅むつざわ内の日帰り温泉。化石海水の湯、露天風呂、種類の異なるサウナを楽しめる。",
+  "lastCheckedAt": "2026-09-26"
+}

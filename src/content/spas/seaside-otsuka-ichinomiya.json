@@ -1,0 +1,18 @@
+{
+  "id": "seaside-otsuka-ichinomiya",
+  "name": "ホテル一宮シーサイドオーツカ",
+  "city": "一宮町",
+  "area": "一宮",
+  "address": "千葉県長生郡一宮町一宮10000",
+  "officialUrl": "https://www.seaside-otsuka.com/spa/day/",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E3%83%9B%E3%83%86%E3%83%AB%E4%B8%80%E5%AE%AE%E3%82%B7%E3%83%BC%E3%82%B5%E3%82%A4%E3%83%89%E3%82%AA%E3%83%BC%E3%83%84%E3%82%AB%20%E5%8D%83%E8%91%89%E7%9C%8C%E9%95%B7%E7%94%9F%E9%83%A1%E4%B8%80%E5%AE%AE%E7%94%BA%E4%B8%80%E5%AE%AE10000",
+  "lat": 35.3622076,
+  "lng": 140.3884665,
+  "tags": ["天然温泉", "露天風呂", "サウナ"],
+  "tagGroups": {
+    "bath": ["天然温泉", "露天風呂"],
+    "sauna": ["サウナ"]
+  },
+  "notes": "一宮海岸近くのホテルで、温泉のみの日帰り利用が可能。露天風呂とサウナも備える。",
+  "lastCheckedAt": "2026-09-26"
+}
