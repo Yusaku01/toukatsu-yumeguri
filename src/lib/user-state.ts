@@ -168,7 +168,7 @@ const getBrowserStorage = (): UserStateStorage | undefined => {
 export const loadUserState = (
   storage = getBrowserStorage(),
 ): YumeguriUserState => {
-  let storedValue: string | null = null;
+  let storedValue: string | null;
 
   try {
     storedValue = storage?.getItem(USER_STATE_STORAGE_KEY) ?? null;
