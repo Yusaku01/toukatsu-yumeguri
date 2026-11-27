@@ -1,11 +1,7 @@
 import type { Spa } from "./types";
 
 export type FeatureFilterId =
-  | "sauna"
-  | "onsen"
-  | "ganbanyoku"
-  | "food"
-  | "station";
+  "sauna" | "onsen" | "ganbanyoku" | "food" | "station";
 
 export type FeatureFilter = {
   id: FeatureFilterId;
