@@ -39,8 +39,9 @@ export const calculateYumeguriProgress = (
   const scopeSpas =
     activeCity === "all" ? spas : spas.filter((spa) => spa.city === activeCity);
   const visitedSpaIds = getVisitedSpaIds(state.visited);
-  const visitedCount = scopeSpas.filter((spa) => visitedSpaIds.has(spa.id))
-    .length;
+  const visitedCount = scopeSpas.filter((spa) =>
+    visitedSpaIds.has(spa.id),
+  ).length;
   const totalCount = scopeSpas.length;
   const percentage =
     totalCount === 0 ? 0 : Math.round((visitedCount / totalCount) * 100);
@@ -85,7 +86,11 @@ export const syncCompletionStamps = (
       citySpas.length > 0 && citySpas.every((spa) => visitedSpaIds.has(spa.id));
 
     if (isCityComplete) {
-      nextState = earnStamp(nextState, `city:${getCitySlug(city)}:complete`, now);
+      nextState = earnStamp(
+        nextState,
+        `city:${getCitySlug(city)}:complete`,
+        now,
+      );
     }
   });
 

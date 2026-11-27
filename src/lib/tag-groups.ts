@@ -1,11 +1,6 @@
 import type { Spa, SpaTagGroupKey } from "./types";
 
-const TAG_GROUP_ORDER: SpaTagGroupKey[] = [
-  "bath",
-  "sauna",
-  "food",
-  "other",
-];
+const TAG_GROUP_ORDER: SpaTagGroupKey[] = ["bath", "sauna", "food", "other"];
 
 export const spaTagGroupLabels: Record<SpaTagGroupKey, string> = {
   bath: "お風呂",

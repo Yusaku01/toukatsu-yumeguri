@@ -81,31 +81,21 @@ describe("user progress", () => {
     };
 
     expect(
-      syncCompletionStamps(
-        unvisitedAgain,
-        spas,
-        "2026-06-20T05:00:00.000Z",
-      ).stamps["city:kashiwa:complete"]?.state,
+      syncCompletionStamps(unvisitedAgain, spas, "2026-06-20T05:00:00.000Z")
+        .stamps["city:kashiwa:complete"]?.state,
     ).toBe("pending");
   });
 
   it("earns all completion stamp when every spa has been visited", () => {
     const visitedState = spas.reduce(
       (state, spa, index) =>
-        markSpaVisited(
-          state,
-          spa.id,
-          `2026-06-20T0${index + 1}:00:00.000Z`,
-        ),
+        markSpaVisited(state, spa.id, `2026-06-20T0${index + 1}:00:00.000Z`),
       createEmptyUserState("2026-06-20T00:00:00.000Z", "device-a"),
     );
 
     expect(
-      syncCompletionStamps(
-        visitedState,
-        spas,
-        "2026-06-20T04:00:00.000Z",
-      ).stamps["all:complete"]?.state,
+      syncCompletionStamps(visitedState, spas, "2026-06-20T04:00:00.000Z")
+        .stamps["all:complete"]?.state,
     ).toBe("pending");
   });
 });
